@@ -132,7 +132,11 @@ const PdfExportButton: React.FC<PdfExportButtonProps> = ({
       14,
       55
     );
-    doc.text(`Babak Selesai         : ${gameState.completedGames.length}`, 14, 65);
+    doc.text(
+      `Babak Selesai         : ${gameState.completedGames.length}`,
+      14,
+      65
+    );
 
     doc.setFont("times", "bold");
     doc.text("Papan Skor", 105, 85, { align: "center" });
@@ -179,18 +183,21 @@ const PdfExportButton: React.FC<PdfExportButtonProps> = ({
     doc.setFont("times", "normal");
 
     const statsYStart = (doc.lastAutoTable?.finalY || 90) + 30;
-    const columnWidth = 80;
-    const margin = 14;
+    const columnWidth = 60;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = (pageWidth - (columnWidth * 2 + 10)) / 2;
 
     playerStats.forEach((player, index) => {
       const columnIndex = index % 2;
       const rowIndex = Math.floor(index / 2);
 
-      const xPos = margin + columnIndex * (columnWidth + 10);
-      const yPos = statsYStart + rowIndex * 50;
+      let yPos = statsYStart + rowIndex * 50;
+      let xPos = margin + columnIndex * (columnWidth + 10);
 
       if (yPos > 250) {
         doc.addPage();
+        yPos = 20;
+        xPos = margin + columnIndex * (columnWidth + 10);
       }
 
       doc.setFontSize(12);
