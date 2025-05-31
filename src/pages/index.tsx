@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/index.module.css";
 
@@ -37,72 +37,16 @@ const UnoTournamentManager: React.FC = () => {
     players: [],
   });
 
-  const [showExistingTournament, setShowExistingTournament] = useState(false);
   const [showPlayersContainer, setShowPlayersContainer] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [playerInputs, setPlayerInputs] = useState<string[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
   const [submitText, setSubmitText] = useState("Mulai Turnamen");
 
-  useEffect(() => {
-    checkExistingTournament();
-  }, []);
-
-  const checkExistingTournament = () => {
-    try {
-      const savedData = sessionStorage.getItem("unoTournamentData");
-      const savedGameState = sessionStorage.getItem("unoGameState");
-
-      if (savedData && savedGameState) {
-        const gameState: GameState = JSON.parse(savedGameState);
-        if (gameState.completedGames && gameState.completedGames.length > 0) {
-          setShowExistingTournament(true);
-          return;
-        }
-      }
-
-      setShowExistingTournament(false);
-    } catch (error) {
-      console.log("Error checking existing tournament:", error);
-      setShowExistingTournament(false);
-    }
-  };
-
-  const continueTournament = () => {
-    setShowLoading(true);
-    setTimeout(() => {
-      navigateToGamePage();
-    }, 1500);
-  };
-
-  const resetTournament = () => {
-    const confirmation = confirm(
-      "Apakah Anda yakin ingin menghapus turnamen yang sedang berlangsung? Semua data akan hilang!"
-    );
-
-    if (confirmation) {
-      sessionStorage.removeItem("unoTournamentData");
-      sessionStorage.removeItem("unoGameState");
-      sessionStorage.removeItem("unoGameHistory");
-
-      setShowExistingTournament(false);
-
-      setTournamentData({
-        playerCount: 0,
-        gamesPerRound: null,
-        players: [],
-      });
-      setShowPlayersContainer(false);
-      setPlayerInputs([]);
-
-      alert("✅ Turnamen berhasil direset! Silakan buat turnamen baru.");
-    }
-  };
-
   const handlePlayerCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const playerCount = parseInt(e.target.value) || 0;
 
-    if (playerCount > 0) {
+    if (playerCount >= 2) {
       setShowPlayersContainer(true);
       const newInputs = Array(playerCount).fill("");
       setPlayerInputs(newInputs);
@@ -130,15 +74,7 @@ const UnoTournamentManager: React.FC = () => {
 
   const navigateToGamePage = () => {
     setShowLoading(false);
-
-    try {
-      router.push("/game");
-    } catch (error) {
-      console.log("Redirect error:", error);
-      console.log(
-        "Turnamen berhasil dibuat! Silakan buka halaman game untuk melanjutkan."
-      );
-    }
+    router.push("/game");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -148,8 +84,8 @@ const UnoTournamentManager: React.FC = () => {
     setSubmitText("Memproses...");
 
     try {
-      if (tournamentData.playerCount < 1) {
-        throw new Error("Jumlah pemain harus minimal 1!");
+      if (tournamentData.playerCount < 2) {
+        throw new Error("Jumlah pemain harus minimal 2!");
       }
 
       const players: Player[] = [];
@@ -189,7 +125,6 @@ const UnoTournamentManager: React.FC = () => {
       alert("❌ " + (error as Error).message);
       setSubmitDisabled(false);
       setSubmitText("Mulai Turnamen");
-      console.error("Tournament creation error:", error);
     }
   };
 
@@ -212,11 +147,7 @@ const UnoTournamentManager: React.FC = () => {
 
       sessionStorage.setItem("unoGameState", JSON.stringify(initialGameState));
       sessionStorage.removeItem("unoGameHistory");
-
-      console.log("✅ Data turnamen berhasil disimpan:", data);
-      console.log("✅ Game state berhasil diinisialisasi:", initialGameState);
     } catch (error) {
-      console.error("❌ Error menyimpan data turnamen:", error);
       throw new Error("Gagal menyimpan data turnamen. Mohon coba lagi.");
     }
   };
@@ -244,98 +175,66 @@ const UnoTournamentManager: React.FC = () => {
               <p>Kelola turnamen UNO Anda dengan mudah</p>
             </div>
 
-            {showExistingTournament && (
-              <div className={styles.existingTournament}>
-                <h3>⚠️ Turnamen Ditemukan</h3>
-                <p>
-                  Terdapat turnamen yang sedang berlangsung. Apa yang ingin Anda
-                  lakukan?
-                </p>
-                <div className={styles.existingTournamentButtons}>
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnSecondary}`}
-                    onClick={continueTournament}
-                  >
-                    Lanjutkan Turnamen
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnDanger}`}
-                    onClick={resetTournament}
-                  >
-                    Reset & Buat Baru
-                  </button>
-                </div>
+            <form onSubmit={handleSubmit}>
+              <div className={styles.formGroup}>
+                <label htmlFor="playerCount">Jumlah Pemain:</label>
+                <input
+                  type="number"
+                  id="playerCount"
+                  name="playerCount"
+                  placeholder="Masukkan jumlah pemain (minimal 2)"
+                  min="2"
+                  required
+                  value={tournamentData.playerCount || ""}
+                  onChange={handlePlayerCountChange}
+                />
               </div>
-            )}
 
-            {!showExistingTournament && (
-              <form onSubmit={handleSubmit}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="playerCount">Jumlah Pemain:</label>
-                  <input
-                    type="number"
-                    id="playerCount"
-                    name="playerCount"
-                    placeholder="Masukkan jumlah pemain (contoh: 4)"
-                    min="1"
-                    required
-                    value={tournamentData.playerCount || ""}
-                    onChange={handlePlayerCountChange}
-                  />
-                </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="gamesPerRound">Jumlah Babak (opsional):</label>
+                <input
+                  type="number"
+                  id="gamesPerRound"
+                  name="gamesPerRound"
+                  placeholder="Kosongkan untuk babak unlimited"
+                  min="1"
+                  value={tournamentData.gamesPerRound || ""}
+                  onChange={handleGamesPerRoundChange}
+                />
+              </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="gamesPerRound">
-                    Jumlah Babak (opsional):
-                  </label>
-                  <input
-                    type="number"
-                    id="gamesPerRound"
-                    name="gamesPerRound"
-                    placeholder="Kosongkan untuk babak unlimited"
-                    min="1"
-                    value={tournamentData.gamesPerRound || ""}
-                    onChange={handleGamesPerRoundChange}
-                  />
-                </div>
-
-                {showPlayersContainer && (
-                  <div className={styles.playersContainer}>
-                    <div className={styles.formGroup}>
-                      <label>Nama Pemain:</label>
-                      <div>
-                        {playerInputs.map((value, index) => (
-                          <div key={index} className={styles.playerInput}>
-                            <div className={styles.playerNumber}>
-                              {index + 1}
-                            </div>
-                            <input
-                              type="text"
-                              placeholder={`Masukkan nama pemain ${index + 1}`}
-                              required
-                              value={value}
-                              onChange={(e) =>
-                                handlePlayerNameChange(index, e.target.value)
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
+              {showPlayersContainer && (
+                <div className={styles.playersContainer}>
+                  <div className={styles.formGroup}>
+                    <label>Nama Pemain:</label>
+                    <div>
+                      {playerInputs.map((value, index) => (
+                        <div key={index} className={styles.playerInput}>
+                          <div className={styles.playerNumber}>{index + 1}</div>
+                          <input
+                            type="text"
+                            placeholder={`Masukkan nama pemain ${index + 1}`}
+                            required
+                            value={value}
+                            onChange={(e) =>
+                              handlePlayerNameChange(index, e.target.value)
+                            }
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                <button
-                  type="submit"
-                  className={styles.btn}
-                  disabled={submitDisabled}
-                >
-                  {submitText}
-                </button>
-              </form>
-            )}
+              <button
+                type="submit"
+                className={styles.btn}
+                disabled={submitDisabled}
+              >
+                {submitText}
+              </button>
+            </form>
           </div>
 
           <div className={styles.infoContainer}>

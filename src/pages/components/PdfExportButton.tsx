@@ -57,7 +57,6 @@ declare module "jspdf" {
   interface jsPDF {
     lastAutoTable?: {
       finalY: number;
-      pageNumber?: number;
     };
     autoTable?: (options: UserOptions) => jsPDF;
   }
@@ -173,68 +172,90 @@ const PdfExportButton: React.FC<PdfExportButtonProps> = ({
       margin: { left: 14 },
     });
 
-    doc.setFont("times", "bold");
-    doc.text(
-      "Statistik Juara per Pemain",
-      105,
-      (doc.lastAutoTable?.finalY || 90) + 20,
-      { align: "center" }
-    );
-    doc.setFont("times", "normal");
+    const currentY = doc.lastAutoTable?.finalY || 90;
+    const sectionTitle = "Statistik Juara Setiap Pemain";
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-    const statsYStart = (doc.lastAutoTable?.finalY || 90) + 30;
+    let statsYStart: number;
+    if (currentY + 50 > pageHeight - 20) {
+      doc.addPage();
+      doc.setFont("times", "bold");
+      doc.text(sectionTitle, 105, 20, { align: "center" });
+      doc.setFont("times", "normal");
+      statsYStart = 30;
+    } else {
+      doc.setFont("times", "bold");
+      doc.text(sectionTitle, 105, currentY + 20, { align: "center" });
+      doc.setFont("times", "normal");
+      statsYStart = currentY + 30;
+    }
+
     const columnWidth = 60;
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = (pageWidth - (columnWidth * 2 + 10)) / 2;
+    const rowHeight = 50;
 
-    playerStats.forEach((player, index) => {
-      const columnIndex = index % 2;
-      const rowIndex = Math.floor(index / 2);
+    let yPos = statsYStart;
+    let currentPage = 1;
 
-      let yPos = statsYStart + rowIndex * 50;
-      let xPos = margin + columnIndex * (columnWidth + 10);
-
-      if (yPos > 250) {
+    for (let i = 0; i < playerStats.length; i += 2) {
+      if (yPos + rowHeight > pageHeight - 20) {
         doc.addPage();
+        currentPage++;
         yPos = 20;
-        xPos = margin + columnIndex * (columnWidth + 10);
+        doc.setFont("times", "bold");
+        doc.text(`${sectionTitle} (lanjutan)`, 105, yPos, { align: "center" });
+        doc.setFont("times", "normal");
+        yPos += 10;
       }
 
-      doc.setFontSize(12);
-      doc.setFont("times", "bold");
-      doc.text(player.name, xPos + columnWidth / 2, yPos, { align: "center" });
-      doc.setFont("times", "normal");
+      for (let j = 0; j < 2; j++) {
+        const playerIndex = i + j;
+        if (playerIndex >= playerStats.length) break;
 
-      const statsData = player.wins.map((count, rankIndex) => [
-        `Juara ${rankIndex + 1}`,
-        `${count}x`,
-      ]);
+        const player = playerStats[playerIndex];
+        const xPos = margin + j * (columnWidth + 10);
 
-      autoTable(doc, {
-        startY: yPos + 5,
-        margin: { left: xPos },
-        head: [["Posisi", "Jumlah"]],
-        body: statsData,
-        tableWidth: columnWidth,
-        headStyles: {
-          fillColor: [52, 152, 219],
-          textColor: 255,
-          fontStyle: "bold",
-          halign: "center",
-          font: "times",
-        },
-        columnStyles: {
-          0: { halign: "center", font: "times" },
-          1: { halign: "center", font: "times" },
-        },
-        styles: {
-          cellPadding: 3,
-          fontSize: 10,
-          halign: "center",
-          font: "times",
-        },
-      });
-    });
+        doc.setFontSize(12);
+        doc.setFont("times", "bold");
+        doc.text(player.name, xPos + columnWidth / 2, yPos, {
+          align: "center",
+        });
+        doc.setFont("times", "normal");
+
+        const statsData = player.wins.map((count, rankIndex) => [
+          `Juara ${rankIndex + 1}`,
+          `${count}x`,
+        ]);
+
+        autoTable(doc, {
+          startY: yPos + 5,
+          margin: { left: xPos },
+          head: [["Posisi", "Jumlah"]],
+          body: statsData,
+          tableWidth: columnWidth,
+          headStyles: {
+            fillColor: [52, 152, 219],
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "center",
+            font: "times",
+          },
+          columnStyles: {
+            0: { halign: "center", font: "times" },
+            1: { halign: "center", font: "times" },
+          },
+          styles: {
+            cellPadding: 3,
+            fontSize: 10,
+            halign: "center",
+            font: "times",
+          },
+        });
+      }
+
+      yPos = (doc.lastAutoTable?.finalY || yPos) + 10;
+    }
 
     doc.save(
       `Laporan_Turnamen_UNO_${new Date().toISOString().slice(0, 10)}.pdf`
