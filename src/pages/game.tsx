@@ -128,8 +128,7 @@ const Game: React.FC = () => {
         const parsedHistory: GameResult[] = JSON.parse(savedHistory);
         setGameHistory(parsedHistory);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const initializePlayerScores = () => {
@@ -292,7 +291,7 @@ const Game: React.FC = () => {
   };
 
   const getSortedHistory = () => {
-    return [...gameHistory].sort((a, b) => a.gameNumber - b.gameNumber);
+    return [...gameHistory].sort((a, b) => b.gameNumber - a.gameNumber);
   };
 
   const getNextAvailableGameNumber = () => {
