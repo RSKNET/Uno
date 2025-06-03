@@ -78,7 +78,18 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-.leaderboard {
+.scoreSection {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+}
+
+.formContainer {
+  flex: 1;
+  min-width: 0;
+}
+
+.formSection {
   background: rgba(20, 20, 40, 0.95);
   backdrop-filter: blur(10px);
   border: 2px solid #0f3460;
@@ -86,6 +97,20 @@
   padding: 30px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   width: 100%;
+}
+
+.leaderboardContainer {
+  width: 350px;
+}
+
+.leaderboard {
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  height: 100%;
 }
 
 .leaderboard h3 {
@@ -115,11 +140,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
-}
-
-.leaderboardGrid.twoColumns {
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
 }
 
 .header {
@@ -216,7 +236,6 @@
 
 .rankingContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -365,7 +384,7 @@
 .historyList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  max-height: 1000px;
+  max-height: 800px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -621,6 +640,14 @@
 
   .contentContainer {
     grid-template-columns: 1fr;
+  }
+
+  .scoreSection {
+    flex-direction: column;
+  }
+
+  .leaderboardContainer {
+    width: 100%;
   }
 
   .container,

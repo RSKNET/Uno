@@ -243,13 +243,13 @@ const UnoTournamentManager: React.FC = () => {
               {showInfo ? (
                 <div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Jumlah Pemain:</span>
+                    <span className={styles.infoLabel}>Jumlah Pemain  :</span>
                     <span className={styles.infoValue}>
                       {tournamentData.playerCount || "-"}
                     </span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Jumlah Babak:</span>
+                    <span className={styles.infoLabel}>Jumlah Babak  :</span>
                     <span className={styles.infoValue}>
                       {tournamentData.gamesPerRound !== null
                         ? tournamentData.gamesPerRound

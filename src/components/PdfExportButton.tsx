@@ -3,7 +3,7 @@
 import React from "react";
 import { jsPDF } from "jspdf";
 import autoTable, { UserOptions } from "jspdf-autotable";
-import styles from "../../styles/game.module.css";
+import styles from "../styles/game.module.css";
 
 interface Player {
   id: number;

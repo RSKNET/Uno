@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import PdfExportButton from "./components/PdfExportButton";
+import PdfExportButton from "@/components/PdfExportButton";
 import styles from "../styles/game.module.css";
 
 interface Player {
@@ -283,10 +283,13 @@ const Game: React.FC = () => {
     return Object.entries(gameState.playerScores)
       .map(([id, data]) => ({ id: parseInt(id), ...data }))
       .sort((a, b) => {
-        if (b.totalScore === a.totalScore) {
+        if (b.totalScore !== a.totalScore) {
+          return b.totalScore - a.totalScore;
+        }
+        if (b.wins !== a.wins) {
           return b.wins - a.wins;
         }
-        return b.totalScore - a.totalScore;
+        return a.name.localeCompare(b.name);
       });
   };
 
@@ -442,123 +445,115 @@ const Game: React.FC = () => {
               </div>
             </div>
 
-            <div className={styles.container}>
-              <div className={styles.formSection}>
-                <h3>➕ Tambah Poin Kemenangan</h3>
-                <div className={styles.currentRound}>
-                  Babak {nextGameNumber}
-                </div>
-
-                {alertMessage && (
-                  <div
-                    className={
-                      alertMessage.type === "error"
-                        ? styles.alert
-                        : styles.success
-                    }
-                  >
-                    {alertMessage.message}
+            <div className={styles.scoreSection}>
+              <div className={styles.formContainer}>
+                <div className={styles.formSection}>
+                  <h3>➕ Tambah Poin Kemenangan</h3>
+                  <div className={styles.currentRound}>
+                    Babak {nextGameNumber}
                   </div>
-                )}
 
-                <form onSubmit={handleSubmit}>
-                  <div className={styles.formGroup}>
-                    <label>Urutan Juara (dari Juara 1 sampai terakhir):</label>
-                    <div className={styles.rankingContainer}>
-                      {Array.from(
-                        { length: tournamentData.playerCount },
-                        (_, i) => i + 1
-                      ).map((rank) => {
-                        const score = Math.max(
-                          0,
-                          tournamentData.playerCount - rank
-                        );
-                        return (
-                          <div key={rank} className={styles.rankItem}>
-                            <div className={styles.rankNumber}>{rank}</div>
-                            <div className={styles.rankPlayer}>
-                              <select
-                                name={`rank${rank}`}
-                                id={`rank${rank}`}
-                                required
-                                onChange={(e) =>
-                                  handlePlayerSelection(rank, e.target.value)
-                                }
-                                value={selectedPlayers[rank - 1] || ""}
-                              >
-                                <option value="">
-                                  Pilih Pemain Juara {rank}
-                                </option>
-                                {tournamentData.players
-                                  .filter(
-                                    (player) =>
-                                      !selectedPlayers.includes(player.id) ||
-                                      selectedPlayers[rank - 1] === player.id
-                                  )
-                                  .map((player) => (
-                                    <option key={player.id} value={player.id}>
-                                      {player.name}
-                                    </option>
-                                  ))}
-                              </select>
-                            </div>
-                            <div className={styles.rankScore}>+{score}</div>
-                          </div>
-                        );
-                      })}
+                  {alertMessage && (
+                    <div
+                      className={
+                        alertMessage.type === "error"
+                          ? styles.alert
+                          : styles.success
+                      }
+                    >
+                      {alertMessage.message}
                     </div>
-                  </div>
+                  )}
 
-                  <button
-                    type="submit"
-                    className={styles.btn}
-                    disabled={isTournamentComplete()}
-                  >
-                    {isTournamentComplete()
-                      ? "Turnamen Selesai"
-                      : "Simpan Hasil Babak"}
-                  </button>
-                </form>
+                  <form onSubmit={handleSubmit}>
+                    <div className={styles.formGroup}>
+                      <label>
+                        Urutan Juara (dari Juara 1 sampai terakhir):
+                      </label>
+                      <div className={styles.rankingContainer}>
+                        {Array.from(
+                          { length: tournamentData.playerCount },
+                          (_, i) => i + 1
+                        ).map((rank) => {
+                          const score = Math.max(
+                            0,
+                            tournamentData.playerCount - rank
+                          );
+                          return (
+                            <div key={rank} className={styles.rankItem}>
+                              <div className={styles.rankNumber}>{rank}</div>
+                              <div className={styles.rankPlayer}>
+                                <select
+                                  name={`rank${rank}`}
+                                  id={`rank${rank}`}
+                                  required
+                                  onChange={(e) =>
+                                    handlePlayerSelection(rank, e.target.value)
+                                  }
+                                  value={selectedPlayers[rank - 1] || ""}
+                                >
+                                  <option value="">
+                                    Pilih Pemain Juara {rank}
+                                  </option>
+                                  {tournamentData.players
+                                    .filter(
+                                      (player) =>
+                                        !selectedPlayers.includes(player.id) ||
+                                        selectedPlayers[rank - 1] === player.id
+                                    )
+                                    .map((player) => (
+                                      <option key={player.id} value={player.id}>
+                                        {player.name}
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
+                              <div className={styles.rankScore}>+{score}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className={styles.btn}
+                      disabled={isTournamentComplete()}
+                    >
+                      {isTournamentComplete()
+                        ? "Turnamen Selesai"
+                        : "Simpan Hasil Babak"}
+                    </button>
+                  </form>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.leaderboard}>
-              <h3>🏆 Papan Skor</h3>
-              <div
-                className={`${styles.leaderboardGrid} ${
-                  playerColumns.length > 1 ? styles.twoColumns : ""
-                }`}
-              >
-                {playerColumns.map((column, columnIndex) => (
-                  <div key={columnIndex}>
-                    {column.map((player, index) => {
-                      const globalIndex =
-                        columnIndex === 0
-                          ? index
-                          : playerColumns[0].length + index;
-                      return (
-                        <div key={player.id} className={styles.playerScore}>
-                          <div className={styles.playerName}>
-                            {globalIndex === 0
-                              ? "🥇"
-                              : globalIndex === 1
-                              ? "🥈"
-                              : globalIndex === 2
-                              ? "🥉"
-                              : `${globalIndex + 1}.`}{" "}
-                            {player.name}
-                            {player.wins > 0
-                              ? ` (${player.wins} kemenangan)`
-                              : ""}
-                          </div>
-                          <div className={styles.playerTotalScore}>
-                            {player.totalScore}
-                          </div>
+              <div className={styles.leaderboardContainer}>
+                <div className={styles.leaderboard}>
+                  <h3>🏆 Papan Skor</h3>
+                  <div className={styles.leaderboardGrid}>
+                    {sortedPlayers.map((player, index) => (
+                      <div key={player.id} className={styles.playerScore}>
+                        <div className={styles.playerName}>
+                          {index === 0
+                            ? "🥇"
+                            : index === 1
+                            ? "🥈"
+                            : index === 2
+                            ? "🥉"
+                            : `${index + 1}.`}{" "}
+                          {player.name}
+                          {player.wins > 0
+                            ? ` (${player.wins} kemenangan)`
+                            : ""}
                         </div>
-                      );
-                    })}
+                        <div className={styles.playerTotalScore}>
+                          {player.totalScore}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
