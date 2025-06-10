@@ -1,0 +1,524 @@
+import React, { useState } from "react";
+import { useRouter } from "next/router";
+import Navbar from "@/components/Navbar";
+import Notification from "@/components/Notification";
+import ConfirmationModal from "@/components/ConfirmationModal";
+import Loading from "@/components/Loading";
+import { useTournament } from "@/context/TournamentContext";
+import styles from "@/styles/pages/GamePage.module.css";
+import NoTournamentSetup from "@/components/NoTournamentSetup";
+import { exportTournamentToPdf } from "@/utils/pdfExport";
+
+const GamePage = () => {
+  const router = useRouter();
+  const {
+    tournamentData,
+    getTournamentSummary,
+    saveRoundResult,
+    resetTournamentData,
+    clearAllData,
+  } = useTournament();
+
+  const tournamentSummary = getTournamentSummary();
+  const [selectedRankings, setSelectedRankings] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+  };
+
+  const closeNotification = () => {
+    setNotification(null);
+  };
+
+  const isTournamentCompleted = () => {
+    if (tournamentSummary.roundsType === "Unlimited") {
+      return false;
+    }
+
+    const maxRounds = parseInt(tournamentSummary.roundsType);
+    const completedRounds = tournamentData.gameData?.completedRounds || 0;
+
+    return completedRounds >= maxRounds;
+  };
+
+  const handleShowDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteAndGoHome = async () => {
+    setIsDeleteModalOpen(false);
+    setIsDeleting(true);
+    setLoadingMessage("Menghapus data tournament...");
+
+    try {
+      await clearAllData();
+      showNotification("Tournament berhasil dihapus!", "success");
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting tournament:", error);
+      showNotification("Terjadi kesalahan saat menghapus tournament", "error");
+    } finally {
+      setIsDeleting(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleRankingChange = (rank, playerIndex) => {
+    const value = playerIndex === "" ? "" : parseInt(playerIndex);
+    setSelectedRankings((prev) => ({
+      ...prev,
+      [rank]: value,
+    }));
+  };
+
+  const handleSubmitRound = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setLoadingMessage("Menyimpan hasil babak...");
+
+    try {
+      const totalPlayers = tournamentSummary.totalPlayers;
+      const rankings = [];
+
+      for (let rank = 1; rank <= totalPlayers; rank++) {
+        rankings.push(selectedRankings[rank]);
+      }
+
+      await saveRoundResult(rankings);
+      setSelectedRankings({});
+      showNotification("Hasil babak berhasil disimpan!", "success");
+    } catch (error) {
+      console.error("Error saving round result:", error);
+      showNotification("Terjadi kesalahan saat menyimpan hasil babak", "error");
+    } finally {
+      setIsSubmitting(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const handleShowResetModal = () => {
+    setIsResetModalOpen(true);
+  };
+
+  const handleResetTournament = async () => {
+    setIsResetModalOpen(false);
+    setIsResetting(true);
+    setLoadingMessage("Mereset tournament...");
+
+    try {
+      await resetTournamentData();
+      setSelectedRankings({});
+      showNotification("Tournament berhasil direset!", "info");
+    } catch (error) {
+      console.error("Error resetting tournament:", error);
+      showNotification("Terjadi kesalahan saat reset tournament", "error");
+    } finally {
+      setIsResetting(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const handleCancelReset = () => {
+    setIsResetModalOpen(false);
+  };
+
+  const handleExportToPdf = async () => {
+    setIsExportingPdf(true);
+    setLoadingMessage("Mengekspor tournament ke PDF...");
+
+    try {
+      await exportTournamentToPdf(tournamentData, tournamentSummary);
+      showNotification("PDF berhasil diekspor!", "success");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      showNotification("Terjadi kesalahan saat mengekspor PDF", "error");
+    } finally {
+      setIsExportingPdf(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const createRankingArray = (totalPlayers) => {
+    return Array.from({ length: totalPlayers }, (_, index) => index + 1);
+  };
+
+  const getRankingLabel = (rank, totalPlayers) => {
+    if (rank === 1) return "Juara 1";
+    if (rank === 2) return "Juara 2";
+    if (rank === 3) return "Juara 3";
+    if (rank === totalPlayers) return "Terakhir";
+    return `Posisi ${rank}`;
+  };
+
+  const isLoading = isSubmitting || isResetting || isExportingPdf || isDeleting;
+
+  return (
+    <div className={styles.gameContainer}>
+      <Navbar />
+
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={closeNotification}
+          duration={4000}
+        />
+      )}
+
+      {/* Modal Konfirmasi - Tetap ada meskipun tournament belum setup */}
+      <ConfirmationModal
+        isOpen={isResetModalOpen}
+        title="Reset Tournament"
+        message="Apakah Anda yakin ingin reset tournament? Semua data akan hilang."
+        confirmText="Ya, Reset"
+        cancelText="Batal"
+        onConfirm={handleResetTournament}
+        onClose={handleCancelReset}
+        type="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        title="Hapus Tournament"
+        message="Apakah Anda yakin ingin menghapus tournament dan kembali ke halaman utama? Semua data pemain, skor, dan babak akan hilang permanen."
+        confirmText="Ya, Hapus & Keluar"
+        cancelText="Batal"
+        onConfirm={handleDeleteAndGoHome}
+        onClose={handleCancelDelete}
+        type="danger"
+      />
+
+      <Loading isVisible={isLoading} message={loadingMessage} />
+
+      {/* Conditional Content - Jika tournament tidak valid, tampilkan NoTournamentSetup */}
+      {!tournamentSummary.isValid ? (
+        <div className={styles.mainContainer}>
+          <NoTournamentSetup />
+        </div>
+      ) : (
+        /* Konten Tournament Normal */
+        <div className={styles.mainContainer}>
+          <div className={styles.contentContainer}>
+            <div className={styles.leftSection}>
+              <div className={styles.infoContainer}>
+                <h3>📋 Informasi Tournamen</h3>
+                <div className={styles.infoGrid}>
+                  <div className={styles.infoItem}>
+                    <div className={styles.infoLabel}>Jumlah Pemain</div>
+                    <div className={styles.infoValue}>
+                      {tournamentSummary.totalPlayers}
+                    </div>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <div className={styles.infoLabel}>Jumlah Babak</div>
+                    <div className={styles.infoValue}>
+                      {tournamentSummary.roundsType}
+                    </div>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <div className={styles.infoLabel}>Babak Selesai</div>
+                    <div className={styles.infoValue}>
+                      {tournamentData.gameData?.completedRounds || 0}
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.buttonGroup}>
+                  <button
+                    className={`${styles.btn} ${styles.btnPdf}`}
+                    onClick={handleExportToPdf}
+                    disabled={isLoading}
+                  >
+                    {isExportingPdf ? "📄 Mengekspor..." : "📄 Simpan ke PDF"}
+                  </button>
+                  <button
+                    className={`${styles.btn} ${styles.btnDanger}`}
+                    onClick={handleShowResetModal}
+                    disabled={isLoading}
+                  >
+                    {isResetting ? "🔄 Mereset..." : "🔄 Reset Tournamen"}
+                  </button>
+                  <button
+                    className={`${styles.btn} ${styles.btnWarning}`}
+                    onClick={handleShowDeleteModal}
+                    disabled={isLoading}
+                  >
+                    {isDeleting ? "🏠 Menghapus..." : "🏠 Hapus & Keluar"}
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.scoreSection}>
+                <div className={styles.formContainer}>
+                  <div className={styles.formSection}>
+                    <h3>➕ Tambah Poin Kemenangan</h3>
+                    <div className={styles.currentRound}>
+                      {isTournamentCompleted() ? (
+                        <span className={styles.tournamentCompleted}>
+                          Turnamen Selesai
+                        </span>
+                      ) : (
+                        <>Babak {tournamentData.gameData?.currentRound || 1}</>
+                      )}
+                    </div>
+
+                    {isTournamentCompleted() ? (
+                      <div className={styles.tournamentCompletedMessage}>
+                        <p>
+                          Turnamen telah mencapai jumlah babak maksimum yang
+                          ditentukan.
+                        </p>
+                        <p>
+                          Anda dapat melihat hasil akhir pada Papan Skor dan
+                          Statistik Pemain.
+                        </p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmitRound}>
+                        <div className={styles.formGroup}>
+                          <label>
+                            Urutan Juara (dari Juara 1 sampai terakhir):
+                          </label>
+                          <div className={styles.rankingContainer}>
+                            {createRankingArray(
+                              tournamentSummary.totalPlayers
+                            ).map((rank) => (
+                              <div key={rank} className={styles.rankItem}>
+                                <div className={styles.rankNumber}>{rank}</div>
+                                <div className={styles.rankPlayer}>
+                                  <select
+                                    name={`rank${rank}`}
+                                    required
+                                    value={selectedRankings[rank] ?? ""}
+                                    onChange={(e) => {
+                                      handleRankingChange(rank, e.target.value);
+                                    }}
+                                    className={styles.rankSelect}
+                                    disabled={isLoading}
+                                  >
+                                    <option value="">
+                                      Pilih Pemain{" "}
+                                      {getRankingLabel(
+                                        rank,
+                                        tournamentSummary.totalPlayers
+                                      )}
+                                    </option>
+                                    {tournamentSummary.players.map(
+                                      (player, index) => {
+                                        const isAlreadySelected =
+                                          Object.entries(selectedRankings).some(
+                                            ([selectedRank, selectedIndex]) =>
+                                              selectedRank !==
+                                                rank.toString() &&
+                                              selectedIndex === index
+                                          );
+
+                                        return (
+                                          <option
+                                            key={index}
+                                            value={index}
+                                            disabled={isAlreadySelected}
+                                            className={
+                                              isAlreadySelected
+                                                ? styles.disabledOption
+                                                : ""
+                                            }
+                                          >
+                                            {player}{" "}
+                                            {isAlreadySelected
+                                              ? "(Sudah dipilih)"
+                                              : ""}
+                                          </option>
+                                        );
+                                      }
+                                    )}
+                                  </select>
+                                </div>
+                                <div className={styles.rankScore}>
+                                  +
+                                  {Math.max(
+                                    0,
+                                    tournamentSummary.totalPlayers - rank
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <button
+                          type="submit"
+                          className={styles.btn}
+                          disabled={isLoading}
+                        >
+                          {isSubmitting ? "Menyimpan..." : "Simpan Hasil Babak"}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.leaderboardContainer}>
+                  <div className={styles.leaderboard}>
+                    <h3>🏆 Papan Skor</h3>
+                    <div className={styles.leaderboardGrid}>
+                      {(tournamentData.gameData?.playerScores || []).map(
+                        (playerScore, index) => {
+                          const playerName =
+                            tournamentSummary.players[playerScore.playerIndex];
+                          const totalWins = playerScore.wins?.first || 0;
+                          return (
+                            <div
+                              key={playerScore.playerIndex}
+                              className={styles.playerScore}
+                            >
+                              <div className={styles.playerInfo}>
+                                <div className={styles.playerName}>
+                                  {index === 0 && "🥇 "}
+                                  {index === 1 && "🥈 "}
+                                  {index === 2 && "🥉 "}
+                                  {index > 2 && `${index + 1}. `}
+                                  {playerName}
+                                </div>
+                                <div className={styles.playerWins}>
+                                  {totalWins} kemenangan
+                                </div>
+                              </div>
+                              <div className={styles.playerTotalScore}>
+                                {playerScore.totalScore}
+                              </div>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.winnerStats}>
+                <h3>📊 Statistik Pemain</h3>
+                <div className={styles.statsGrid}>
+                  {(tournamentData.gameData?.playerScores || []).map(
+                    (playerScore) => {
+                      const playerName =
+                        tournamentSummary.players[playerScore.playerIndex];
+                      return (
+                        <div
+                          key={playerScore.playerIndex}
+                          className={styles.playerStats}
+                        >
+                          <h4>{playerName}</h4>
+                          {createRankingArray(
+                            tournamentSummary.totalPlayers
+                          ).map((rank) => (
+                            <div key={rank} className={styles.statItem}>
+                              <span className={styles.statLabel}>
+                                {getRankingLabel(
+                                  rank,
+                                  tournamentSummary.totalPlayers
+                                )}
+                                :
+                              </span>
+                              <span className={styles.statValue}>
+                                {rank === 1
+                                  ? playerScore.wins?.first || 0
+                                  : rank === 2
+                                  ? playerScore.wins?.second || 0
+                                  : rank === 3
+                                  ? playerScore.wins?.third || 0
+                                  : rank === 4
+                                  ? playerScore.wins?.fourth || 0
+                                  : 0}
+                                x
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.rightSection}>
+              <div className={styles.historyContainer}>
+                <div className={styles.historySection}>
+                  <h3>📚 Riwayat Babak</h3>
+                  <div className={styles.historyList}>
+                    {tournamentData.gameData?.roundHistory?.length > 0 ? (
+                      [...tournamentData.gameData.roundHistory]
+                        .reverse()
+                        .map((round) => (
+                          <div key={round.round} className={styles.historyItem}>
+                            <div className={styles.historyHeader}>
+                              <h4>Babak {round.round}</h4>
+                              <div className={styles.historyTimestamp}>
+                                {new Date(round.timestamp).toLocaleDateString(
+                                  "id-ID",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </div>
+                            </div>
+                            <div className={styles.historyRankings}>
+                              {round.rankings.map((ranking) => {
+                                const playerName =
+                                  tournamentSummary.players[
+                                    ranking.playerIndex
+                                  ];
+                                return (
+                                  <div
+                                    key={ranking.playerIndex}
+                                    className={styles.historyRank}
+                                  >
+                                    <div className={styles.historyRankLeft}>
+                                      <div className={styles.historyPosition}>
+                                        {ranking.rank}
+                                      </div>
+                                      <div className={styles.historyPlayer}>
+                                        {playerName}
+                                      </div>
+                                    </div>
+                                    <div className={styles.historyPoints}>
+                                      +{ranking.points} poin
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))
+                    ) : (
+                      <div className={styles.noHistoryMessage}>
+                        Belum ada riwayat babak
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GamePage;
