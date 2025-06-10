@@ -6,13 +6,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>UNO Tournament | Welcome</title>
-        <meta
-          name="description"
-          content="Kelola turnamen UNO Anda dengan mudah"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>UNO Tournament</title>
       </Head>
       <TournamentProvider>
         <Component {...pageProps} />
