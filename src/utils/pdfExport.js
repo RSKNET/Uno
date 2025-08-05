@@ -131,11 +131,16 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
       for (let i = 1; i <= tournamentSummary.totalPlayers; i++) {
         const positionKey = `position${i}`;
         const count = player.wins[positionKey] || 0;
-        const label = i === 1 ? "Juara 1" : 
-                     i === 2 ? "Juara 2" : 
-                     i === 3 ? "Juara 3" : 
-                     i === tournamentSummary.totalPlayers ? "Terakhir" : 
-                     `Posisi ${i}`;
+        const label =
+          i === 1
+            ? "Juara 1"
+            : i === 2
+            ? "Juara 2"
+            : i === 3
+            ? "Juara 3"
+            : i === tournamentSummary.totalPlayers
+            ? "Terakhir"
+            : `Posisi ${i}`;
         statsData.push([label, `${count}x`]);
       }
 

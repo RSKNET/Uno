@@ -373,35 +373,44 @@ const GamePage = () => {
                     <h3>🏆 Papan Skor</h3>
                     <div className={styles.leaderboardGrid}>
                       {(() => {
-                        const playerScores = tournamentData.gameData?.playerScores || [];
+                        const playerScores =
+                          tournamentData.gameData?.playerScores || [];
                         const groupedByPosition = [];
                         let currentPosition = 1;
-                        
+
                         for (let i = 0; i < playerScores.length; i++) {
                           const currentPlayer = playerScores[i];
-                          const currentPlayerName = tournamentSummary.players[currentPlayer.playerIndex];
-                          
+                          const currentPlayerName =
+                            tournamentSummary.players[
+                              currentPlayer.playerIndex
+                            ];
+
                           // Cari pemain lain dengan skor yang sama (seri)
                           const tiedPlayers = [currentPlayer];
                           let j = i + 1;
-                          
-                          while (j < playerScores.length && 
-                                 playerScores[j].totalScore === currentPlayer.totalScore) {
+
+                          while (
+                            j < playerScores.length &&
+                            playerScores[j].totalScore ===
+                              currentPlayer.totalScore
+                          ) {
                             // Periksa apakah benar-benar seri sempurna dengan weighted score dan average position
                             const currentStats = {
                               weightedScore: 0,
-                              averagePosition: 0
+                              averagePosition: 0,
                             };
                             const nextStats = {
                               weightedScore: 0,
-                              averagePosition: 0
+                              averagePosition: 0,
                             };
-                            
+
                             // Hitung statistik untuk perbandingan
                             const playerCount = tournamentSummary.totalPlayers;
-                            
+
                             // Current player stats
-                            let weighted = 0, totalPositionSum = 0, totalGames = 0;
+                            let weighted = 0,
+                              totalPositionSum = 0,
+                              totalGames = 0;
                             for (let pos = 1; pos <= playerCount; pos++) {
                               const posKey = `position${pos}`;
                               const count = currentPlayer.wins?.[posKey] || 0;
@@ -411,10 +420,15 @@ const GamePage = () => {
                               totalGames += count;
                             }
                             currentStats.weightedScore = weighted;
-                            currentStats.averagePosition = totalGames > 0 ? totalPositionSum / totalGames : 0;
-                            
+                            currentStats.averagePosition =
+                              totalGames > 0
+                                ? totalPositionSum / totalGames
+                                : 0;
+
                             // Next player stats
-                            weighted = 0; totalPositionSum = 0; totalGames = 0;
+                            weighted = 0;
+                            totalPositionSum = 0;
+                            totalGames = 0;
                             for (let pos = 1; pos <= playerCount; pos++) {
                               const posKey = `position${pos}`;
                               const count = playerScores[j].wins?.[posKey] || 0;
@@ -424,38 +438,47 @@ const GamePage = () => {
                               totalGames += count;
                             }
                             nextStats.weightedScore = weighted;
-                            nextStats.averagePosition = totalGames > 0 ? totalPositionSum / totalGames : 0;
-                            
+                            nextStats.averagePosition =
+                              totalGames > 0
+                                ? totalPositionSum / totalGames
+                                : 0;
+
                             // Jika benar-benar seri sempurna
-                            if (currentStats.weightedScore === nextStats.weightedScore && 
-                                currentStats.averagePosition === nextStats.averagePosition) {
+                            if (
+                              currentStats.weightedScore ===
+                                nextStats.weightedScore &&
+                              currentStats.averagePosition ===
+                                nextStats.averagePosition
+                            ) {
                               tiedPlayers.push(playerScores[j]);
                               j++;
                             } else {
                               break;
                             }
                           }
-                          
+
                           // Buat entry untuk posisi ini
-                          const playerNames = tiedPlayers.map(player => 
-                            tournamentSummary.players[player.playerIndex]
+                          const playerNames = tiedPlayers.map(
+                            (player) =>
+                              tournamentSummary.players[player.playerIndex]
                           );
-                          
-                          const displayName = tiedPlayers.length > 1 
-                            ? playerNames.join(' & ')
-                            : currentPlayerName;
-                          
+
+                          const displayName =
+                            tiedPlayers.length > 1
+                              ? playerNames.join(" & ")
+                              : currentPlayerName;
+
                           groupedByPosition.push({
                             position: currentPosition,
                             displayName,
                             totalScore: currentPlayer.totalScore,
-                            isTied: tiedPlayers.length > 1
+                            isTied: tiedPlayers.length > 1,
                           });
-                          
+
                           currentPosition += tiedPlayers.length;
                           i = j - 1; // Skip pemain yang sudah diproses
                         }
-                        
+
                         return groupedByPosition.map((entry, index) => (
                           <div key={index} className={styles.playerScore}>
                             <div className={styles.playerInfo}>
