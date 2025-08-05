@@ -17,12 +17,7 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
     tournamentData.gameData?.playerScores.map((playerScore) => ({
       id: playerScore.playerIndex,
       name: tournamentSummary.players[playerScore.playerIndex],
-      wins: [
-        playerScore.wins?.first || 0,
-        playerScore.wins?.second || 0,
-        playerScore.wins?.third || 0,
-        playerScore.wins?.fourth || 0,
-      ],
+      wins: playerScore.wins || {},
     })) || [];
 
   doc.setFont("times", "normal");
@@ -55,12 +50,11 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
   const leaderboardData = sortedPlayers.map((playerScore) => [
     tournamentSummary.players[playerScore.playerIndex],
     playerScore.totalScore,
-    playerScore.wins?.first || 0,
   ]);
 
   autoTable(doc, {
     startY: 90,
-    head: [["Nama Pemain", "Total Skor", "Kemenangan"]],
+    head: [["Nama Pemain", "Total Skor"]],
     body: leaderboardData,
     headStyles: {
       fillColor: [41, 128, 185],
@@ -72,32 +66,6 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
     columnStyles: {
       0: { cellWidth: "auto", halign: "center", font: "times" },
       1: { cellWidth: "auto", halign: "center", font: "times" },
-      2: { cellWidth: "auto", halign: "center", font: "times" },
-    },
-    styles: {
-      cellPadding: 5,
-      fontSize: 11,
-      halign: "center",
-      font: "times",
-    },
-    margin: { left: 14 },
-  });
-
-  autoTable(doc, {
-    startY: 90,
-    head: [["Nama Pemain", "Total Skor", "Kemenangan"]],
-    body: leaderboardData,
-    headStyles: {
-      fillColor: [41, 128, 185],
-      textColor: 255,
-      fontStyle: "bold",
-      halign: "center",
-      font: "times",
-    },
-    columnStyles: {
-      0: { cellWidth: "auto", halign: "center", font: "times" },
-      1: { cellWidth: "auto", halign: "center", font: "times" },
-      2: { cellWidth: "auto", halign: "center", font: "times" },
     },
     styles: {
       cellPadding: 5,
@@ -159,9 +127,17 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
       });
       doc.setFont("times", "normal");
 
-      const statsData = player.wins
-        .map((count, rankIndex) => [`Juara ${rankIndex + 1}`, `${count}x`])
-        .slice(0, tournamentSummary.totalPlayers);
+      const statsData = [];
+      for (let i = 1; i <= tournamentSummary.totalPlayers; i++) {
+        const positionKey = `position${i}`;
+        const count = player.wins[positionKey] || 0;
+        const label = i === 1 ? "Juara 1" : 
+                     i === 2 ? "Juara 2" : 
+                     i === 3 ? "Juara 3" : 
+                     i === tournamentSummary.totalPlayers ? "Terakhir" : 
+                     `Posisi ${i}`;
+        statsData.push([label, `${count}x`]);
+      }
 
       autoTable(doc, {
         startY: yPos + 5,

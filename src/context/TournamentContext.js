@@ -18,11 +18,34 @@ const INITIAL_TOURNAMENT_STATE = {
   },
 };
 
-const INITIAL_PLAYER_WINS = {
-  first: 0,
-  second: 0,
-  third: 0,
-  fourth: 0,
+const createInitialPlayerWins = (playerCount) => {
+  const wins = {};
+  for (let i = 1; i <= playerCount; i++) {
+    wins[`position${i}`] = 0;
+  }
+  return wins;
+};
+
+const calculateStatistics = (wins, playerCount) => {
+  let weighted = 0;
+  let totalPositionSum = 0;
+  let totalGames = 0;
+  
+  for (let i = 1; i <= playerCount; i++) {
+    const positionKey = `position${i}`;
+    const count = wins[positionKey] || 0;
+    const weight = playerCount - i + 1;
+    
+    weighted += count * weight;
+    totalPositionSum += count * i;
+    totalGames += count;
+  }
+  
+  return {
+    weightedScore: weighted,
+    averagePosition: totalGames > 0 ? totalPositionSum / totalGames : 0,
+    totalGames
+  };
 };
 
 // Context
@@ -37,10 +60,10 @@ export const useTournament = () => {
 };
 
 // Utility Functions
-const createPlayerScore = (playerIndex) => ({
+const createPlayerScore = (playerIndex, playerCount) => ({
   playerIndex,
   totalScore: 0,
-  wins: { ...INITIAL_PLAYER_WINS },
+  wins: createInitialPlayerWins(playerCount),
   firstWinRound: null,
 });
 
@@ -58,40 +81,30 @@ const createRoundHistory = (currentRound, rankings, playerCount) => ({
   timestamp: new Date().toISOString(),
 });
 
-const sortPlayersByScore = (players) => {
+const sortPlayersByScore = (players, playerCount) => {
   return [...players].sort((a, b) => {
-    // Primary: Total points (highest first)
     if (b.totalScore !== a.totalScore) {
       return b.totalScore - a.totalScore;
     }
 
-    // Secondary: Number of first place wins (most first)
-    const aWins = a.wins?.first || 0;
-    const bWins = b.wins?.first || 0;
-    if (bWins !== aWins) {
-      return bWins - aWins;
+    const aStats = calculateStatistics(a.wins, playerCount);
+    const bStats = calculateStatistics(b.wins, playerCount);
+    
+    if (bStats.weightedScore !== aStats.weightedScore) {
+      return bStats.weightedScore - aStats.weightedScore;
     }
 
-    // Tertiary: Who achieved first win earlier (lower round number first)
-    const aFirstWin = a.firstWinRound || Number.MAX_SAFE_INTEGER;
-    const bFirstWin = b.firstWinRound || Number.MAX_SAFE_INTEGER;
-
-    if (aWins > 0 && bWins > 0) {
-      return aFirstWin - bFirstWin;
+    if (aStats.averagePosition !== bStats.averagePosition) {
+      return aStats.averagePosition - bStats.averagePosition;
     }
 
-    if (aWins > 0) return -1;
-    if (bWins > 0) return 1;
-
-    // Final: Player index for consistency
-    return a.playerIndex - b.playerIndex;
+    return 0;
   });
 };
 
-const updateWinCounts = (player, rank) => {
-  const winTypes = ["first", "second", "third", "fourth"];
-  if (rank < winTypes.length) {
-    player.wins[winTypes[rank]]++;
+const updateWinCounts = (player, rank, playerCount) => {
+  if (rank < playerCount) {
+    player.wins[`position${rank + 1}`]++;
   }
 };
 
@@ -131,19 +144,32 @@ const migrateOldData = (data) => {
       gameData: {
         currentRound: 1,
         completedRounds: 0,
-        playerScores: data.playerNames
-          ? data.playerNames.map((_, index) => createPlayerScore(index))
-          : [],
+        playerScores: data.playerNames?.map((_, index) => 
+          createPlayerScore(index, data.playerCount)
+        ) || [],
         roundHistory: [],
       },
     };
   }
 
   if (data.gameData.playerScores) {
-    data.gameData.playerScores = data.gameData.playerScores.map((player) => ({
-      ...player,
-      firstWinRound: player.firstWinRound || null,
-    }));
+    data.gameData.playerScores = data.gameData.playerScores.map((player) => {
+      const migratedPlayer = {
+        ...player,
+        firstWinRound: player.firstWinRound || null,
+      };
+
+      if (player.wins && player.wins.first !== undefined) {
+        const newWins = createInitialPlayerWins(data.playerCount);
+        newWins.position1 = player.wins.first || 0;
+        newWins.position2 = player.wins.second || 0;
+        newWins.position3 = player.wins.third || 0;
+        newWins.position4 = player.wins.fourth || 0;
+        migratedPlayer.wins = newWins;
+      }
+
+      return migratedPlayer;
+    });
   }
 
   return data;
@@ -182,7 +208,7 @@ export const TournamentProvider = ({ children }) => {
         currentRound: 1,
         completedRounds: 0,
         playerScores: data.playerNames.map((_, index) =>
-          createPlayerScore(index)
+          createPlayerScore(index, data.playerCount)
         ),
         roundHistory: [],
       },
@@ -203,14 +229,12 @@ export const TournamentProvider = ({ children }) => {
       playerCount
     );
 
-    // Buat map untuk akses cepat berdasarkan playerIndex
-    const playerMap = new Map();
-    gameData.playerScores.forEach((player) => {
-      playerMap.set(player.playerIndex, {
-        ...player,
-        wins: { ...player.wins },
-      });
-    });
+    const playerMap = new Map(
+      gameData.playerScores.map(player => [
+        player.playerIndex,
+        { ...player, wins: { ...player.wins } }
+      ])
+    );
 
     rankings.forEach((playerIndex, rank) => {
       const points = calculatePoints(playerCount, rank);
@@ -218,7 +242,7 @@ export const TournamentProvider = ({ children }) => {
 
       if (player) {
         player.totalScore += points;
-        updateWinCounts(player, rank);
+        updateWinCounts(player, rank, playerCount);
 
         if (rank === 0 && !player.firstWinRound) {
           player.firstWinRound = gameData.currentRound;
@@ -234,7 +258,7 @@ export const TournamentProvider = ({ children }) => {
         ...gameData,
         currentRound: gameData.currentRound + 1,
         completedRounds: gameData.completedRounds + 1,
-        playerScores: sortPlayersByScore(updatedPlayerScores),
+        playerScores: sortPlayersByScore(updatedPlayerScores, playerCount),
         roundHistory: [...gameData.roundHistory, newRoundHistory],
       },
     };
@@ -252,7 +276,7 @@ export const TournamentProvider = ({ children }) => {
         currentRound: 1,
         completedRounds: 0,
         playerScores: tournamentData.playerNames.map((_, index) =>
-          createPlayerScore(index)
+          createPlayerScore(index, tournamentData.playerCount)
         ),
         roundHistory: [],
       },
@@ -286,12 +310,9 @@ export const TournamentProvider = ({ children }) => {
 
   // Check if tournament is completed
   const isTournamentCompleted = () => {
-    if (!tournamentData.rounds || tournamentData.rounds === "unlimited") {
-      return false;
-    }
-    return (
-      tournamentData.gameData.completedRounds >= parseInt(tournamentData.rounds)
-    );
+    const rounds = tournamentData.rounds;
+    return rounds && rounds !== "unlimited" && 
+           tournamentData.gameData.completedRounds >= parseInt(rounds, 10);
   };
 
   const value = {
