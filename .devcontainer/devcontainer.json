@@ -1,0 +1,6 @@
+{
+  "name": "uno",
+  "image": "jnckk/nodejs-custom:22-alpine",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "runArgs": ["--name", "uno"]
+}
