@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
@@ -21,6 +21,25 @@ const LandingPage = () => {
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [playerSuggestions, setPlayerSuggestions] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState({});
+
+  useEffect(() => {
+    fetchPlayerSuggestions();
+  }, []);
+
+  const fetchPlayerSuggestions = async () => {
+    try {
+      const response = await fetch("/api/players");
+      const result = await response.json();
+      if (result.success) {
+        setPlayerSuggestions(result.data.map((player) => player.name));
+      }
+    } catch (error) {
+      console.error("Error fetching player suggestions:", error);
+    }
+  };
 
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
@@ -45,6 +64,60 @@ const LandingPage = () => {
     const updatedNames = [...playerNames];
     updatedNames[index] = name;
     setPlayerNames(updatedNames);
+
+    if (name.length > 1) {
+      const filteredSuggestions = playerSuggestions.filter(
+        (suggestion) =>
+          suggestion.toLowerCase().includes(name.toLowerCase()) &&
+          suggestion.toLowerCase() !== name.toLowerCase()
+      );
+      setShowSuggestions({
+        ...showSuggestions,
+        [index]: filteredSuggestions.length > 0 ? filteredSuggestions : [],
+      });
+    } else {
+      setShowSuggestions({
+        ...showSuggestions,
+        [index]: [],
+      });
+    }
+    setActiveSuggestionIndex(-1);
+  };
+
+  const handleSuggestionClick = (index, suggestion) => {
+    const updatedNames = [...playerNames];
+    updatedNames[index] = suggestion;
+    setPlayerNames(updatedNames);
+    setShowSuggestions({
+      ...showSuggestions,
+      [index]: [],
+    });
+  };
+
+  const handleKeyDown = (e, index) => {
+    const suggestions = showSuggestions[index] || [];
+    if (suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) =>
+        prev > 0 ? prev - 1 : suggestions.length - 1
+      );
+    } else if (e.key === "Enter" && activeSuggestionIndex >= 0) {
+      e.preventDefault();
+      handleSuggestionClick(index, suggestions[activeSuggestionIndex]);
+    } else if (e.key === "Escape") {
+      setShowSuggestions({
+        ...showSuggestions,
+        [index]: [],
+      });
+      setActiveSuggestionIndex(-1);
+    }
   };
 
   const validateForm = () => {
@@ -210,16 +283,57 @@ const LandingPage = () => {
                             <div className={styles.playerNumber}>
                               {index + 1}
                             </div>
-                            <input
-                              type="text"
-                              placeholder={`Masukkan nama pemain ${index + 1}`}
-                              value={name}
-                              onChange={(e) =>
-                                handlePlayerNameChange(index, e.target.value)
-                              }
-                              required
-                              disabled={isLoading}
-                            />
+                            <div className={styles.inputWrapper}>
+                              <input
+                                type="text"
+                                placeholder={`Masukkan nama pemain ${
+                                  index + 1
+                                }`}
+                                value={name}
+                                onChange={(e) =>
+                                  handlePlayerNameChange(index, e.target.value)
+                                }
+                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                onBlur={() => {
+                                  setTimeout(() => {
+                                    setShowSuggestions({
+                                      ...showSuggestions,
+                                      [index]: [],
+                                    });
+                                  }, 200);
+                                }}
+                                required
+                                disabled={isLoading}
+                              />
+                              {showSuggestions[index] &&
+                                showSuggestions[index].length > 0 && (
+                                  <div className={styles.suggestions}>
+                                    {showSuggestions[index].map(
+                                      (suggestion, suggestionIndex) => (
+                                        <div
+                                          key={suggestionIndex}
+                                          className={`${
+                                            styles.suggestionItem
+                                          } ${
+                                            suggestionIndex ===
+                                            activeSuggestionIndex
+                                              ? styles.active
+                                              : ""
+                                          }`}
+                                          onClick={() =>
+                                            handleSuggestionClick(
+                                              index,
+                                              suggestion
+                                            )
+                                          }
+                                        >
+                                          {suggestion}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                            </div>
                           </div>
                         ))}
                       </div>

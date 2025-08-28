@@ -1,0 +1,470 @@
+.settingsContainer {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  margin-bottom: 40px;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+/* Settings Content */
+.settingsContent {
+  display: flex;
+  gap: 30px;
+}
+
+/* Tabs Navigation */
+.tabsNavigation {
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  padding: 20px;
+  min-width: 250px;
+  height: fit-content;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.tabButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+.tabButton.activeTab {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tabIcon {
+  font-size: 1.2rem;
+  min-width: 20px;
+}
+
+.tabLabel {
+  font-weight: 500;
+}
+
+/* Settings Panel */
+.settingsPanel {
+  flex: 1;
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.settingsSection {
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sectionHeader {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sectionHeader h2 {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+.sectionHeader p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+/* Settings Grid */
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.settingItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settingItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.settingItem label {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+.settingInput,
+.settingSelect {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  transition: all 0.3s ease;
+}
+
+.settingInput:focus,
+.settingSelect:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+}
+
+.settingInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Switch Components */
+.switchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.switchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 24px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.switch:checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.switch::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.switch:checked::before {
+  transform: translateX(26px);
+}
+
+.switchLabel {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  min-width: 80px;
+}
+
+/* Backup Info */
+.backupInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.backupStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statusLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+.statusValue {
+  color: #4ade80;
+  font-weight: 500;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+}
+
+.backupButton {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.backupButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resetButton,
+.saveButton {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resetButton {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.resetButton:hover {
+  background: rgba(239, 68, 68, 0.3);
+  transform: translateY(-2px);
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .settingsContent {
+    flex-direction: column;
+  }
+
+  .tabsNavigation {
+    display: flex;
+    overflow-x: auto;
+    min-width: auto;
+    padding: 15px;
+  }
+
+  .tabButton {
+    flex-shrink: 0;
+    margin-right: 10px;
+    margin-bottom: 0;
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsContainer {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .settingsPanel {
+    padding: 20px;
+  }
+
+  .sectionHeader h2 {
+    font-size: 1.5rem;
+  }
+
+  .tabsNavigation {
+    padding: 10px;
+  }
+
+  .tabButton {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .switchContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .backupInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .backupButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .resetButton,
+  .saveButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .settingsContainer {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .settingsPanel {
+    padding: 15px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 20px;
+  }
+
+  .settingsGrid {
+    gap: 15px;
+  }
+
+  .settingInput,
+  .settingSelect {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .tabButton {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .switchContainer {
+    padding: 12px 16px;
+  }
+
+  .actionButtons {
+    margin-top: 30px;
+    padding-top: 20px;
+  }
+}

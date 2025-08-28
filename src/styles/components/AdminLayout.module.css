@@ -1,0 +1,29 @@
+.adminLayout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+.mainContent {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  padding: 20px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 60px;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainContent {
+    margin-left: 50px;
+    padding: 10px;
+  }
+}
