@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Constants
 const STORAGE_KEY = "unoTournamentData";
 const MIN_PLAYERS = 2;
 
@@ -30,25 +29,24 @@ const calculateStatistics = (wins, playerCount) => {
   let weighted = 0;
   let totalPositionSum = 0;
   let totalGames = 0;
-  
+
   for (let i = 1; i <= playerCount; i++) {
     const positionKey = `position${i}`;
     const count = wins[positionKey] || 0;
     const weight = playerCount - i + 1;
-    
+
     weighted += count * weight;
     totalPositionSum += count * i;
     totalGames += count;
   }
-  
+
   return {
     weightedScore: weighted,
     averagePosition: totalGames > 0 ? totalPositionSum / totalGames : 0,
-    totalGames
+    totalGames,
   };
 };
 
-// Context
 const TournamentContext = createContext();
 
 export const useTournament = () => {
@@ -59,7 +57,6 @@ export const useTournament = () => {
   return context;
 };
 
-// Utility Functions
 const createPlayerScore = (playerIndex, playerCount) => ({
   playerIndex,
   totalScore: 0,
@@ -89,7 +86,7 @@ const sortPlayersByScore = (players, playerCount) => {
 
     const aStats = calculateStatistics(a.wins, playerCount);
     const bStats = calculateStatistics(b.wins, playerCount);
-    
+
     if (bStats.weightedScore !== aStats.weightedScore) {
       return bStats.weightedScore - aStats.weightedScore;
     }
@@ -108,7 +105,6 @@ const updateWinCounts = (player, rank, playerCount) => {
   }
 };
 
-// Storage utilities
 const storageUtils = {
   async save(data) {
     try {
@@ -136,7 +132,6 @@ const storageUtils = {
   },
 };
 
-// Data migration utility
 const migrateOldData = (data) => {
   if (!data.gameData) {
     return {
@@ -144,9 +139,10 @@ const migrateOldData = (data) => {
       gameData: {
         currentRound: 1,
         completedRounds: 0,
-        playerScores: data.playerNames?.map((_, index) => 
-          createPlayerScore(index, data.playerCount)
-        ) || [],
+        playerScores:
+          data.playerNames?.map((_, index) =>
+            createPlayerScore(index, data.playerCount)
+          ) || [],
         roundHistory: [],
       },
     };
@@ -175,13 +171,11 @@ const migrateOldData = (data) => {
   return data;
 };
 
-// Provider Component
 export const TournamentProvider = ({ children }) => {
   const [tournamentData, setTournamentData] = useState(
     INITIAL_TOURNAMENT_STATE
   );
 
-  // Load saved data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -198,7 +192,6 @@ export const TournamentProvider = ({ children }) => {
     loadData();
   }, []);
 
-  // Tournament setup
   const saveTournamentData = async (data) => {
     const tournamentInfo = {
       ...data,
@@ -219,7 +212,6 @@ export const TournamentProvider = ({ children }) => {
     return tournamentInfo;
   };
 
-  // Save round results
   const saveRoundResult = async (rankings) => {
     const { gameData, playerCount } = tournamentData;
 
@@ -230,9 +222,9 @@ export const TournamentProvider = ({ children }) => {
     );
 
     const playerMap = new Map(
-      gameData.playerScores.map(player => [
+      gameData.playerScores.map((player) => [
         player.playerIndex,
-        { ...player, wins: { ...player.wins } }
+        { ...player, wins: { ...player.wins } },
       ])
     );
 
@@ -268,7 +260,6 @@ export const TournamentProvider = ({ children }) => {
     return updatedTournamentData;
   };
 
-  // Reset tournament
   const resetTournamentData = async () => {
     const resetData = {
       ...tournamentData,
@@ -287,14 +278,12 @@ export const TournamentProvider = ({ children }) => {
     return resetData;
   };
 
-  // Clear all tournament data and return to initial state
   const clearAllData = async () => {
     await storageUtils.remove();
     setTournamentData(INITIAL_TOURNAMENT_STATE);
     return INITIAL_TOURNAMENT_STATE;
   };
 
-  // Tournament summary
   const getTournamentSummary = () => ({
     totalPlayers: tournamentData.playerCount,
     roundsType: tournamentData.rounds
@@ -308,11 +297,13 @@ export const TournamentProvider = ({ children }) => {
       : null,
   });
 
-  // Check if tournament is completed
   const isTournamentCompleted = () => {
     const rounds = tournamentData.rounds;
-    return rounds && rounds !== "unlimited" && 
-           tournamentData.gameData.completedRounds >= parseInt(rounds, 10);
+    return (
+      rounds &&
+      rounds !== "unlimited" &&
+      tournamentData.gameData.completedRounds >= parseInt(rounds, 10)
+    );
   };
 
   const value = {

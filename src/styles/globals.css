@@ -18,29 +18,26 @@ body {
   line-height: 1.5;
 }
 
-/* Hide scrollbar globally but keep scroll functionality */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
   font-family: inherit;
-  /* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for webkit browsers */
+  display: none;
 }
 
-/* Ensure body and html can still scroll */
 html,
 body {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for webkit browsers */
+  display: none;
 }

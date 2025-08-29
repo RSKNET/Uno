@@ -21,9 +21,9 @@ const Notification = ({
   const getIcon = useMemo(() => {
     const iconMap = {
       success: "✅",
-      error: "❌", 
+      error: "❌",
       warning: "⚠️",
-      info: "ℹ️"
+      info: "ℹ️",
     };
     return iconMap[type] || iconMap.success;
   }, [type]);
@@ -36,8 +36,8 @@ const Notification = ({
       <div className={styles.content}>
         <p className={styles.message}>{message}</p>
       </div>
-      <button 
-        className={styles.closeButton} 
+      <button
+        className={styles.closeButton}
         onClick={handleClose}
         type="button"
         aria-label="Tutup notifikasi"

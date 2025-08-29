@@ -24,9 +24,8 @@ const AdminPage = () => {
         "Akses ditolak. Silakan login terlebih dahulu.",
         "error"
       );
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
+      setIsLoading(false);
       return;
     }
 
@@ -44,22 +43,17 @@ const AdminPage = () => {
       if (result.success) {
         setUser(JSON.parse(userData));
         setIsAuthenticated(true);
-        // Auto redirect ke dashboard
         router.push("/admin/dashboard");
       } else {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         showNotification("Session expired. Silakan login kembali.", "error");
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        router.push("/login");
       }
     } catch (error) {
       console.error("Error verifying token:", error);
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
     } finally {
       setIsLoading(false);
     }
@@ -70,14 +64,45 @@ const AdminPage = () => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showNotification("Token tidak ditemukan", "error");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        showNotification("Logout berhasil", "success");
+        router.push("/login");
+      } else {
+        showNotification(data.error || "Gagal logout", "error");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      showNotification("Terjadi kesalahan saat logout", "error");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
   };
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
 
   if (!isAuthenticated) {

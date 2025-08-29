@@ -13,12 +13,10 @@ const SettingsPage = () => {
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Settings state
   const [activeTab, setActiveTab] = useState("general");
   const [isSaving, setIsSaving] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
-  // General Settings
   const [generalSettings, setGeneralSettings] = useState({
     siteName: "UNO Tournament System",
     adminEmail: "admin@unotournament.com",
@@ -28,7 +26,6 @@ const SettingsPage = () => {
     registrationEnabled: true,
   });
 
-  // Tournament Settings
   const [tournamentSettings, setTournamentSettings] = useState({
     maxPlayers: 8,
     defaultRounds: 5,
@@ -38,7 +35,6 @@ const SettingsPage = () => {
     tournamentTimer: 30,
   });
 
-  // Email Settings
   const [emailSettings, setEmailSettings] = useState({
     smtpHost: "smtp.gmail.com",
     smtpPort: 587,
@@ -49,7 +45,6 @@ const SettingsPage = () => {
     enableNotifications: true,
   });
 
-  // Security Settings
   const [securitySettings, setSecuritySettings] = useState({
     sessionTimeout: 24,
     passwordMinLength: 8,
@@ -60,7 +55,6 @@ const SettingsPage = () => {
     enableTwoFactor: false,
   });
 
-  // Backup Settings
   const [backupSettings, setBackupSettings] = useState({
     autoBackup: true,
     backupFrequency: "daily",
@@ -82,9 +76,8 @@ const SettingsPage = () => {
         "Akses ditolak. Silakan login terlebih dahulu.",
         "error"
       );
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
+      setIsLoading(false);
       return;
     }
 
@@ -106,16 +99,11 @@ const SettingsPage = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         showNotification("Session expired. Silakan login kembali.", "error");
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        router.push("/login");
       }
     } catch (error) {
-      console.error("Error verifying token:", error);
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
     } finally {
       setIsLoading(false);
     }
@@ -126,20 +114,46 @@ const SettingsPage = () => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showNotification("Token tidak ditemukan", "error");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        showNotification("Logout berhasil", "success");
+        router.push("/login");
+      } else {
+        showNotification(data.error || "Gagal logout", "error");
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat logout", "error");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
   };
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      showNotification("Pengaturan berhasil disimpan!", "success");
-      setIsSaving(false);
-    }, 1000);
+    showNotification("Pengaturan berhasil disimpan!", "success");
+    setIsSaving(false);
   };
 
   const handleResetSettings = () => {
@@ -147,7 +161,6 @@ const SettingsPage = () => {
   };
 
   const handleConfirmReset = () => {
-    // Reset to default values
     if (activeTab === "general") {
       setGeneralSettings({
         siteName: "UNO Tournament System",
@@ -209,13 +222,11 @@ const SettingsPage = () => {
 
   const createBackup = () => {
     showNotification("Backup sedang dibuat...", "info");
-    setTimeout(() => {
-      setBackupSettings((prev) => ({
-        ...prev,
-        lastBackup: new Date().toISOString(),
-      }));
-      showNotification("Backup berhasil dibuat!", "success");
-    }, 2000);
+    setBackupSettings((prev) => ({
+      ...prev,
+      lastBackup: new Date().toISOString(),
+    }));
+    showNotification("Backup berhasil dibuat!", "success");
   };
 
   const tabs = [
@@ -227,7 +238,7 @@ const SettingsPage = () => {
   ];
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
 
   if (!isAuthenticated) {
@@ -238,7 +249,6 @@ const SettingsPage = () => {
     <>
       <AdminLayout user={user} onLogout={handleLogout}>
         <div className={styles.settingsContainer}>
-          {/* Header */}
           <div className={styles.header}>
             <h1 className={styles.title}>Pengaturan Sistem</h1>
             <p className={styles.subtitle}>
@@ -246,9 +256,7 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          {/* Settings Content */}
           <div className={styles.settingsContent}>
-            {/* Tabs Navigation */}
             <div className={styles.tabsNavigation}>
               {tabs.map((tab) => (
                 <button
@@ -264,9 +272,7 @@ const SettingsPage = () => {
               ))}
             </div>
 
-            {/* Settings Panel */}
             <div className={styles.settingsPanel}>
-              {/* General Settings */}
               {activeTab === "general" && (
                 <div className={styles.settingsSection}>
                   <div className={styles.sectionHeader}>
@@ -387,7 +393,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Tournament Settings */}
               {activeTab === "tournament" && (
                 <div className={styles.settingsSection}>
                   <div className={styles.sectionHeader}>
@@ -528,7 +533,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Email Settings */}
               {activeTab === "email" && (
                 <div className={styles.settingsSection}>
                   <div className={styles.sectionHeader}>
@@ -641,7 +645,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Security Settings */}
               {activeTab === "security" && (
                 <div className={styles.settingsSection}>
                   <div className={styles.sectionHeader}>
@@ -808,7 +811,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Backup Settings */}
               {activeTab === "backup" && (
                 <div className={styles.settingsSection}>
                   <div className={styles.sectionHeader}>
@@ -912,7 +914,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className={styles.actionButtons}>
                 <button
                   onClick={handleResetSettings}
@@ -933,7 +934,6 @@ const SettingsPage = () => {
         </div>
       </AdminLayout>
 
-      {/* Reset Confirmation Modal */}
       {isResetModalOpen && (
         <ConfirmationModal
           isOpen={isResetModalOpen}

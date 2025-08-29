@@ -63,7 +63,6 @@ const GamePage = () => {
       showNotification("Tournament berhasil dihapus!", "success");
       router.push("/");
     } catch (error) {
-      console.error("Error deleting tournament:", error);
       showNotification("Terjadi kesalahan saat menghapus tournament", "error");
     } finally {
       setIsDeleting(false);
@@ -100,7 +99,6 @@ const GamePage = () => {
       setSelectedRankings({});
       showNotification("Hasil babak berhasil disimpan!", "success");
     } catch (error) {
-      console.error("Error saving round result:", error);
       showNotification("Terjadi kesalahan saat menyimpan hasil babak", "error");
     } finally {
       setIsSubmitting(false);
@@ -122,7 +120,6 @@ const GamePage = () => {
       setSelectedRankings({});
       showNotification("Tournament berhasil direset!", "info");
     } catch (error) {
-      console.error("Error resetting tournament:", error);
       showNotification("Terjadi kesalahan saat reset tournament", "error");
     } finally {
       setIsResetting(false);
@@ -142,7 +139,6 @@ const GamePage = () => {
       await exportTournamentToPdf(tournamentData, tournamentSummary);
       showNotification("PDF berhasil diekspor!", "success");
     } catch (error) {
-      console.error("Error exporting PDF:", error);
       showNotification("Terjadi kesalahan saat mengekspor PDF", "error");
     } finally {
       setIsExportingPdf(false);
@@ -177,7 +173,6 @@ const GamePage = () => {
         />
       )}
 
-      {/* Modal Konfirmasi - Tetap ada meskipun tournament belum setup */}
       <ConfirmationModal
         isOpen={isResetModalOpen}
         title="Reset Tournament"
@@ -202,13 +197,11 @@ const GamePage = () => {
 
       <Loading isVisible={isLoading} message={loadingMessage} />
 
-      {/* Conditional Content - Jika tournament tidak valid, tampilkan NoTournamentSetup */}
       {!tournamentSummary.isValid ? (
         <div className={styles.mainContainer}>
           <NoTournamentSetup />
         </div>
       ) : (
-        /* Konten Tournament Normal */
         <div className={styles.mainContainer}>
           <div className={styles.contentContainer}>
             <div className={styles.leftSection}>
@@ -385,7 +378,6 @@ const GamePage = () => {
                               currentPlayer.playerIndex
                             ];
 
-                          // Cari pemain lain dengan skor yang sama (seri)
                           const tiedPlayers = [currentPlayer];
                           let j = i + 1;
 
@@ -394,7 +386,6 @@ const GamePage = () => {
                             playerScores[j].totalScore ===
                               currentPlayer.totalScore
                           ) {
-                            // Periksa apakah benar-benar seri sempurna dengan weighted score dan average position
                             const currentStats = {
                               weightedScore: 0,
                               averagePosition: 0,
@@ -404,10 +395,8 @@ const GamePage = () => {
                               averagePosition: 0,
                             };
 
-                            // Hitung statistik untuk perbandingan
                             const playerCount = tournamentSummary.totalPlayers;
 
-                            // Current player stats
                             let weighted = 0,
                               totalPositionSum = 0,
                               totalGames = 0;
@@ -425,7 +414,6 @@ const GamePage = () => {
                                 ? totalPositionSum / totalGames
                                 : 0;
 
-                            // Next player stats
                             weighted = 0;
                             totalPositionSum = 0;
                             totalGames = 0;
@@ -443,7 +431,6 @@ const GamePage = () => {
                                 ? totalPositionSum / totalGames
                                 : 0;
 
-                            // Jika benar-benar seri sempurna
                             if (
                               currentStats.weightedScore ===
                                 nextStats.weightedScore &&
@@ -457,7 +444,6 @@ const GamePage = () => {
                             }
                           }
 
-                          // Buat entry untuk posisi ini
                           const playerNames = tiedPlayers.map(
                             (player) =>
                               tournamentSummary.players[player.playerIndex]
@@ -476,7 +462,7 @@ const GamePage = () => {
                           });
 
                           currentPosition += tiedPlayers.length;
-                          i = j - 1; // Skip pemain yang sudah diproses
+                          i = j - 1;
                         }
 
                         return groupedByPosition.map((entry, index) => (

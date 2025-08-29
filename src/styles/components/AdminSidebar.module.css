@@ -9,8 +9,9 @@
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   z-index: 1000;
+  box-sizing: border-box;
 }
 
 .sidebar.minimized {
@@ -42,7 +43,7 @@
   font-weight: bold;
   white-space: nowrap;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .minimized .logoText {
@@ -58,7 +59,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   backdrop-filter: blur(10px);
 }
 
@@ -84,7 +85,7 @@
   color: white;
   text-align: left;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   position: relative;
   margin-bottom: 5px;
 }
@@ -120,7 +121,7 @@
   font-weight: 500;
   white-space: nowrap;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .minimized .menuLabel {
@@ -150,12 +151,15 @@
   border-radius: 50%;
   min-width: 40px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .userInfo {
   flex: 1;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .minimized .userInfo {
@@ -185,7 +189,7 @@
   color: white;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .logoutButton:hover {
@@ -201,12 +205,28 @@
   font-size: 14px;
   font-weight: 500;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .minimized .logoutText {
   opacity: 0;
   pointer-events: none;
+}
+
+.minimized .logoutButton {
+  justify-content: center;
+  padding: 12px;
+}
+
+.minimized .userSection {
+  justify-content: center;
+}
+
+.minimized .userAvatar {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  min-width: auto;
 }
 
 .sidebarOverlay {
@@ -226,6 +246,7 @@
     width: 280px;
     transform: translateX(-100%);
     z-index: 1001;
+    box-sizing: border-box;
   }
 
   .sidebar.minimized {
@@ -289,6 +310,7 @@
 @media (max-width: 480px) {
   .sidebar.minimized {
     width: 50px;
+    box-sizing: border-box;
   }
 
   .sidebarHeader {

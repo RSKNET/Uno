@@ -13,78 +13,52 @@ const PlayersPage = () => {
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Players data state
   const [players, setPlayers] = useState([]);
   const [filteredPlayers, setFilteredPlayers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    phone: "",
     joinDate: "",
   });
 
-  // Mock data untuk demo UI
   const mockPlayers = [
     {
       id: 1,
       name: "John Doe",
-      email: "john@example.com",
-      phone: "081234567890",
       joinDate: "2024-01-15",
       totalGames: 15,
-      wins: 8,
-      winRate: "53%",
     },
     {
       id: 2,
       name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "081234567891",
       joinDate: "2024-01-20",
       totalGames: 12,
-      wins: 10,
-      winRate: "83%",
     },
     {
       id: 3,
       name: "Bob Wilson",
-      email: "bob@example.com",
-      phone: "081234567892",
       joinDate: "2024-02-01",
       totalGames: 8,
-      wins: 3,
-      winRate: "38%",
     },
     {
       id: 4,
       name: "Alice Johnson",
-      email: "alice@example.com",
-      phone: "081234567893",
       joinDate: "2024-02-10",
       totalGames: 20,
-      wins: 15,
-      winRate: "75%",
     },
     {
       id: 5,
       name: "Charlie Brown",
-      email: "charlie@example.com",
-      phone: "081234567894",
       joinDate: "2024-02-15",
       totalGames: 6,
-      wins: 2,
-      winRate: "33%",
     },
   ];
 
@@ -94,24 +68,16 @@ const PlayersPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Simulate loading players data
-      setTimeout(() => {
-        setPlayers(mockPlayers);
-        setFilteredPlayers(mockPlayers);
-      }, 500);
+      setPlayers(mockPlayers);
+      setFilteredPlayers(mockPlayers);
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    // Filter players based on search term
-    const filtered = players.filter(
-      (player) =>
-        player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        player.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        player.phone.includes(searchTerm)
+    const filtered = players.filter((player) =>
+      player.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Sort players
     const sorted = [...filtered].sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
@@ -135,9 +101,8 @@ const PlayersPage = () => {
         "Akses ditolak. Silakan login terlebih dahulu.",
         "error"
       );
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
+      setIsLoading(false);
       return;
     }
 
@@ -159,16 +124,11 @@ const PlayersPage = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         showNotification("Session expired. Silakan login kembali.", "error");
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        router.push("/login");
       }
     } catch (error) {
-      console.error("Error verifying token:", error);
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
     } finally {
       setIsLoading(false);
     }
@@ -179,14 +139,44 @@ const PlayersPage = () => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showNotification("Token tidak ditemukan", "error");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        showNotification("Logout berhasil", "success");
+        router.push("/login");
+      } else {
+        showNotification(data.error || "Gagal logout", "error");
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat logout", "error");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
   };
 
   const handleAddPlayer = () => {
-    setFormData({ name: "", email: "", phone: "", joinDate: "" });
+    setFormData({ name: "", joinDate: "" });
     setIsAddModalOpen(true);
   };
 
@@ -194,8 +184,6 @@ const PlayersPage = () => {
     setSelectedPlayer(player);
     setFormData({
       name: player.name,
-      email: player.email,
-      phone: player.phone,
       joinDate: player.joinDate,
     });
     setIsEditModalOpen(true);
@@ -207,14 +195,12 @@ const PlayersPage = () => {
   };
 
   const handleSavePlayer = () => {
-    // TODO: Implement save functionality
     showNotification("Pemain berhasil disimpan!", "success");
     setIsAddModalOpen(false);
     setIsEditModalOpen(false);
   };
 
   const handleConfirmDelete = () => {
-    // TODO: Implement delete functionality
     showNotification("Pemain berhasil dihapus!", "success");
     setIsDeleteModalOpen(false);
   };
@@ -237,7 +223,7 @@ const PlayersPage = () => {
   };
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
 
   if (!isAuthenticated) {
@@ -248,13 +234,11 @@ const PlayersPage = () => {
     <>
       <AdminLayout user={user} onLogout={handleLogout}>
         <div className={styles.playersContainer}>
-          {/* Header */}
           <div className={styles.header}>
             <h1 className={styles.title}>Manajemen Pemain</h1>
             <p className={styles.subtitle}>Kelola data pemain UNO tournament</p>
           </div>
 
-          {/* Stats Cards */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon}>👥</div>
@@ -272,39 +256,13 @@ const PlayersPage = () => {
                 <p className={styles.statLabel}>Total Game</p>
               </div>
             </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>🏆</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {players.reduce((sum, p) => sum + p.wins, 0)}
-                </h3>
-                <p className={styles.statLabel}>Total Kemenangan</p>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>📈</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {players.length > 0
-                    ? Math.round(
-                        players.reduce(
-                          (sum, p) => sum + parseFloat(p.winRate),
-                          0
-                        ) / players.length
-                      ) + "%"
-                    : "0%"}
-                </h3>
-                <p className={styles.statLabel}>Rata-rata Win Rate</p>
-              </div>
-            </div>
           </div>
 
-          {/* Controls */}
           <div className={styles.controls}>
             <div className={styles.searchContainer}>
               <input
                 type="text"
-                placeholder="Cari pemain..."
+                placeholder="Cari pemain berdasarkan nama..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={styles.searchInput}
@@ -327,7 +285,7 @@ const PlayersPage = () => {
                 <option value="joinDate-desc">Terbaru</option>
                 <option value="joinDate-asc">Terlama</option>
                 <option value="totalGames-desc">Game Terbanyak</option>
-                <option value="winRate-desc">Win Rate Tertinggi</option>
+                <option value="totalGames-asc">Game Tersedikit</option>
               </select>
 
               <button onClick={handleAddPlayer} className={styles.addButton}>
@@ -337,49 +295,33 @@ const PlayersPage = () => {
             </div>
           </div>
 
-          {/* Players Table */}
           <div className={styles.tableContainer}>
             <table className={styles.playersTable}>
               <thead>
                 <tr>
                   <th
                     onClick={() => handleSort("name")}
-                    className={styles.sortableHeader}
+                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
                   >
                     Nama{" "}
                     {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}
                   </th>
                   <th
-                    onClick={() => handleSort("email")}
-                    className={styles.sortableHeader}
-                  >
-                    Email{" "}
-                    {sortBy === "email" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th>Telepon</th>
-                  <th
                     onClick={() => handleSort("joinDate")}
-                    className={styles.sortableHeader}
+                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
                   >
                     Tanggal Bergabung{" "}
                     {sortBy === "joinDate" && (sortOrder === "asc" ? "↑" : "↓")}
                   </th>
                   <th
                     onClick={() => handleSort("totalGames")}
-                    className={styles.sortableHeader}
+                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
                   >
                     Total Game{" "}
                     {sortBy === "totalGames" &&
                       (sortOrder === "asc" ? "↑" : "↓")}
                   </th>
-                  <th
-                    onClick={() => handleSort("winRate")}
-                    className={styles.sortableHeader}
-                  >
-                    Win Rate{" "}
-                    {sortBy === "winRate" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th>Aksi</th>
+                  <th className={styles.centerHeader}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -391,13 +333,10 @@ const PlayersPage = () => {
                       </div>
                       {player.name}
                     </td>
-                    <td>{player.email}</td>
-                    <td>{player.phone}</td>
-                    <td>
+                    <td className={styles.joinDate}>
                       {new Date(player.joinDate).toLocaleDateString("id-ID")}
                     </td>
                     <td className={styles.gameCount}>{player.totalGames}</td>
-                    <td className={styles.winRate}>{player.winRate}</td>
                     <td className={styles.actions}>
                       <button
                         onClick={() => handleEditPlayer(player)}
@@ -434,7 +373,6 @@ const PlayersPage = () => {
         </div>
       </AdminLayout>
 
-      {/* Add/Edit Player Modal */}
       {(isAddModalOpen || isEditModalOpen) && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -459,26 +397,6 @@ const PlayersPage = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Masukkan nama pemain"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan email"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Telepon</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan nomor telepon"
                 />
               </div>
               <div className={styles.formGroup}>
@@ -509,7 +427,6 @@ const PlayersPage = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <ConfirmationModal
           isOpen={isDeleteModalOpen}

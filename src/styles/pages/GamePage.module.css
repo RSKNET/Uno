@@ -2,6 +2,7 @@
   background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
   min-height: 100vh;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .mainContainer {
@@ -11,6 +12,7 @@
   flex-direction: column;
   gap: 30px;
   animation: slideIn 0.6s ease-out;
+  box-sizing: border-box;
 }
 
 @keyframes slideIn {
@@ -42,7 +44,6 @@
   gap: 30px;
 }
 
-/* Base Container Styling */
 .infoContainer,
 .formSection,
 .leaderboard,
@@ -54,9 +55,9 @@
   border-radius: 20px;
   padding: 30px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
 }
 
-/* Headers */
 .infoContainer h3,
 .formSection h3,
 .leaderboard h3,
@@ -84,7 +85,6 @@
   background: linear-gradient(90deg, transparent, #00bfff, transparent);
 }
 
-/* No History Message */
 .noHistoryMessage {
   text-align: center;
   padding: 2rem;
@@ -92,12 +92,12 @@
   font-style: italic;
 }
 
-/* Info Grid */
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
   margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .infoItem {
@@ -105,6 +105,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .infoLabel {
@@ -121,13 +122,14 @@
   color: white;
   box-shadow: 0 2px 8px rgba(0, 191, 255, 0.3);
   min-width: 40px;
+  box-sizing: border-box;
 }
 
-/* Button Group */
 .buttonGroup {
   display: flex;
   gap: 15px;
   margin-top: 25px;
+  box-sizing: border-box;
 }
 
 .buttonGroup .btn {
@@ -138,12 +140,12 @@
   letter-spacing: 0.5px;
 }
 
-/* Score Section Layout - Updated for equal height */
 .scoreSection {
   display: flex;
   gap: 30px;
   width: 100%;
   align-items: stretch;
+  box-sizing: border-box;
 }
 
 .formContainer {
@@ -151,15 +153,16 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .leaderboardContainer {
   width: 350px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* Make form section and leaderboard equal height */
 .formSection,
 .leaderboard {
   flex: 1;
@@ -178,7 +181,6 @@
   flex: 1;
 }
 
-/* Current Round */
 .currentRound {
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: white;
@@ -188,11 +190,12 @@
   text-align: center;
   margin-bottom: 20px;
   box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+  box-sizing: border-box;
 }
 
-/* Form Elements */
 .formGroup {
   margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .formGroup label {
@@ -201,12 +204,14 @@
   color: #00bfff;
   font-weight: 600;
   font-size: 1.1em;
+  box-sizing: border-box;
 }
 
 .rankingContainer {
   display: grid;
   gap: 15px;
   margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .rankItem {
@@ -217,6 +222,7 @@
   padding: 10px 15px;
   border-radius: 10px;
   border: 2px solid #0f3460;
+  box-sizing: border-box;
 }
 
 .rankNumber {
@@ -231,10 +237,12 @@
   font-weight: bold;
   box-shadow: 0 2px 8px rgba(0, 191, 255, 0.3);
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .rankPlayer {
   flex: 1;
+  box-sizing: border-box;
 }
 
 .rankSelect {
@@ -246,6 +254,7 @@
   color: white;
   font-size: 14px;
   min-height: 40px;
+  box-sizing: border-box;
 }
 
 .rankSelect option {
@@ -268,14 +277,15 @@
   font-weight: bold;
   min-width: 50px;
   text-align: center;
+  box-sizing: border-box;
 }
 
-/* Tournament Completed */
 .tournamentCompleted {
   color: white;
   padding: 8px 12px;
   border-radius: 20px;
   font-weight: bold;
+  box-sizing: border-box;
 }
 
 .tournamentCompletedMessage {
@@ -286,6 +296,7 @@
   margin: 20px 0;
   text-align: center;
   color: #ff9f43;
+  box-sizing: border-box;
 }
 
 .tournamentCompletedMessage p {
@@ -296,7 +307,6 @@
   margin-bottom: 0;
 }
 
-/* Buttons */
 .btn {
   background: linear-gradient(135deg, #00bfff 0%, #0080ff 100%);
   color: white;
@@ -306,11 +316,12 @@
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   width: 100%;
   text-transform: uppercase;
   letter-spacing: 1px;
   box-shadow: 0 5px 15px rgba(0, 191, 255, 0.3);
+  box-sizing: border-box;
 }
 
 .btn:hover {
@@ -358,7 +369,8 @@
   padding: 15px 20px;
   border-radius: 10px;
   border: 1px solid #00bfff;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
+  box-sizing: border-box;
 }
 
 .playerScore:hover {
@@ -370,18 +382,21 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-sizing: border-box;
 }
 
 .playerName {
   font-weight: bold;
   color: white;
   font-size: 1.1em;
+  box-sizing: border-box;
 }
 
 .playerWins {
   font-size: 0.85em;
   color: #b8c5d6;
   font-style: italic;
+  box-sizing: border-box;
 }
 
 .playerTotalScore {
@@ -393,13 +408,14 @@
   box-shadow: 0 2px 8px rgba(0, 191, 255, 0.3);
   min-width: 50px;
   text-align: center;
+  box-sizing: border-box;
 }
 
-/* Stats Grid */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
+  box-sizing: border-box;
 }
 
 .playerStats {
@@ -407,6 +423,7 @@
   padding: 15px;
   border-radius: 10px;
   border: 1px solid #00bfff;
+  box-sizing: border-box;
 }
 
 .playerStats h4 {
@@ -431,11 +448,11 @@
   font-weight: bold;
 }
 
-/* History Section */
 .historyList {
   max-height: 800px;
   overflow-y: auto;
   padding-right: 10px;
+  box-sizing: border-box;
 }
 
 .historyList::-webkit-scrollbar {
@@ -463,6 +480,7 @@
   padding: 20px;
   margin-bottom: 15px;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  box-sizing: border-box;
 }
 
 .historyHeader {
@@ -470,6 +488,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
 .historyItem h4 {
@@ -489,6 +508,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-sizing: border-box;
 }
 
 .historyRank {
@@ -499,12 +519,14 @@
   padding: 10px 15px;
   border-radius: 12px;
   border: 1px solid rgba(147, 197, 253, 0.2);
+  box-sizing: border-box;
 }
 
 .historyRankLeft {
   display: flex;
   align-items: center;
   gap: 12px;
+  box-sizing: border-box;
 }
 
 .historyPosition {
@@ -519,12 +541,14 @@
   font-weight: bold;
   font-size: 1.1em;
   box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  box-sizing: border-box;
 }
 
 .historyPlayer {
   color: white;
   font-weight: 600;
   font-size: 1.05em;
+  box-sizing: border-box;
 }
 
 .historyPoints {
@@ -537,43 +561,50 @@
   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
   min-width: 60px;
   text-align: center;
+  box-sizing: border-box;
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .contentContainer {
     grid-template-columns: 1fr;
+    box-sizing: border-box;
   }
 
   .scoreSection {
     flex-direction: column;
     align-items: normal;
+    box-sizing: border-box;
   }
 
   .leaderboardContainer {
     width: 100%;
+    box-sizing: border-box;
   }
 
   .formContainer,
   .leaderboardContainer {
     display: block;
+    box-sizing: border-box;
   }
 
   .formSection,
   .leaderboard {
     display: block;
+    box-sizing: border-box;
   }
 
   .leaderboardGrid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
+    box-sizing: border-box;
   }
 }
 
 @media (max-width: 768px) {
   .gameContainer {
     padding: 16px;
+    box-sizing: border-box;
   }
 
   .infoContainer,
@@ -582,27 +613,33 @@
   .winnerStats,
   .historySection {
     padding: 20px;
+    box-sizing: border-box;
   }
 
   .infoGrid {
     grid-template-columns: repeat(2, 1fr);
+    box-sizing: border-box;
   }
 
   .statsGrid {
     grid-template-columns: 1fr;
+    box-sizing: border-box;
   }
 
   .buttonGroup {
     flex-direction: column;
     gap: 10px;
+    box-sizing: border-box;
   }
 
   .historyRank {
     padding: 8px 12px;
+    box-sizing: border-box;
   }
 
   .historyRankLeft {
     flex: 1;
+    box-sizing: border-box;
   }
 
   .historyPlayer {
@@ -610,21 +647,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 130px;
+    box-sizing: border-box;
   }
 
   .historyPoints {
     flex-shrink: 0;
+    box-sizing: border-box;
   }
 
   .playerInfo {
     gap: 2px;
+    box-sizing: border-box;
   }
 
   .playerName {
     font-size: 1em;
+    box-sizing: border-box;
   }
 
   .playerWins {
     font-size: 0.8em;
+    box-sizing: border-box;
   }
 }

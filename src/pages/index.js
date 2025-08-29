@@ -36,9 +36,7 @@ const LandingPage = () => {
       if (result.success) {
         setPlayerSuggestions(result.data.map((player) => player.name));
       }
-    } catch (error) {
-      console.error("Error fetching player suggestions:", error);
-    }
+    } catch (error) {}
   };
 
   const showNotification = (message, type = "success") => {
@@ -170,7 +168,6 @@ const LandingPage = () => {
         playerNames: playerNames.map((name) => name.trim()),
       };
 
-      // Real case: menyimpan data ke context/database
       await saveTournamentData(tournamentInfo);
 
       const roundsText = rounds ? `${rounds} babak` : "babak unlimited";
@@ -181,10 +178,8 @@ const LandingPage = () => {
 
       setLoadingMessage("Mengalihkan ke halaman game...");
 
-      // Redirect langsung tanpa setTimeout
       router.push("/GamePage");
     } catch (error) {
-      console.error("Error saving tournament data:", error);
       showNotification("Terjadi kesalahan saat menyimpan data!", "error");
     } finally {
       setIsLoading(false);
@@ -197,17 +192,14 @@ const LandingPage = () => {
     setLoadingMessage("Mereset data turnamen...");
 
     try {
-      // Reset state variables
       setPlayerCount(0);
       setRounds("");
       setPlayerNames([]);
 
-      // Real case: reset data di context/database
       await resetTournamentData();
 
       showNotification("Form berhasil direset!", "info");
     } catch (error) {
-      console.error("Error resetting tournament data:", error);
       showNotification("Terjadi kesalahan saat mereset data!", "error");
     } finally {
       setIsLoading(false);
@@ -229,7 +221,6 @@ const LandingPage = () => {
           />
         )}
 
-        {/* Loading Component dengan real case loading */}
         <Loading isVisible={isLoading} message={loadingMessage} />
 
         <div className={styles.mainContainer}>

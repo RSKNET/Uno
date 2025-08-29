@@ -50,19 +50,10 @@ const AdminSidebar = ({ user, onLogout }) => {
 
   const handleMenuClick = (path) => {
     router.push(path);
-    if (isMobile && !isMinimized) {
-      setIsMinimized(true);
-    }
   };
 
   const toggleSidebar = () => {
     setIsMinimized(!isMinimized);
-  };
-
-  const handleOverlayClick = () => {
-    if (isMobile) {
-      setIsMinimized(true);
-    }
   };
 
   return (
@@ -125,7 +116,10 @@ const AdminSidebar = ({ user, onLogout }) => {
       </div>
 
       {isMobile && !isMinimized && (
-        <div className={styles.sidebarOverlay} onClick={handleOverlayClick} />
+        <div
+          className={styles.sidebarOverlay}
+          onClick={() => setIsMinimized(true)}
+        />
       )}
     </>
   );

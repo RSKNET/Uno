@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     totalPlayers: 0,
     totalTournaments: 0,
@@ -37,9 +38,8 @@ const Dashboard = () => {
         "Akses ditolak. Silakan login terlebih dahulu.",
         "error"
       );
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
+      setIsLoading(false);
       return;
     }
 
@@ -61,24 +61,19 @@ const Dashboard = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         showNotification("Session expired. Silakan login kembali.", "error");
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        router.push("/login");
       }
     } catch (error) {
-      console.error("Error verifying token:", error);
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
     } finally {
       setIsLoading(false);
     }
   };
 
   const fetchDashboardData = async () => {
+    setIsLoadingData(true);
     try {
-      // Fetch players data
       const playersResponse = await fetch("/api/players");
       const playersResult = await playersResponse.json();
 
@@ -87,11 +82,12 @@ const Dashboard = () => {
         setDashboardData((prev) => ({
           ...prev,
           totalPlayers: players.length,
-          recentPlayers: players.slice(-5).reverse(), // Get 5 most recent players
+          recentPlayers: players.slice(-5).reverse(),
         }));
       }
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
@@ -100,18 +96,44 @@ const Dashboard = () => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showNotification("Token tidak ditemukan", "error");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        showNotification("Logout berhasil", "success");
+        router.push("/login");
+      } else {
+        showNotification(data.error || "Gagal logout", "error");
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat logout", "error");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
   };
 
   const navigateToPlayers = () => {
     router.push("/admin/players");
-  };
-
-  const navigateToReports = () => {
-    router.push("/admin/reports");
   };
 
   const navigateToSettings = () => {
@@ -119,7 +141,7 @@ const Dashboard = () => {
   };
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
 
   if (!isAuthenticated) {
@@ -130,14 +152,6 @@ const Dashboard = () => {
     <>
       <AdminLayout user={user} onLogout={handleLogout}>
         <div className={styles.dashboardContainer}>
-          <div className={styles.header}>
-            <h1 className={styles.title}>Dashboard Admin</h1>
-            <p className={styles.subtitle}>
-              Selamat datang kembali, {user?.username || "Admin"}!
-            </p>
-          </div>
-
-          {/* Stats Cards */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon}>👥</div>
@@ -178,9 +192,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Main Content Grid */}
           <div className={styles.contentGrid}>
-            {/* Recent Players */}
             <div className={styles.contentCard}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Pemain Terbaru</h2>
@@ -221,7 +233,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className={styles.contentCard}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Aksi Cepat</h2>
@@ -243,19 +254,6 @@ const Dashboard = () => {
 
                   <button
                     className={styles.actionBtn}
-                    onClick={navigateToReports}
-                  >
-                    <span className={styles.actionIcon}>📊</span>
-                    <div className={styles.actionText}>
-                      <p className={styles.actionTitle}>Lihat Laporan</p>
-                      <p className={styles.actionDesc}>
-                        Analisis data dan statistik
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    className={styles.actionBtn}
                     onClick={navigateToSettings}
                   >
                     <span className={styles.actionIcon}>⚙️</span>
@@ -268,7 +266,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* System Info */}
             <div className={styles.contentCard}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Informasi Sistem</h2>
@@ -314,6 +311,7 @@ const Dashboard = () => {
           onClose={() => setNotification(null)}
         />
       )}
+      <Loading isVisible={isLoadingData} message="Memuat data dashboard..." />
     </>
   );
 };
