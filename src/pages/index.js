@@ -4,12 +4,15 @@ import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
 import Loading from "@/components/Loading";
 import { useTournament } from "@/context/TournamentContext";
+import useMaintenance from "@/hooks/useMaintenance";
 import styles from "@/styles/pages/LandingPage.module.css";
 
 const LandingPage = () => {
   const router = useRouter();
   const { tournamentData, saveTournamentData, resetTournamentData } =
     useTournament();
+
+  const { isLoading: isMaintenanceLoading } = useMaintenance();
 
   const [playerCount, setPlayerCount] = useState(
     tournamentData.playerCount || 0
@@ -292,7 +295,12 @@ const LandingPage = () => {
           />
         )}
 
-        <Loading isVisible={isLoading} message={loadingMessage} />
+        <Loading
+          isVisible={isLoading || isMaintenanceLoading}
+          message={
+            isMaintenanceLoading ? "Memeriksa status sistem..." : loadingMessage
+          }
+        />
 
         <div className={styles.mainContainer}>
           <div className={styles.formContainer}>

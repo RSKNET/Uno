@@ -5,8 +5,9 @@ import Notification from "@/components/Notification";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import Loading from "@/components/Loading";
 import { useTournament } from "@/context/TournamentContext";
+import useMaintenance from "@/hooks/useMaintenance";
 import styles from "@/styles/pages/GamePage.module.css";
-import NoTournamentSetup from "@/components/NoTournamentSetup";
+import NoTournamentSetup from "@/pages/NoTournamentSetup";
 import { exportTournamentToPdf } from "@/utils/pdfExport";
 
 const GamePage = () => {
@@ -18,6 +19,8 @@ const GamePage = () => {
     resetTournamentData,
     clearAllData,
   } = useTournament();
+
+  const { isLoading: isMaintenanceLoading } = useMaintenance();
 
   const [tournamentSummary, setTournamentSummary] = useState(null);
   const [selectedRankings, setSelectedRankings] = useState({});
@@ -312,7 +315,12 @@ const GamePage = () => {
         type="danger"
       />
 
-      <Loading isVisible={isLoading} message={loadingMessage} />
+      <Loading
+        isVisible={isLoading || isMaintenanceLoading}
+        message={
+          isMaintenanceLoading ? "Memeriksa status sistem..." : loadingMessage
+        }
+      />
 
       {!tournamentSummary.isValid ? (
         <div className={styles.mainContainer}>

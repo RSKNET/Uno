@@ -29,16 +29,16 @@ const AdminSidebar = ({ user, onLogout }) => {
       path: "/admin/dashboard",
     },
     {
-      id: "tournament",
-      icon: "🏆",
-      label: "Tournament",
-      path: "/GamePage",
-    },
-    {
       id: "players",
       icon: "👥",
       label: "Players",
       path: "/admin/players",
+    },
+    {
+      id: "report",
+      icon: "📄",
+      label: "Report",
+      path: "/admin/report",
     },
     {
       id: "settings",
