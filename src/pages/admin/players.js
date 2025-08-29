@@ -18,6 +18,9 @@ const PlayersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [isLoadingPlayers, setIsLoadingPlayers] = useState(false);
+  const [isSavingPlayer, setIsSavingPlayer] = useState(false);
+  const [isDeletingPlayer, setIsDeletingPlayer] = useState(false);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -28,38 +31,36 @@ const PlayersPage = () => {
     name: "",
   });
 
-  const mockPlayers = [
-    {
-      id: 1,
-      name: "John Doe",
-      joinDate: "2024-01-15",
-      totalGames: 15,
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      joinDate: "2024-01-20",
-      totalGames: 12,
-    },
-    {
-      id: 3,
-      name: "Bob Wilson",
-      joinDate: "2024-02-01",
-      totalGames: 8,
-    },
-    {
-      id: 4,
-      name: "Alice Johnson",
-      joinDate: "2024-02-10",
-      totalGames: 20,
-    },
-    {
-      id: 5,
-      name: "Charlie Brown",
-      joinDate: "2024-02-15",
-      totalGames: 6,
-    },
-  ];
+  const fetchPlayers = async () => {
+    setIsLoadingPlayers(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/players", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setPlayers(result.data || []);
+        setFilteredPlayers(result.data || []);
+      } else {
+        showNotification(result.error || "Gagal memuat data pemain", "error");
+        setPlayers([]);
+        setFilteredPlayers([]);
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat memuat data pemain", "error");
+      setPlayers([]);
+      setFilteredPlayers([]);
+    } finally {
+      setIsLoadingPlayers(false);
+    }
+  };
 
   useEffect(() => {
     checkAuthentication();
@@ -67,8 +68,7 @@ const PlayersPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setPlayers(mockPlayers);
-      setFilteredPlayers(mockPlayers);
+      fetchPlayers();
     }
   }, [isAuthenticated]);
 
@@ -192,15 +192,111 @@ const PlayersPage = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleSavePlayer = () => {
-    showNotification("Pemain berhasil disimpan!", "success");
-    setIsAddModalOpen(false);
-    setIsEditModalOpen(false);
+  const handleSavePlayer = async () => {
+    if (!formData.name || formData.name.trim().length === 0) {
+      showNotification("Nama pemain harus diisi", "error");
+      return;
+    }
+
+    if (formData.name.trim().length > 100) {
+      showNotification("Nama pemain maksimal 100 karakter", "error");
+      return;
+    }
+
+    setIsSavingPlayer(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        showNotification("Token tidak ditemukan", "error");
+        return;
+      }
+
+      let response;
+      let successMessage;
+
+      if (isAddModalOpen) {
+        response = await fetch("/api/players", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+          }),
+        });
+        successMessage = "Pemain berhasil ditambahkan!";
+      } else if (isEditModalOpen && selectedPlayer) {
+        response = await fetch("/api/players", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: selectedPlayer.id,
+            name: formData.name.trim(),
+          }),
+        });
+        successMessage = "Pemain berhasil diupdate!";
+      }
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showNotification(successMessage, "success");
+        handleCloseModal();
+        await fetchPlayers();
+      } else {
+        showNotification(result.error || "Gagal menyimpan pemain", "error");
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat menyimpan pemain", "error");
+    } finally {
+      setIsSavingPlayer(false);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    showNotification("Pemain berhasil dihapus!", "success");
-    setIsDeleteModalOpen(false);
+  const handleConfirmDelete = async () => {
+    if (!selectedPlayer) {
+      showNotification("Pemain tidak ditemukan", "error");
+      return;
+    }
+
+    setIsDeletingPlayer(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        showNotification("Token tidak ditemukan", "error");
+        return;
+      }
+
+      const response = await fetch(`/api/players?id=${selectedPlayer.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showNotification("Pemain berhasil dihapus!", "success");
+        handleCloseDeleteModal();
+        await fetchPlayers();
+      } else {
+        showNotification(result.error || "Gagal menghapus pemain", "error");
+      }
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat menghapus pemain", "error");
+    } finally {
+      setIsDeletingPlayer(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -209,6 +305,18 @@ const PlayersPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
+    setFormData({ name: "" });
+    setSelectedPlayer(null);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedPlayer(null);
   };
 
   const handleSort = (field) => {
@@ -286,77 +394,88 @@ const PlayersPage = () => {
                 <option value="totalGames-asc">Game Tersedikit</option>
               </select>
 
-              <button onClick={handleAddPlayer} className={styles.addButton}>
+              <button
+                onClick={handleAddPlayer}
+                className={styles.addButton}
+                disabled={isSavingPlayer || isDeletingPlayer}
+              >
                 <span className={styles.addIcon}>+</span>
-                Tambah Pemain
+                {isSavingPlayer ? "Menyimpan..." : "Tambah Pemain"}
               </button>
             </div>
           </div>
 
           <div className={styles.tableContainer}>
-            <table className={styles.playersTable}>
-              <thead>
-                <tr>
-                  <th
-                    onClick={() => handleSort("name")}
-                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
-                  >
-                    Nama{" "}
-                    {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("joinDate")}
-                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
-                  >
-                    Tanggal Bergabung{" "}
-                    {sortBy === "joinDate" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th
-                    onClick={() => handleSort("totalGames")}
-                    className={`${styles.sortableHeader} ${styles.centerHeader}`}
-                  >
-                    Total Game{" "}
-                    {sortBy === "totalGames" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th className={styles.centerHeader}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPlayers.map((player) => (
-                  <tr key={player.id} className={styles.tableRow}>
-                    <td className={styles.playerName}>
-                      <div className={styles.playerAvatar}>
-                        {player.name.charAt(0).toUpperCase()}
-                      </div>
-                      {player.name}
-                    </td>
-                    <td className={styles.joinDate}>
-                      {new Date(player.joinDate).toLocaleDateString("id-ID")}
-                    </td>
-                    <td className={styles.gameCount}>{player.totalGames}</td>
-                    <td className={styles.actions}>
-                      <button
-                        onClick={() => handleEditPlayer(player)}
-                        className={styles.editButton}
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDeletePlayer(player)}
-                        className={styles.deleteButton}
-                        title="Hapus"
-                      >
-                        🗑️
-                      </button>
-                    </td>
+            {isLoadingPlayers ? (
+              <Loading isVisible={true} message="Memuat data pemain..." />
+            ) : (
+              <table className={styles.playersTable}>
+                <thead>
+                  <tr>
+                    <th
+                      onClick={() => handleSort("name")}
+                      className={`${styles.sortableHeader} ${styles.centerHeader}`}
+                    >
+                      Nama{" "}
+                      {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("joinDate")}
+                      className={`${styles.sortableHeader} ${styles.centerHeader}`}
+                    >
+                      Tanggal Bergabung{" "}
+                      {sortBy === "joinDate" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th
+                      onClick={() => handleSort("totalGames")}
+                      className={`${styles.sortableHeader} ${styles.centerHeader}`}
+                    >
+                      Total Game{" "}
+                      {sortBy === "totalGames" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th className={styles.centerHeader}>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredPlayers.map((player) => (
+                    <tr key={player.id} className={styles.tableRow}>
+                      <td className={styles.playerName}>
+                        <div className={styles.playerAvatar}>
+                          {player.name.charAt(0).toUpperCase()}
+                        </div>
+                        {player.name}
+                      </td>
+                      <td className={styles.joinDate}>
+                        {new Date(player.joinDate).toLocaleDateString("id-ID")}
+                      </td>
+                      <td className={styles.gameCount}>{player.totalGames}</td>
+                      <td className={styles.actions}>
+                        <button
+                          onClick={() => handleEditPlayer(player)}
+                          className={styles.editButton}
+                          title="Edit"
+                          disabled={isSavingPlayer || isDeletingPlayer}
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlayer(player)}
+                          className={styles.deleteButton}
+                          title="Hapus"
+                          disabled={isSavingPlayer || isDeletingPlayer}
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
-            {filteredPlayers.length === 0 && (
+            {!isLoadingPlayers && filteredPlayers.length === 0 && (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>👥</div>
                 <h3>Tidak ada pemain ditemukan</h3>
@@ -377,39 +496,48 @@ const PlayersPage = () => {
             <div className={styles.modalHeader}>
               <h2>{isAddModalOpen ? "Tambah Pemain" : "Edit Pemain"}</h2>
               <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setIsEditModalOpen(false);
-                }}
+                onClick={handleCloseModal}
                 className={styles.closeButton}
+                disabled={isSavingPlayer}
               >
                 ✕
               </button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.formGroup}>
-                <label>Nama</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Masukkan nama pemain"
-                />
-              </div>
+              {isSavingPlayer ? (
+                <Loading isVisible={true} message="Menyimpan pemain..." />
+              ) : (
+                <div className={styles.formGroup}>
+                  <label>Nama</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan nama pemain"
+                    disabled={isSavingPlayer}
+                  />
+                </div>
+              )}
             </div>
             <div className={styles.modalFooter}>
               <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setIsEditModalOpen(false);
-                }}
+                onClick={handleCloseModal}
                 className={styles.cancelButton}
+                disabled={isSavingPlayer}
               >
                 Batal
               </button>
-              <button onClick={handleSavePlayer} className={styles.saveButton}>
-                {isAddModalOpen ? "Tambah" : "Simpan"}
+              <button
+                onClick={handleSavePlayer}
+                className={styles.saveButton}
+                disabled={isSavingPlayer}
+              >
+                {isSavingPlayer
+                  ? "Menyimpan..."
+                  : isAddModalOpen
+                  ? "Tambah"
+                  : "Simpan"}
               </button>
             </div>
           </div>
@@ -420,9 +548,16 @@ const PlayersPage = () => {
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
           title="Hapus Pemain"
-          message={`Apakah Anda yakin ingin menghapus pemain "${selectedPlayer?.name}"?`}
+          message={
+            isDeletingPlayer
+              ? "Menghapus pemain..."
+              : `Apakah Anda yakin ingin menghapus pemain "${selectedPlayer?.name}"?`
+          }
           onConfirm={handleConfirmDelete}
-          onClose={() => setIsDeleteModalOpen(false)}
+          onClose={handleCloseDeleteModal}
+          confirmText={isDeletingPlayer ? "Menghapus..." : "Ya, Hapus"}
+          cancelText="Batal"
+          type="danger"
         />
       )}
 

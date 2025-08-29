@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "@/styles/components/ConfirmationModal.module.css";
+import Loading from "./Loading";
 
 const ConfirmationModal = ({
   isOpen,
@@ -10,41 +11,42 @@ const ConfirmationModal = ({
   confirmText = "Ya",
   cancelText = "Batal",
   type = "default", // 'default', 'danger', 'success', 'warning'
+  isLoading = false,
 }) => {
   const handleBackdropClick = React.useCallback(
     (e) => {
-      if (e.target === e.currentTarget && onClose) {
+      if (e.target === e.currentTarget && onClose && !isLoading) {
         onClose();
       }
     },
-    [onClose]
+    [onClose, isLoading]
   );
 
   const handleConfirm = React.useCallback(
     (e) => {
       e.preventDefault();
-      if (onConfirm) onConfirm();
+      if (onConfirm && !isLoading) onConfirm();
     },
-    [onConfirm]
+    [onConfirm, isLoading]
   );
 
   const handleClose = React.useCallback(
     (e) => {
       e.preventDefault();
-      if (onClose) onClose();
+      if (onClose && !isLoading) onClose();
     },
-    [onClose]
+    [onClose, isLoading]
   );
 
   React.useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && onClose) {
+      if (e.key === "Escape" && onClose && !isLoading) {
         e.preventDefault();
         onClose();
       }
-      if (e.key === "Enter" && onConfirm) {
+      if (e.key === "Enter" && onConfirm && !isLoading) {
         e.preventDefault();
         onConfirm();
       }
@@ -57,7 +59,7 @@ const ConfirmationModal = ({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose, onConfirm]);
+  }, [isOpen, onClose, onConfirm, isLoading]);
 
   const getIcon = () => {
     const iconProps = {
@@ -114,6 +116,7 @@ const ConfirmationModal = ({
           onClick={handleClose}
           type="button"
           aria-label="Tutup modal"
+          disabled={isLoading}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -122,11 +125,17 @@ const ConfirmationModal = ({
         </button>
 
         <div className={styles.content}>
-          <div className={styles.iconContainer}>{getIcon()}</div>
-          <div className={styles.textContent}>
-            <h2 className={styles.title}>{title}</h2>
-            <p className={styles.message}>{message}</p>
-          </div>
+          {isLoading ? (
+            <Loading isVisible={true} message="Memproses..." />
+          ) : (
+            <>
+              <div className={styles.iconContainer}>{getIcon()}</div>
+              <div className={styles.textContent}>
+                <h2 className={styles.title}>{title}</h2>
+                <p className={styles.message}>{message}</p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.actions}>
@@ -134,6 +143,7 @@ const ConfirmationModal = ({
             className={`${styles.button} ${styles.cancelButton}`}
             onClick={handleClose}
             type="button"
+            disabled={isLoading}
           >
             {cancelText}
           </button>
@@ -143,6 +153,7 @@ const ConfirmationModal = ({
             }`}
             onClick={handleConfirm}
             type="button"
+            disabled={isLoading}
           >
             {confirmText}
           </button>
