@@ -26,7 +26,6 @@ const PlayersPage = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    joinDate: "",
   });
 
   const mockPlayers = [
@@ -176,7 +175,7 @@ const PlayersPage = () => {
   };
 
   const handleAddPlayer = () => {
-    setFormData({ name: "", joinDate: "" });
+    setFormData({ name: "" });
     setIsAddModalOpen(true);
   };
 
@@ -184,7 +183,6 @@ const PlayersPage = () => {
     setSelectedPlayer(player);
     setFormData({
       name: player.name,
-      joinDate: player.joinDate,
     });
     setIsEditModalOpen(true);
   };
@@ -399,15 +397,6 @@ const PlayersPage = () => {
                   placeholder="Masukkan nama pemain"
                 />
               </div>
-              <div className={styles.formGroup}>
-                <label>Tanggal Bergabung</label>
-                <input
-                  type="date"
-                  name="joinDate"
-                  value={formData.joinDate}
-                  onChange={handleInputChange}
-                />
-              </div>
             </div>
             <div className={styles.modalFooter}>
               <button
@@ -433,7 +422,7 @@ const PlayersPage = () => {
           title="Hapus Pemain"
           message={`Apakah Anda yakin ingin menghapus pemain "${selectedPlayer?.name}"?`}
           onConfirm={handleConfirmDelete}
-          onCancel={() => setIsDeleteModalOpen(false)}
+          onClose={() => setIsDeleteModalOpen(false)}
         />
       )}
 
