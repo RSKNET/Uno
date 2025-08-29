@@ -7,6 +7,7 @@ const INITIAL_TOURNAMENT_STATE = {
   playerCount: 0,
   rounds: "",
   playerNames: [],
+  playerIds: [],
   isSetup: false,
   createdAt: null,
   gameData: {
@@ -18,32 +19,32 @@ const INITIAL_TOURNAMENT_STATE = {
 };
 
 const createInitialPlayerWins = (playerCount) => {
-  const wins = {};
-  for (let i = 1; i <= playerCount; i++) {
-    wins[`position${i}`] = 0;
-  }
-  return wins;
+  return Array.from(
+    { length: playerCount },
+    (_, i) => `position${i + 1}`
+  ).reduce((wins, key) => ({ ...wins, [key]: 0 }), {});
 };
 
 const calculateStatistics = (wins, playerCount) => {
-  let weighted = 0;
-  let totalPositionSum = 0;
-  let totalGames = 0;
-
-  for (let i = 1; i <= playerCount; i++) {
-    const positionKey = `position${i}`;
+  const stats = Array.from({ length: playerCount }, (_, i) => {
+    const positionKey = `position${i + 1}`;
     const count = wins[positionKey] || 0;
-    const weight = playerCount - i + 1;
-
-    weighted += count * weight;
-    totalPositionSum += count * i;
-    totalGames += count;
-  }
+    const weight = playerCount - i;
+    return { count, weight, position: i + 1 };
+  }).reduce(
+    (acc, { count, weight, position }) => ({
+      weighted: acc.weighted + count * weight,
+      totalPositionSum: acc.totalPositionSum + count * position,
+      totalGames: acc.totalGames + count,
+    }),
+    { weighted: 0, totalPositionSum: 0, totalGames: 0 }
+  );
 
   return {
-    weightedScore: weighted,
-    averagePosition: totalGames > 0 ? totalPositionSum / totalGames : 0,
-    totalGames,
+    weightedScore: stats.weighted,
+    averagePosition:
+      stats.totalGames > 0 ? stats.totalPositionSum / stats.totalGames : 0,
+    totalGames: stats.totalGames,
   };
 };
 
@@ -91,11 +92,7 @@ const sortPlayersByScore = (players, playerCount) => {
       return bStats.weightedScore - aStats.weightedScore;
     }
 
-    if (aStats.averagePosition !== bStats.averagePosition) {
-      return aStats.averagePosition - bStats.averagePosition;
-    }
-
-    return 0;
+    return aStats.averagePosition - bStats.averagePosition;
   });
 };
 
@@ -107,28 +104,16 @@ const updateWinCounts = (player, rank, playerCount) => {
 
 const storageUtils = {
   async save(data) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-      throw new Error("Failed to save tournament data");
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   },
 
   async load() {
-    try {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      return savedData ? JSON.parse(savedData) : null;
-    } catch (error) {
-      throw new Error("Failed to load tournament data");
-    }
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    return savedData ? JSON.parse(savedData) : null;
   },
 
   async remove() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      throw new Error("Failed to remove tournament data");
-    }
+    localStorage.removeItem(STORAGE_KEY);
   },
 };
 
@@ -155,12 +140,14 @@ const migrateOldData = (data) => {
         firstWinRound: player.firstWinRound || null,
       };
 
-      if (player.wins && player.wins.first !== undefined) {
+      if (player.wins?.first !== undefined) {
         const newWins = createInitialPlayerWins(data.playerCount);
-        newWins.position1 = player.wins.first || 0;
-        newWins.position2 = player.wins.second || 0;
-        newWins.position3 = player.wins.third || 0;
-        newWins.position4 = player.wins.fourth || 0;
+        Object.assign(newWins, {
+          position1: player.wins.first || 0,
+          position2: player.wins.second || 0,
+          position3: player.wins.third || 0,
+          position4: player.wins.fourth || 0,
+        });
         migratedPlayer.wins = newWins;
       }
 
@@ -284,18 +271,40 @@ export const TournamentProvider = ({ children }) => {
     return INITIAL_TOURNAMENT_STATE;
   };
 
-  const getTournamentSummary = () => ({
-    totalPlayers: tournamentData.playerCount,
-    roundsType: tournamentData.rounds
-      ? `${tournamentData.rounds} babak`
-      : "Unlimited",
-    players: tournamentData.playerNames,
-    isValid:
-      tournamentData.isSetup && tournamentData.playerCount >= MIN_PLAYERS,
-    createdDate: tournamentData.createdAt
-      ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
-      : null,
-  });
+  const getTournamentSummary = async () => {
+    let players = tournamentData.playerNames;
+
+    if (tournamentData.playerIds?.length > 0) {
+      const fetchedPlayers = await Promise.all(
+        tournamentData.playerIds.map(async (playerId, index) => {
+          try {
+            const response = await fetch(`/api/players?id=${playerId}`);
+            if (response.ok) {
+              const result = await response.json();
+              if (result.success && result.data?.length > 0) {
+                return result.data[0].name;
+              }
+            }
+          } catch (error) {}
+          return tournamentData.playerNames[index] || `Player ${index + 1}`;
+        })
+      );
+      players = fetchedPlayers;
+    }
+
+    return {
+      totalPlayers: tournamentData.playerCount,
+      roundsType: tournamentData.rounds
+        ? `${tournamentData.rounds} babak`
+        : "Unlimited",
+      players,
+      isValid:
+        tournamentData.isSetup && tournamentData.playerCount >= MIN_PLAYERS,
+      createdDate: tournamentData.createdAt
+        ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
+        : null,
+    };
+  };
 
   const isTournamentCompleted = () => {
     const rounds = tournamentData.rounds;

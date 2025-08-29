@@ -32,55 +32,77 @@ const LandingPage = () => {
   const fetchPlayerSuggestions = async () => {
     try {
       const response = await fetch("/api/players");
+      if (!response.ok) throw new Error("Failed to fetch players");
       const result = await response.json();
-      if (result.success && result.data) {
-        setPlayerSuggestions(result.data.map((player) => player.name));
-      } else {
-        setPlayerSuggestions([]);
-      }
+      setPlayerSuggestions(
+        result.success && result.data
+          ? result.data.map((player) => player.name)
+          : []
+      );
     } catch (error) {
       setPlayerSuggestions([]);
     }
   };
 
-  const registerNewPlayers = async (playerNames) => {
-    try {
-      if (!playerSuggestions || playerSuggestions.length === 0) {
-        return;
-      }
+  const findOrCreatePlayers = async (playerNames) => {
+    const playersData = [];
 
-      const existingPlayerNames = playerSuggestions.map((player) =>
-        player.toLowerCase()
-      );
+    for (const name of playerNames) {
+      const trimmedName = name.trim();
+      if (!trimmedName) continue;
 
-      const newPlayers = playerNames.filter(
-        (name) =>
-          name.trim() &&
-          !existingPlayerNames.includes(name.trim().toLowerCase())
-      );
+      try {
+        const searchResponse = await fetch(
+          `/api/players?search=${encodeURIComponent(trimmedName)}`
+        );
+        if (!searchResponse.ok) throw new Error("Search failed");
 
-      if (newPlayers.length > 0) {
-        const registerPromises = newPlayers.map(async (playerName) => {
-          try {
-            const response = await fetch("/api/players", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                name: playerName.trim(),
-              }),
+        const searchResult = await searchResponse.json();
+
+        if (searchResult.success && searchResult.data?.length > 0) {
+          const exactMatch = searchResult.data.find(
+            (player) => player.name.toLowerCase() === trimmedName.toLowerCase()
+          );
+
+          playersData.push({
+            id: (exactMatch || searchResult.data[0]).id,
+            name: (exactMatch || searchResult.data[0]).name,
+          });
+        } else {
+          const createResponse = await fetch("/api/players", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: trimmedName }),
+          });
+
+          if (createResponse.ok) {
+            const createResult = await createResponse.json();
+            playersData.push({
+              id: createResult.data.id,
+              name: createResult.data.name,
             });
-            return response.ok;
-          } catch (error) {
-            return false;
           }
-        });
+        }
+      } catch (error) {
+        try {
+          const createResponse = await fetch("/api/players", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: trimmedName }),
+          });
 
-        await Promise.all(registerPromises);
+          if (createResponse.ok) {
+            const createResult = await createResponse.json();
+            playersData.push({
+              id: createResult.data.id,
+              name: createResult.data.name,
+            });
+          }
+        } catch (fallbackError) {}
       }
-    } catch (error) {
     }
+
+    return playersData;
   };
 
   const showNotification = (message, type = "success") => {
@@ -203,10 +225,10 @@ const LandingPage = () => {
     }
 
     setIsLoading(true);
-    setLoadingMessage("Mendaftarkan pemain baru...");
+    setLoadingMessage("Memproses data pemain...");
 
     try {
-      await registerNewPlayers(playerNames);
+      const playersData = await findOrCreatePlayers(playerNames);
 
       await fetchPlayerSuggestions();
 
@@ -215,7 +237,8 @@ const LandingPage = () => {
       const tournamentInfo = {
         playerCount,
         rounds,
-        playerNames: playerNames.map((name) => name.trim()),
+        playerNames: playersData.map((player) => player.name),
+        playerIds: playersData.map((player) => player.id),
       };
 
       await saveTournamentData(tournamentInfo);
@@ -245,9 +268,7 @@ const LandingPage = () => {
       setPlayerCount(0);
       setRounds("");
       setPlayerNames([]);
-
       await resetTournamentData();
-
       showNotification("Form berhasil direset!", "info");
     } catch (error) {
       showNotification("Terjadi kesalahan saat mereset data!", "error");

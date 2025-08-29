@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
@@ -19,7 +19,7 @@ const GamePage = () => {
     clearAllData,
   } = useTournament();
 
-  const tournamentSummary = getTournamentSummary();
+  const [tournamentSummary, setTournamentSummary] = useState(null);
   const [selectedRankings, setSelectedRankings] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -30,6 +30,34 @@ const GamePage = () => {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
 
+  useEffect(() => {
+    const loadTournamentSummary = async () => {
+      setLoadingMessage("Memuat data turnamen...");
+      try {
+        const summary = await getTournamentSummary();
+        setTournamentSummary(summary);
+      } catch (error) {
+        setTournamentSummary({
+          totalPlayers: tournamentData.playerCount,
+          roundsType: tournamentData.rounds
+            ? `${tournamentData.rounds} babak`
+            : "Unlimited",
+          players: tournamentData.playerNames,
+          isValid: tournamentData.isSetup && tournamentData.playerCount >= 2,
+          createdDate: tournamentData.createdAt
+            ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
+            : null,
+        });
+      } finally {
+        setLoadingMessage("");
+      }
+    };
+
+    if (tournamentData.isSetup) {
+      loadTournamentSummary();
+    }
+  }, [tournamentData, getTournamentSummary]);
+
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
   };
@@ -39,14 +67,14 @@ const GamePage = () => {
   };
 
   const isTournamentCompleted = () => {
-    if (tournamentSummary.roundsType === "Unlimited") {
-      return false;
-    }
+    if (!tournamentSummary) return false;
 
-    const maxRounds = parseInt(tournamentSummary.roundsType);
-    const completedRounds = tournamentData.gameData?.completedRounds || 0;
-
-    return completedRounds >= maxRounds;
+    const rounds = tournamentData.rounds;
+    return (
+      rounds &&
+      rounds !== "unlimited" &&
+      tournamentData.gameData.completedRounds >= parseInt(rounds, 10)
+    );
   };
 
   const handleShowDeleteModal = () => {
@@ -89,11 +117,10 @@ const GamePage = () => {
 
     try {
       const totalPlayers = tournamentSummary.totalPlayers;
-      const rankings = [];
-
-      for (let rank = 1; rank <= totalPlayers; rank++) {
-        rankings.push(selectedRankings[rank]);
-      }
+      const rankings = Array.from(
+        { length: totalPlayers },
+        (_, i) => selectedRankings[i + 1]
+      );
 
       await saveRoundResult(rankings);
       setSelectedRankings({});
@@ -158,7 +185,97 @@ const GamePage = () => {
     return `Posisi ${rank}`;
   };
 
-  const isLoading = isSubmitting || isResetting || isExportingPdf || isDeleting;
+  const calculatePlayerStats = (player, playerCount) => {
+    let weighted = 0,
+      totalPositionSum = 0,
+      totalGames = 0;
+
+    for (let pos = 1; pos <= playerCount; pos++) {
+      const posKey = `position${pos}`;
+      const count = player.wins?.[posKey] || 0;
+      const weight = playerCount - pos + 1;
+      weighted += count * weight;
+      totalPositionSum += count * pos;
+      totalGames += count;
+    }
+
+    return {
+      weightedScore: weighted,
+      averagePosition: totalGames > 0 ? totalPositionSum / totalGames : 0,
+    };
+  };
+
+  const getLeaderboardData = () => {
+    const playerScores = tournamentData.gameData?.playerScores || [];
+    const groupedByPosition = [];
+    let currentPosition = 1;
+
+    for (let i = 0; i < playerScores.length; i++) {
+      const currentPlayer = playerScores[i];
+      const currentPlayerName =
+        tournamentSummary.players[currentPlayer.playerIndex];
+      const tiedPlayers = [currentPlayer];
+      let j = i + 1;
+
+      while (
+        j < playerScores.length &&
+        playerScores[j].totalScore === currentPlayer.totalScore
+      ) {
+        const currentStats = calculatePlayerStats(
+          currentPlayer,
+          tournamentSummary.totalPlayers
+        );
+        const nextStats = calculatePlayerStats(
+          playerScores[j],
+          tournamentSummary.totalPlayers
+        );
+
+        if (
+          currentStats.weightedScore === nextStats.weightedScore &&
+          currentStats.averagePosition === nextStats.averagePosition
+        ) {
+          tiedPlayers.push(playerScores[j]);
+          j++;
+        } else {
+          break;
+        }
+      }
+
+      const playerNames = tiedPlayers.map(
+        (player) => tournamentSummary.players[player.playerIndex]
+      );
+      const displayName =
+        tiedPlayers.length > 1 ? playerNames.join(" & ") : currentPlayerName;
+
+      groupedByPosition.push({
+        position: currentPosition,
+        displayName,
+        totalScore: currentPlayer.totalScore,
+        isTied: tiedPlayers.length > 1,
+      });
+
+      currentPosition += tiedPlayers.length;
+      i = j - 1;
+    }
+
+    return groupedByPosition;
+  };
+
+  const isLoading =
+    isSubmitting ||
+    isResetting ||
+    isExportingPdf ||
+    isDeleting ||
+    !tournamentSummary;
+
+  if (!tournamentSummary) {
+    return (
+      <div className={styles.gameContainer}>
+        <Navbar />
+        <Loading message={loadingMessage || "Memuat data turnamen..."} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.gameContainer}>
@@ -365,124 +482,23 @@ const GamePage = () => {
                   <div className={styles.leaderboard}>
                     <h3>🏆 Papan Skor</h3>
                     <div className={styles.leaderboardGrid}>
-                      {(() => {
-                        const playerScores =
-                          tournamentData.gameData?.playerScores || [];
-                        const groupedByPosition = [];
-                        let currentPosition = 1;
-
-                        for (let i = 0; i < playerScores.length; i++) {
-                          const currentPlayer = playerScores[i];
-                          const currentPlayerName =
-                            tournamentSummary.players[
-                              currentPlayer.playerIndex
-                            ];
-
-                          const tiedPlayers = [currentPlayer];
-                          let j = i + 1;
-
-                          while (
-                            j < playerScores.length &&
-                            playerScores[j].totalScore ===
-                              currentPlayer.totalScore
-                          ) {
-                            const currentStats = {
-                              weightedScore: 0,
-                              averagePosition: 0,
-                            };
-                            const nextStats = {
-                              weightedScore: 0,
-                              averagePosition: 0,
-                            };
-
-                            const playerCount = tournamentSummary.totalPlayers;
-
-                            let weighted = 0,
-                              totalPositionSum = 0,
-                              totalGames = 0;
-                            for (let pos = 1; pos <= playerCount; pos++) {
-                              const posKey = `position${pos}`;
-                              const count = currentPlayer.wins?.[posKey] || 0;
-                              const weight = playerCount - pos + 1;
-                              weighted += count * weight;
-                              totalPositionSum += count * pos;
-                              totalGames += count;
-                            }
-                            currentStats.weightedScore = weighted;
-                            currentStats.averagePosition =
-                              totalGames > 0
-                                ? totalPositionSum / totalGames
-                                : 0;
-
-                            weighted = 0;
-                            totalPositionSum = 0;
-                            totalGames = 0;
-                            for (let pos = 1; pos <= playerCount; pos++) {
-                              const posKey = `position${pos}`;
-                              const count = playerScores[j].wins?.[posKey] || 0;
-                              const weight = playerCount - pos + 1;
-                              weighted += count * weight;
-                              totalPositionSum += count * pos;
-                              totalGames += count;
-                            }
-                            nextStats.weightedScore = weighted;
-                            nextStats.averagePosition =
-                              totalGames > 0
-                                ? totalPositionSum / totalGames
-                                : 0;
-
-                            if (
-                              currentStats.weightedScore ===
-                                nextStats.weightedScore &&
-                              currentStats.averagePosition ===
-                                nextStats.averagePosition
-                            ) {
-                              tiedPlayers.push(playerScores[j]);
-                              j++;
-                            } else {
-                              break;
-                            }
-                          }
-
-                          const playerNames = tiedPlayers.map(
-                            (player) =>
-                              tournamentSummary.players[player.playerIndex]
-                          );
-
-                          const displayName =
-                            tiedPlayers.length > 1
-                              ? playerNames.join(" & ")
-                              : currentPlayerName;
-
-                          groupedByPosition.push({
-                            position: currentPosition,
-                            displayName,
-                            totalScore: currentPlayer.totalScore,
-                            isTied: tiedPlayers.length > 1,
-                          });
-
-                          currentPosition += tiedPlayers.length;
-                          i = j - 1;
-                        }
-
-                        return groupedByPosition.map((entry, index) => (
-                          <div key={index} className={styles.playerScore}>
-                            <div className={styles.playerInfo}>
-                              <div className={styles.playerName}>
-                                {entry.position === 1 && "🥇 "}
-                                {entry.position === 2 && "🥈 "}
-                                {entry.position === 3 && "🥉 "}
-                                {entry.position > 3 && `${entry.position}. `}
-                                {entry.displayName}
-                                {entry.isTied && " (Seri)"}
-                              </div>
-                            </div>
-                            <div className={styles.playerTotalScore}>
-                              {entry.totalScore}
+                      {getLeaderboardData().map((entry, index) => (
+                        <div key={index} className={styles.playerScore}>
+                          <div className={styles.playerInfo}>
+                            <div className={styles.playerName}>
+                              {entry.position === 1 && "🥇 "}
+                              {entry.position === 2 && "🥈 "}
+                              {entry.position === 3 && "🥉 "}
+                              {entry.position > 3 && `${entry.position}. `}
+                              {entry.displayName}
+                              {entry.isTied && " (Seri)"}
                             </div>
                           </div>
-                        ));
-                      })()}
+                          <div className={styles.playerTotalScore}>
+                            {entry.totalScore}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

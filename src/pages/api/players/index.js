@@ -13,10 +13,23 @@ function formatPlayerName(name) {
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      const { data, error } = await supabase
+      const { search, id } = req.query;
+
+      let query = supabase
         .from("players")
-        .select("id, name, total_games, created_at, updated_at")
-        .order("created_at", { ascending: false });
+        .select("id, name, total_games, created_at, updated_at");
+
+      if (search) {
+        query = query.ilike("name", `%${search}%`);
+      }
+
+      if (id) {
+        query = query.eq("id", id);
+      }
+
+      const { data, error } = await query.order("created_at", {
+        ascending: false,
+      });
 
       if (error) {
         return res.status(500).json({ error: "Gagal mengambil data players" });
