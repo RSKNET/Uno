@@ -33,10 +33,54 @@ const LandingPage = () => {
     try {
       const response = await fetch("/api/players");
       const result = await response.json();
-      if (result.success) {
+      if (result.success && result.data) {
         setPlayerSuggestions(result.data.map((player) => player.name));
+      } else {
+        setPlayerSuggestions([]);
       }
-    } catch (error) {}
+    } catch (error) {
+      setPlayerSuggestions([]);
+    }
+  };
+
+  const registerNewPlayers = async (playerNames) => {
+    try {
+      if (!playerSuggestions || playerSuggestions.length === 0) {
+        return;
+      }
+
+      const existingPlayerNames = playerSuggestions.map((player) =>
+        player.toLowerCase()
+      );
+
+      const newPlayers = playerNames.filter(
+        (name) =>
+          name.trim() &&
+          !existingPlayerNames.includes(name.trim().toLowerCase())
+      );
+
+      if (newPlayers.length > 0) {
+        const registerPromises = newPlayers.map(async (playerName) => {
+          try {
+            const response = await fetch("/api/players", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: playerName.trim(),
+              }),
+            });
+            return response.ok;
+          } catch (error) {
+            return false;
+          }
+        });
+
+        await Promise.all(registerPromises);
+      }
+    } catch (error) {
+    }
   };
 
   const showNotification = (message, type = "success") => {
@@ -159,9 +203,15 @@ const LandingPage = () => {
     }
 
     setIsLoading(true);
-    setLoadingMessage("Menyimpan data turnamen...");
+    setLoadingMessage("Mendaftarkan pemain baru...");
 
     try {
+      await registerNewPlayers(playerNames);
+
+      await fetchPlayerSuggestions();
+
+      setLoadingMessage("Menyimpan data turnamen...");
+
       const tournamentInfo = {
         playerCount,
         rounds,

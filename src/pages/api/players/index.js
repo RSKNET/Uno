@@ -1,5 +1,15 @@
 import supabase from "../../../utils/supabase";
 
+function formatPlayerName(name) {
+  return name
+    .toLowerCase()
+    .split(/[,\s]+/)
+    .filter((word) => word.length > 0)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .replace(/\s*,\s*/g, ", ");
+}
+
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
@@ -47,10 +57,12 @@ export default async function handler(req, res) {
         });
       }
 
+      const formattedName = formatPlayerName(name.trim());
+
       const { data: existingPlayer, error: checkError } = await supabase
         .from("players")
         .select("id")
-        .eq("name", name.trim())
+        .eq("name", formattedName)
         .single();
 
       if (checkError && checkError.code !== "PGRST116") {
@@ -66,7 +78,7 @@ export default async function handler(req, res) {
       const { data, error } = await supabase
         .from("players")
         .insert({
-          name: name.trim(),
+          name: formattedName,
           total_games: 0,
         })
         .select("id, name, total_games, created_at, updated_at")
@@ -126,10 +138,11 @@ export default async function handler(req, res) {
       }
 
       if (name.trim() !== existingPlayer.name) {
+        const formattedName = formatPlayerName(name.trim());
         const { data: duplicatePlayer, error: duplicateError } = await supabase
           .from("players")
           .select("id")
-          .eq("name", name.trim())
+          .eq("name", formattedName)
           .neq("id", id)
           .single();
 
@@ -144,10 +157,12 @@ export default async function handler(req, res) {
         }
       }
 
+      const formattedName = formatPlayerName(name.trim());
+
       const { data, error } = await supabase
         .from("players")
         .update({
-          name: name.trim(),
+          name: formattedName,
         })
         .eq("id", id)
         .select("id, name, total_games, created_at, updated_at")
