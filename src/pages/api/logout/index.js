@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         user: verification.data.username,
       },
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       error: "Terjadi kesalahan server saat logout",
       success: false,

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 const STORAGE_KEY = "unoTournamentData";
 const MIN_PLAYERS = 2;
@@ -171,7 +177,7 @@ export const TournamentProvider = ({ children }) => {
           const migratedData = migrateOldData(savedData);
           setTournamentData(migratedData);
         }
-      } catch (error) {
+      } catch {
         setTournamentData(INITIAL_TOURNAMENT_STATE);
       }
     };
@@ -179,7 +185,7 @@ export const TournamentProvider = ({ children }) => {
     loadData();
   }, []);
 
-  const saveTournamentData = async (data) => {
+  const saveTournamentData = useCallback(async (data) => {
     const tournamentInfo = {
       ...data,
       isSetup: true,
@@ -197,57 +203,60 @@ export const TournamentProvider = ({ children }) => {
     await storageUtils.save(tournamentInfo);
     setTournamentData(tournamentInfo);
     return tournamentInfo;
-  };
+  }, []);
 
-  const saveRoundResult = async (rankings) => {
-    const { gameData, playerCount } = tournamentData;
+  const saveRoundResult = useCallback(
+    async (rankings) => {
+      const { gameData, playerCount } = tournamentData;
 
-    const newRoundHistory = createRoundHistory(
-      gameData.currentRound,
-      rankings,
-      playerCount
-    );
+      const newRoundHistory = createRoundHistory(
+        gameData.currentRound,
+        rankings,
+        playerCount
+      );
 
-    const playerMap = new Map(
-      gameData.playerScores.map((player) => [
-        player.playerIndex,
-        { ...player, wins: { ...player.wins } },
-      ])
-    );
+      const playerMap = new Map(
+        gameData.playerScores.map((player) => [
+          player.playerIndex,
+          { ...player, wins: { ...player.wins } },
+        ])
+      );
 
-    rankings.forEach((playerIndex, rank) => {
-      const points = calculatePoints(playerCount, rank);
-      const player = playerMap.get(playerIndex);
+      rankings.forEach((playerIndex, rank) => {
+        const points = calculatePoints(playerCount, rank);
+        const player = playerMap.get(playerIndex);
 
-      if (player) {
-        player.totalScore += points;
-        updateWinCounts(player, rank, playerCount);
+        if (player) {
+          player.totalScore += points;
+          updateWinCounts(player, rank, playerCount);
 
-        if (rank === 0 && !player.firstWinRound) {
-          player.firstWinRound = gameData.currentRound;
+          if (rank === 0 && !player.firstWinRound) {
+            player.firstWinRound = gameData.currentRound;
+          }
         }
-      }
-    });
+      });
 
-    const updatedPlayerScores = Array.from(playerMap.values());
+      const updatedPlayerScores = Array.from(playerMap.values());
 
-    const updatedTournamentData = {
-      ...tournamentData,
-      gameData: {
-        ...gameData,
-        currentRound: gameData.currentRound + 1,
-        completedRounds: gameData.completedRounds + 1,
-        playerScores: sortPlayersByScore(updatedPlayerScores, playerCount),
-        roundHistory: [...gameData.roundHistory, newRoundHistory],
-      },
-    };
+      const updatedTournamentData = {
+        ...tournamentData,
+        gameData: {
+          ...gameData,
+          currentRound: gameData.currentRound + 1,
+          completedRounds: gameData.completedRounds + 1,
+          playerScores: sortPlayersByScore(updatedPlayerScores, playerCount),
+          roundHistory: [...gameData.roundHistory, newRoundHistory],
+        },
+      };
 
-    await storageUtils.save(updatedTournamentData);
-    setTournamentData(updatedTournamentData);
-    return updatedTournamentData;
-  };
+      await storageUtils.save(updatedTournamentData);
+      setTournamentData(updatedTournamentData);
+      return updatedTournamentData;
+    },
+    [tournamentData]
+  );
 
-  const resetTournamentData = async () => {
+  const resetTournamentData = useCallback(async () => {
     const resetData = {
       ...tournamentData,
       gameData: {
@@ -263,15 +272,15 @@ export const TournamentProvider = ({ children }) => {
     await storageUtils.save(resetData);
     setTournamentData(resetData);
     return resetData;
-  };
+  }, [tournamentData]);
 
-  const clearAllData = async () => {
+  const clearAllData = useCallback(async () => {
     await storageUtils.remove();
     setTournamentData(INITIAL_TOURNAMENT_STATE);
     return INITIAL_TOURNAMENT_STATE;
-  };
+  }, []);
 
-  const getTournamentSummary = async () => {
+  const getTournamentSummary = useCallback(async () => {
     let players = tournamentData.playerNames;
 
     if (tournamentData.playerIds?.length > 0) {
@@ -285,7 +294,7 @@ export const TournamentProvider = ({ children }) => {
                 return result.data[0].name;
               }
             }
-          } catch (error) {}
+          } catch {}
           return tournamentData.playerNames[index] || `Player ${index + 1}`;
         })
       );
@@ -304,16 +313,16 @@ export const TournamentProvider = ({ children }) => {
         ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
         : null,
     };
-  };
+  }, [tournamentData]);
 
-  const isTournamentCompleted = () => {
+  const isTournamentCompleted = useCallback(() => {
     const rounds = tournamentData.rounds;
     return (
       rounds &&
       rounds !== "unlimited" &&
       tournamentData.gameData.completedRounds >= parseInt(rounds, 10)
     );
-  };
+  }, [tournamentData]);
 
   const value = {
     tournamentData,

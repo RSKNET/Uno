@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useRouter } from "next/router";
 import useMaintenance from "@/hooks/useMaintenance";
 import styles from "@/styles/pages/NoTournamentSetup.module.css";
@@ -8,9 +8,9 @@ const NoTournamentSetup = () => {
 
   const { isLoading: isMaintenanceLoading } = useMaintenance();
 
-  const handleGoToSetup = () => {
+  const handleGoToSetup = useCallback(() => {
     router.push("/");
-  };
+  }, [router]);
 
   if (isMaintenanceLoading) {
     return (

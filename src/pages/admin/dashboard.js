@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
@@ -29,7 +29,7 @@ const Dashboard = () => {
     }
   }, [isAuthenticated]);
 
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
 
@@ -63,15 +63,15 @@ const Dashboard = () => {
         showNotification("Session expired. Silakan login kembali.", "error");
         router.push("/login");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
       router.push("/login");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoadingData(true);
     try {
       const playersResponse = await fetch("/api/players");
@@ -85,18 +85,18 @@ const Dashboard = () => {
           recentPlayers: players.slice(-5).reverse(),
         }));
       }
-    } catch (error) {
+    } catch {
     } finally {
       setIsLoadingData(false);
     }
-  };
+  }, []);
 
-  const showNotification = (message, type) => {
+  const showNotification = useCallback((message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -124,21 +124,21 @@ const Dashboard = () => {
       } else {
         showNotification(data.error || "Gagal logout", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat logout", "error");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       router.push("/login");
     }
-  };
+  }, [router]);
 
-  const navigateToPlayers = () => {
+  const navigateToPlayers = useCallback(() => {
     router.push("/admin/players");
-  };
+  }, [router]);
 
-  const navigateToSettings = () => {
+  const navigateToSettings = useCallback(() => {
     router.push("/admin/settings");
-  };
+  }, [router]);
 
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
@@ -7,30 +7,26 @@ import styles from "@/styles/pages/LoginPage.module.css";
 
 const LoginPage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const showNotification = (message, type = "success") => {
+  const showNotification = useCallback((message, type = "success") => {
     setNotification({ message, type });
-  };
+  }, []);
 
-  const closeNotification = () => {
+  const closeNotification = useCallback(() => {
     setNotification(null);
-  };
+  }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { username, password } = formData;
 
     if (!username?.trim() || !password?.trim()) {
@@ -47,10 +43,8 @@ const LoginPage = () => {
         body: JSON.stringify({ username: username.trim(), password }),
       });
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
 
       if (result.success && result.token && result.user) {
@@ -62,17 +56,24 @@ const LoginPage = () => {
         showNotification(result.error || "Login gagal!", "error");
         setIsLoading(false);
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
       setIsLoading(false);
     }
   };
 
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  const goToHome = useCallback(() => {
+    router.push("/");
+  }, [router]);
+
   return (
     <main className={styles.container}>
       <div className={styles.body}>
         <Navbar />
-
         {notification && (
           <Notification
             message={notification.message}
@@ -81,7 +82,6 @@ const LoginPage = () => {
             duration={4000}
           />
         )}
-
         <Loading isVisible={isLoading} message="Sedang login..." />
 
         <div className={styles.loginContainer}>
@@ -126,7 +126,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     className={styles.togglePassword}
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={togglePasswordVisibility}
                     disabled={isLoading}
                   >
                     {showPassword ? "🙈" : "👁️"}
@@ -147,7 +147,7 @@ const LoginPage = () => {
               <p>
                 Kembali ke{" "}
                 <button
-                  onClick={() => router.push("/")}
+                  onClick={goToHome}
                   className={styles.linkButton}
                   disabled={isLoading}
                 >

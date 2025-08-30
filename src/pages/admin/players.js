@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
@@ -31,7 +31,7 @@ const PlayersPage = () => {
     name: "",
   });
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = useCallback(async () => {
     setIsLoadingPlayers(true);
     try {
       const token = localStorage.getItem("token");
@@ -53,14 +53,14 @@ const PlayersPage = () => {
         setPlayers([]);
         setFilteredPlayers([]);
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat memuat data pemain", "error");
       setPlayers([]);
       setFilteredPlayers([]);
     } finally {
       setIsLoadingPlayers(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuthentication();
@@ -70,7 +70,7 @@ const PlayersPage = () => {
     if (isAuthenticated) {
       fetchPlayers();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchPlayers]);
 
   useEffect(() => {
     const filtered = players.filter((player) =>
@@ -91,7 +91,7 @@ const PlayersPage = () => {
     setFilteredPlayers(sorted);
   }, [searchTerm, sortBy, sortOrder, players]);
 
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
 
@@ -125,20 +125,20 @@ const PlayersPage = () => {
         showNotification("Session expired. Silakan login kembali.", "error");
         router.push("/login");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
       router.push("/login");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const showNotification = (message, type) => {
+  const showNotification = useCallback((message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -166,33 +166,33 @@ const PlayersPage = () => {
       } else {
         showNotification(data.error || "Gagal logout", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat logout", "error");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       router.push("/login");
     }
-  };
+  }, [router]);
 
-  const handleAddPlayer = () => {
+  const handleAddPlayer = useCallback(() => {
     setFormData({ name: "" });
     setIsAddModalOpen(true);
-  };
+  }, []);
 
-  const handleEditPlayer = (player) => {
+  const handleEditPlayer = useCallback((player) => {
     setSelectedPlayer(player);
     setFormData({
       name: player.name,
     });
     setIsEditModalOpen(true);
-  };
+  }, []);
 
-  const handleDeletePlayer = (player) => {
+  const handleDeletePlayer = useCallback((player) => {
     setSelectedPlayer(player);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
-  const handleSavePlayer = async () => {
+  const handleSavePlayer = useCallback(async () => {
     if (!formData.name || formData.name.trim().length === 0) {
       showNotification("Nama pemain harus diisi", "error");
       return;
@@ -252,14 +252,20 @@ const PlayersPage = () => {
       } else {
         showNotification(result.error || "Gagal menyimpan pemain", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menyimpan pemain", "error");
     } finally {
       setIsSavingPlayer(false);
     }
-  };
+  }, [
+    formData.name,
+    isAddModalOpen,
+    isEditModalOpen,
+    selectedPlayer,
+    fetchPlayers,
+  ]);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!selectedPlayer) {
       showNotification("Pemain tidak ditemukan", "error");
       return;
@@ -292,41 +298,44 @@ const PlayersPage = () => {
       } else {
         showNotification(result.error || "Gagal menghapus pemain", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menghapus pemain", "error");
     } finally {
       setIsDeletingPlayer(false);
     }
-  };
+  }, [selectedPlayer, fetchPlayers]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsAddModalOpen(false);
     setIsEditModalOpen(false);
     setFormData({ name: "" });
     setSelectedPlayer(null);
-  };
+  }, []);
 
-  const handleCloseDeleteModal = () => {
+  const handleCloseDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
     setSelectedPlayer(null);
-  };
+  }, []);
 
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortOrder("asc");
-    }
-  };
+  const handleSort = useCallback(
+    (field) => {
+      if (sortBy === field) {
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        setSortBy(field);
+        setSortOrder("asc");
+      }
+    },
+    [sortBy, sortOrder]
+  );
 
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;

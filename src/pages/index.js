@@ -1,35 +1,55 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
 import Loading from "@/components/Loading";
 import { useTournament } from "@/context/TournamentContext";
 import useMaintenance from "@/hooks/useMaintenance";
-import styles from "@/styles/pages/LandingPage.module.css";
+import useSettings from "@/hooks/useSettings";
+import styles from "@/styles/pages/IndexPage.module.css";
 
-const LandingPage = () => {
+const Index = () => {
   const router = useRouter();
   const { tournamentData, saveTournamentData, resetTournamentData } =
     useTournament();
-
   const { isLoading: isMaintenanceLoading } = useMaintenance();
+  const { settings } = useSettings();
 
-  const [playerCount, setPlayerCount] = useState(
-    tournamentData.playerCount || 0
-  );
-  const [rounds, setRounds] = useState(tournamentData.rounds || "");
-  const [playerNames, setPlayerNames] = useState(
-    tournamentData.playerNames || []
-  );
+  const [formData, setFormData] = useState({
+    playerCount: tournamentData.playerCount || 0,
+    rounds: tournamentData.rounds || "",
+    playerNames: tournamentData.playerNames || [],
+  });
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [playerSuggestions, setPlayerSuggestions] = useState([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState({});
+  const [formErrors, setFormErrors] = useState({ playerCount: "", rounds: "" });
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const { playerCount, rounds, playerNames } = formData;
 
   useEffect(() => {
     fetchPlayerSuggestions();
+  }, []);
+
+  useEffect(() => {
+    if (settings.maxPlayers && playerCount > settings.maxPlayers) {
+      updateFormData({
+        playerCount: settings.maxPlayers,
+        playerNames: Array(settings.maxPlayers).fill(""),
+      });
+    }
+  }, [settings.maxPlayers, playerCount]);
+
+  useEffect(() => {
+    validateFormRealtime();
+  }, [playerCount, rounds, playerNames, settings]);
+
+  const updateFormData = useCallback((updates) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const fetchPlayerSuggestions = async () => {
@@ -42,15 +62,53 @@ const LandingPage = () => {
           ? result.data.map((player) => player.name)
           : []
       );
-    } catch (error) {
+    } catch {
       setPlayerSuggestions([]);
     }
   };
 
-  const findOrCreatePlayers = async (playerNames) => {
-    const playersData = [];
+  const validateFormRealtime = useCallback(() => {
+    const errors = { playerCount: "", rounds: "" };
 
-    for (const name of playerNames) {
+    if (playerCount < 2) {
+      errors.playerCount = "Jumlah pemain harus minimal 2!";
+    } else if (settings.maxPlayers && playerCount > settings.maxPlayers) {
+      errors.playerCount = `Jumlah pemain maksimal adalah ${settings.maxPlayers}!`;
+    }
+
+    if (rounds && rounds < 1) {
+      errors.rounds = "Jika diisi, jumlah babak harus minimal 1!";
+    } else if (settings.maxRounds && rounds && rounds > settings.maxRounds) {
+      errors.rounds = `Jumlah babak maksimal adalah ${settings.maxRounds}!`;
+    } else if (!settings.allowUnlimited && !rounds) {
+      errors.rounds = "Jumlah babak harus diisi!";
+    }
+
+    if (playerCount >= 2) {
+      const emptyNames = playerNames.filter((name) => !name.trim());
+      if (emptyNames.length > 0) {
+        errors.playerCount = "Mohon isi semua nama pemain!";
+      } else {
+        const filledNames = playerNames
+          .map((name) => name.trim().toLowerCase())
+          .filter((name) => name);
+        const uniqueNames = [...new Set(filledNames)];
+        if (filledNames.length !== uniqueNames.length) {
+          errors.playerCount =
+            "Nama pemain tidak boleh sama! Mohon gunakan nama yang berbeda.";
+        }
+      }
+    }
+
+    setFormErrors(errors);
+    const valid = Object.values(errors).every((error) => error === "");
+    setIsFormValid(valid);
+    return valid;
+  }, [playerCount, rounds, playerNames, settings]);
+
+  const findOrCreatePlayers = async (names) => {
+    const playersData = [];
+    for (const name of names) {
       const trimmedName = name.trim();
       if (!trimmedName) continue;
 
@@ -59,14 +117,12 @@ const LandingPage = () => {
           `/api/players?search=${encodeURIComponent(trimmedName)}`
         );
         if (!searchResponse.ok) throw new Error("Search failed");
-
         const searchResult = await searchResponse.json();
 
         if (searchResult.success && searchResult.data?.length > 0) {
           const exactMatch = searchResult.data.find(
             (player) => player.name.toLowerCase() === trimmedName.toLowerCase()
           );
-
           playersData.push({
             id: (exactMatch || searchResult.data[0]).id,
             name: (exactMatch || searchResult.data[0]).name,
@@ -77,7 +133,6 @@ const LandingPage = () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: trimmedName }),
           });
-
           if (createResponse.ok) {
             const createResult = await createResponse.json();
             playersData.push({
@@ -86,14 +141,13 @@ const LandingPage = () => {
             });
           }
         }
-      } catch (error) {
+      } catch {
         try {
           const createResponse = await fetch("/api/players", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: trimmedName }),
           });
-
           if (createResponse.ok) {
             const createResult = await createResponse.json();
             playersData.push({
@@ -101,36 +155,32 @@ const LandingPage = () => {
               name: createResult.data.name,
             });
           }
-        } catch (fallbackError) {}
+        } catch {}
       }
     }
-
     return playersData;
   };
 
-  const showNotification = (message, type = "success") => {
+  const showNotification = useCallback((message, type = "success") => {
     setNotification({ message, type });
-  };
+  }, []);
 
-  const closeNotification = () => {
+  const closeNotification = useCallback(() => {
     setNotification(null);
-  };
+  }, []);
 
   const handlePlayerCountChange = (e) => {
     const count = parseInt(e.target.value) || 0;
-    setPlayerCount(count);
-
-    if (count >= 2) {
-      setPlayerNames(Array(count).fill(""));
-    } else {
-      setPlayerNames([]);
-    }
+    updateFormData({
+      playerCount: count,
+      playerNames: count >= 2 ? Array(count).fill("") : [],
+    });
   };
 
   const handlePlayerNameChange = (index, name) => {
     const updatedNames = [...playerNames];
     updatedNames[index] = name;
-    setPlayerNames(updatedNames);
+    updateFormData({ playerNames: updatedNames });
 
     if (name.length > 1) {
       const filteredSuggestions = playerSuggestions.filter(
@@ -138,15 +188,12 @@ const LandingPage = () => {
           suggestion.toLowerCase().includes(name.toLowerCase()) &&
           suggestion.toLowerCase() !== name.toLowerCase()
       );
-      setShowSuggestions({
-        ...showSuggestions,
+      setShowSuggestions((prev) => ({
+        ...prev,
         [index]: filteredSuggestions.length > 0 ? filteredSuggestions : [],
-      });
+      }));
     } else {
-      setShowSuggestions({
-        ...showSuggestions,
-        [index]: [],
-      });
+      setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
     }
     setActiveSuggestionIndex(-1);
   };
@@ -154,11 +201,8 @@ const LandingPage = () => {
   const handleSuggestionClick = (index, suggestion) => {
     const updatedNames = [...playerNames];
     updatedNames[index] = suggestion;
-    setPlayerNames(updatedNames);
-    setShowSuggestions({
-      ...showSuggestions,
-      [index]: [],
-    });
+    updateFormData({ playerNames: updatedNames });
+    setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
   };
 
   const handleKeyDown = (e, index) => {
@@ -179,62 +223,23 @@ const LandingPage = () => {
       e.preventDefault();
       handleSuggestionClick(index, suggestions[activeSuggestionIndex]);
     } else if (e.key === "Escape") {
-      setShowSuggestions({
-        ...showSuggestions,
-        [index]: [],
-      });
+      setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
       setActiveSuggestionIndex(-1);
     }
   };
 
-  const validateForm = () => {
-    if (playerCount < 2) {
-      showNotification("Jumlah pemain harus minimal 2!", "error");
-      return false;
-    }
-
-    if (rounds && rounds < 1) {
-      showNotification("Jika diisi, jumlah babak harus minimal 1!", "error");
-      return false;
-    }
-
-    const emptyNames = playerNames.filter((name) => !name.trim());
-    if (emptyNames.length > 0) {
-      showNotification("Mohon isi semua nama pemain!", "warning");
-      return false;
-    }
-
-    const lowerCaseNames = playerNames.map((name) => name.trim().toLowerCase());
-    const duplicateNames = lowerCaseNames.filter(
-      (name, index) => lowerCaseNames.indexOf(name) !== index
-    );
-
-    if (duplicateNames.length > 0) {
-      showNotification(
-        "Nama pemain tidak boleh sama! Mohon gunakan nama yang berbeda.",
-        "error"
-      );
-      return false;
-    }
-
-    return true;
-  };
+  const validateForm = () => validateFormRealtime();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     setLoadingMessage("Memproses data pemain...");
 
     try {
       const playersData = await findOrCreatePlayers(playerNames);
-
       await fetchPlayerSuggestions();
-
       setLoadingMessage("Menyimpan data turnamen...");
 
       const tournamentInfo = {
@@ -245,17 +250,14 @@ const LandingPage = () => {
       };
 
       await saveTournamentData(tournamentInfo);
-
       const roundsText = rounds ? `${rounds} babak` : "babak unlimited";
       showNotification(
         `Turnamen berhasil dibuat dengan ${playerCount} pemain dan ${roundsText}!`,
         "success"
       );
-
       setLoadingMessage("Mengalihkan ke halaman game...");
-
       router.push("/GamePage");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menyimpan data!", "error");
     } finally {
       setIsLoading(false);
@@ -268,12 +270,10 @@ const LandingPage = () => {
     setLoadingMessage("Mereset data turnamen...");
 
     try {
-      setPlayerCount(0);
-      setRounds("");
-      setPlayerNames([]);
+      updateFormData({ playerCount: 0, rounds: "", playerNames: [] });
       await resetTournamentData();
       showNotification("Form berhasil direset!", "info");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat mereset data!", "error");
     } finally {
       setIsLoading(false);
@@ -281,11 +281,17 @@ const LandingPage = () => {
     }
   };
 
+  const isPlayersFormVisible =
+    playerCount >= 2 &&
+    (!settings.maxPlayers || playerCount <= settings.maxPlayers) &&
+    (!settings.allowUnlimited
+      ? rounds && (!settings.maxRounds || rounds <= settings.maxRounds)
+      : true);
+
   return (
     <main className={styles.container}>
       <div className={styles.body}>
         <Navbar />
-
         {notification && (
           <Notification
             message={notification.message}
@@ -294,7 +300,6 @@ const LandingPage = () => {
             duration={4000}
           />
         )}
-
         <Loading
           isVisible={isLoading || isMaintenanceLoading}
           message={
@@ -313,37 +318,67 @@ const LandingPage = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGroup}>
-                  <label htmlFor="playerCount">Masukkan jumlah pemain:</label>
+                  <label htmlFor="playerCount">
+                    Masukkan jumlah pemain:
+                    {settings.maxPlayers &&
+                      ` (Maksimal ${settings.maxPlayers})`}
+                  </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     id="playerCount"
                     name="playerCount"
-                    placeholder="Minimal 2 pemain"
-                    min="2"
+                    placeholder={`Minimal 2${
+                      settings.maxPlayers
+                        ? `, maksimal ${settings.maxPlayers}`
+                        : ""
+                    } pemain`}
                     value={playerCount || ""}
                     onChange={handlePlayerCountChange}
                     required
                     disabled={isLoading}
                   />
+                  {formErrors.playerCount && (
+                    <div className={styles.errorMessage}>
+                      {formErrors.playerCount}
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
                   <label htmlFor="rounds">
-                    Masukkan jumlah babak (opsional):
+                    Masukkan jumlah babak:
+                    {settings.allowUnlimited
+                      ? " (Opsional, kosongkan untuk unlimited)"
+                      : ` (Wajib, maksimal ${
+                          settings.maxRounds || "tidak terbatas"
+                        })`}
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     id="rounds"
                     name="rounds"
-                    placeholder="Kosongkan untuk unlimited"
-                    min="1"
+                    placeholder={
+                      settings.allowUnlimited
+                        ? "Kosongkan untuk unlimited"
+                        : `Maksimal ${settings.maxRounds || "tidak terbatas"}`
+                    }
                     value={rounds}
-                    onChange={(e) => setRounds(e.target.value)}
+                    onChange={(e) => updateFormData({ rounds: e.target.value })}
+                    required={!settings.allowUnlimited}
                     disabled={isLoading}
                   />
+                  {formErrors.rounds && (
+                    <div className={styles.errorMessage}>
+                      {formErrors.rounds}
+                    </div>
+                  )}
                 </div>
 
-                {playerCount >= 2 && (
+                {isPlayersFormVisible && (
                   <div className={styles.playersContainer}>
                     <div className={styles.formGroup}>
                       <label>Nama Pemain:</label>
@@ -364,45 +399,44 @@ const LandingPage = () => {
                                   handlePlayerNameChange(index, e.target.value)
                                 }
                                 onKeyDown={(e) => handleKeyDown(e, index)}
-                                onBlur={() => {
-                                  setTimeout(() => {
-                                    setShowSuggestions({
-                                      ...showSuggestions,
-                                      [index]: [],
-                                    });
-                                  }, 200);
-                                }}
+                                onBlur={() =>
+                                  setTimeout(
+                                    () =>
+                                      setShowSuggestions((prev) => ({
+                                        ...prev,
+                                        [index]: [],
+                                      })),
+                                    200
+                                  )
+                                }
                                 required
                                 disabled={isLoading}
                               />
-                              {showSuggestions[index] &&
-                                showSuggestions[index].length > 0 && (
-                                  <div className={styles.suggestions}>
-                                    {showSuggestions[index].map(
-                                      (suggestion, suggestionIndex) => (
-                                        <div
-                                          key={suggestionIndex}
-                                          className={`${
-                                            styles.suggestionItem
-                                          } ${
-                                            suggestionIndex ===
-                                            activeSuggestionIndex
-                                              ? styles.active
-                                              : ""
-                                          }`}
-                                          onClick={() =>
-                                            handleSuggestionClick(
-                                              index,
-                                              suggestion
-                                            )
-                                          }
-                                        >
-                                          {suggestion}
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                )}
+                              {showSuggestions[index]?.length > 0 && (
+                                <div className={styles.suggestions}>
+                                  {showSuggestions[index].map(
+                                    (suggestion, suggestionIndex) => (
+                                      <div
+                                        key={suggestionIndex}
+                                        className={`${styles.suggestionItem} ${
+                                          suggestionIndex ===
+                                          activeSuggestionIndex
+                                            ? styles.active
+                                            : ""
+                                        }`}
+                                        onClick={() =>
+                                          handleSuggestionClick(
+                                            index,
+                                            suggestion
+                                          )
+                                        }
+                                      >
+                                        {suggestion}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -415,7 +449,7 @@ const LandingPage = () => {
                   <button
                     type="submit"
                     className={styles.primaryBtn}
-                    disabled={isLoading}
+                    disabled={isLoading || !isFormValid}
                   >
                     {isLoading ? "Memproses..." : "Mulai Turnamen"}
                   </button>
@@ -459,7 +493,6 @@ const LandingPage = () => {
                       </tr>
                     </tbody>
                   </table>
-
                   {playerCount >= 2 && (
                     <div className={styles.playersInfoContainer}>
                       <div className={styles.infoLabel}>Daftar Pemain:</div>
@@ -491,4 +524,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default Index;

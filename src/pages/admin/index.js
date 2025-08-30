@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
@@ -15,7 +15,7 @@ const AdminPage = () => {
     checkAuthentication();
   }, []);
 
-  const checkAuthentication = async () => {
+  const checkAuthentication = useCallback(async () => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
 
@@ -50,21 +50,20 @@ const AdminPage = () => {
         showNotification("Session expired. Silakan login kembali.", "error");
         router.push("/login");
       }
-    } catch (error) {
-      console.error("Error verifying token:", error);
+    } catch {
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
       router.push("/login");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
 
-  const showNotification = (message, type) => {
+  const showNotification = useCallback((message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -92,14 +91,13 @@ const AdminPage = () => {
       } else {
         showNotification(data.error || "Gagal logout", "error");
       }
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch {
       showNotification("Terjadi kesalahan saat logout", "error");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       router.push("/login");
     }
-  };
+  }, [router]);
 
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;

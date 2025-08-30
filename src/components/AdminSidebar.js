@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import styles from "@/styles/components/AdminSidebar.module.css";
 
@@ -48,13 +48,16 @@ const AdminSidebar = ({ user, onLogout }) => {
     },
   ];
 
-  const handleMenuClick = (path) => {
-    router.push(path);
-  };
+  const handleMenuClick = useCallback(
+    (path) => {
+      router.push(path);
+    },
+    [router]
+  );
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     setIsMinimized(!isMinimized);
-  };
+  }, [isMinimized]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
@@ -12,27 +12,31 @@ const SettingsPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const [isSaving, setIsSaving] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
-  const [generalSettings, setGeneralSettings] = useState({
-    maintenanceMode: false,
-  });
-
-  const [tournamentSettings, setTournamentSettings] = useState({
-    maxPlayers: 10,
-    defaultRounds: 40,
-    allowUnlimitedRounds: true,
+  const [settings, setSettings] = useState({
+    general: { maintenanceMode: false },
+    tournament: {
+      maxPlayers: 10,
+      defaultRounds: 40,
+      allowUnlimitedRounds: true,
+    },
   });
 
   useEffect(() => {
     checkAuthentication();
   }, []);
 
-  const fetchSettings = async () => {
-    const token = localStorage.getItem("token");
+  const showNotification = useCallback((message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  }, []);
 
+  const getToken = useCallback(() => localStorage.getItem("token"), []);
+
+  const fetchSettings = useCallback(async () => {
+    const token = getToken();
     if (!token) {
       showNotification("Token tidak ditemukan", "error");
       return;
@@ -51,13 +55,13 @@ const SettingsPage = () => {
 
       if (result.success) {
         const data = result.data;
-        setTournamentSettings({
-          maxPlayers: data.maxPlayers,
-          defaultRounds: data.rounds,
-          allowUnlimitedRounds: data.unlimited,
-        });
-        setGeneralSettings({
-          maintenanceMode: data.maintenance,
+        setSettings({
+          tournament: {
+            maxPlayers: data.maxPlayers,
+            defaultRounds: data.rounds,
+            allowUnlimitedRounds: data.unlimited,
+          },
+          general: { maintenanceMode: data.maintenance },
         });
       } else {
         showNotification(
@@ -65,16 +69,16 @@ const SettingsPage = () => {
           "error"
         );
       }
-    } catch (error) {
+    } catch {
       showNotification(
         "Terjadi kesalahan saat mengambil data settings",
         "error"
       );
     }
-  };
+  }, [getToken, showNotification]);
 
-  const checkAuthentication = async () => {
-    const token = localStorage.getItem("token");
+  const checkAuthentication = useCallback(async () => {
+    const token = getToken();
     const userData = localStorage.getItem("user");
 
     if (!token || !userData) {
@@ -108,22 +112,16 @@ const SettingsPage = () => {
         showNotification("Session expired. Silakan login kembali.", "error");
         router.push("/login");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
       router.push("/login");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getToken, showNotification, router, fetchSettings]);
 
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  const handleLogout = async () => {
-    const token = localStorage.getItem("token");
-
+  const handleLogout = useCallback(async () => {
+    const token = getToken();
     if (!token) {
       showNotification("Token tidak ditemukan", "error");
       router.push("/login");
@@ -149,17 +147,16 @@ const SettingsPage = () => {
       } else {
         showNotification(data.error || "Gagal logout", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat logout", "error");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       router.push("/login");
     }
-  };
+  }, [getToken, showNotification, router]);
 
-  const handleSaveSettings = async () => {
-    const token = localStorage.getItem("token");
-
+  const handleSaveSettings = useCallback(async () => {
+    const token = getToken();
     if (!token) {
       showNotification("Token tidak ditemukan", "error");
       return;
@@ -170,10 +167,10 @@ const SettingsPage = () => {
     try {
       const requestBody = {
         action: "update",
-        maxPlayers: tournamentSettings.maxPlayers,
-        rounds: tournamentSettings.defaultRounds,
-        unlimited: tournamentSettings.allowUnlimitedRounds,
-        maintenance: generalSettings.maintenanceMode,
+        maxPlayers: settings.tournament.maxPlayers,
+        rounds: settings.tournament.defaultRounds,
+        unlimited: settings.tournament.allowUnlimitedRounds,
+        maintenance: settings.general.maintenanceMode,
       };
 
       const response = await fetch("/api/settings", {
@@ -192,20 +189,15 @@ const SettingsPage = () => {
       } else {
         showNotification(result.error || "Gagal menyimpan pengaturan", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menyimpan pengaturan", "error");
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [getToken, settings, showNotification]);
 
-  const handleResetSettings = () => {
-    setIsResetModalOpen(true);
-  };
-
-  const handleConfirmReset = async () => {
-    const token = localStorage.getItem("token");
-
+  const handleConfirmReset = useCallback(async () => {
+    const token = getToken();
     if (!token) {
       showNotification("Token tidak ditemukan", "error");
       return;
@@ -218,22 +210,20 @@ const SettingsPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          action: "reset",
-        }),
+        body: JSON.stringify({ action: "reset" }),
       });
 
       const result = await response.json();
 
       if (result.success) {
         const data = result.data;
-        setTournamentSettings({
-          maxPlayers: data.maxPlayers,
-          defaultRounds: data.rounds,
-          allowUnlimitedRounds: data.unlimited,
-        });
-        setGeneralSettings({
-          maintenanceMode: data.maintenance,
+        setSettings({
+          tournament: {
+            maxPlayers: data.maxPlayers,
+            defaultRounds: data.rounds,
+            allowUnlimitedRounds: data.unlimited,
+          },
+          general: { maintenanceMode: data.maintenance },
         });
 
         setIsResetModalOpen(false);
@@ -241,24 +231,17 @@ const SettingsPage = () => {
       } else {
         showNotification(result.error || "Gagal mereset pengaturan", "error");
       }
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat mereset pengaturan", "error");
     }
-  };
+  }, [getToken, showNotification]);
 
-  const handleGeneralChange = (field, value) => {
-    setGeneralSettings((prev) => ({
+  const updateSettings = useCallback((category, field, value) => {
+    setSettings((prev) => ({
       ...prev,
-      [field]: value,
+      [category]: { ...prev[category], [field]: value },
     }));
-  };
-
-  const handleTournamentChange = (field, value) => {
-    setTournamentSettings((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  }, []);
 
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
@@ -287,9 +270,10 @@ const SettingsPage = () => {
                       type="number"
                       min="2"
                       max="16"
-                      value={tournamentSettings.maxPlayers}
+                      value={settings.tournament.maxPlayers}
                       onChange={(e) =>
-                        handleTournamentChange(
+                        updateSettings(
+                          "tournament",
                           "maxPlayers",
                           parseInt(e.target.value)
                         )
@@ -304,9 +288,10 @@ const SettingsPage = () => {
                       type="number"
                       min="1"
                       max="20"
-                      value={tournamentSettings.defaultRounds}
+                      value={settings.tournament.defaultRounds}
                       onChange={(e) =>
-                        handleTournamentChange(
+                        updateSettings(
+                          "tournament",
                           "defaultRounds",
                           parseInt(e.target.value)
                         )
@@ -321,9 +306,10 @@ const SettingsPage = () => {
                       <div className={styles.switchWrapper}>
                         <input
                           type="checkbox"
-                          checked={tournamentSettings.allowUnlimitedRounds}
+                          checked={settings.tournament.allowUnlimitedRounds}
                           onChange={(e) =>
-                            handleTournamentChange(
+                            updateSettings(
+                              "tournament",
                               "allowUnlimitedRounds",
                               e.target.checked
                             )
@@ -331,7 +317,7 @@ const SettingsPage = () => {
                           className={styles.switch}
                         />
                         <span className={styles.switchLabel}>
-                          {tournamentSettings.allowUnlimitedRounds
+                          {settings.tournament.allowUnlimitedRounds
                             ? "Diizinkan"
                             : "Tidak diizinkan"}
                         </span>
@@ -345,9 +331,10 @@ const SettingsPage = () => {
                       <div className={styles.switchWrapper}>
                         <input
                           type="checkbox"
-                          checked={generalSettings.maintenanceMode}
+                          checked={settings.general.maintenanceMode}
                           onChange={(e) =>
-                            handleGeneralChange(
+                            updateSettings(
+                              "general",
                               "maintenanceMode",
                               e.target.checked
                             )
@@ -355,7 +342,7 @@ const SettingsPage = () => {
                           className={styles.switch}
                         />
                         <span className={styles.switchLabel}>
-                          {generalSettings.maintenanceMode
+                          {settings.general.maintenanceMode
                             ? "Aktif"
                             : "Non-aktif"}
                         </span>
@@ -367,7 +354,7 @@ const SettingsPage = () => {
 
               <div className={styles.actionButtons}>
                 <button
-                  onClick={handleResetSettings}
+                  onClick={() => setIsResetModalOpen(true)}
                   className={styles.resetButton}
                 >
                   🔄 Reset ke Default

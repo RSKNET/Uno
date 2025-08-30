@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import Navbar from "@/components/Navbar";
 import Notification from "@/components/Notification";
@@ -24,22 +24,29 @@ const GamePage = () => {
 
   const [tournamentSummary, setTournamentSummary] = useState(null);
   const [selectedRankings, setSelectedRankings] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("");
+  const [modals, setModals] = useState({
+    reset: false,
+    delete: false,
+  });
+  const [loadingStates, setLoadingStates] = useState({
+    submitting: false,
+    resetting: false,
+    deleting: false,
+    exportingPdf: false,
+    message: "",
+  });
 
   useEffect(() => {
     const loadTournamentSummary = async () => {
-      setLoadingMessage("Memuat data turnamen...");
+      setLoadingStates((prev) => ({
+        ...prev,
+        message: "Memuat data turnamen...",
+      }));
       try {
         const summary = await getTournamentSummary();
         setTournamentSummary(summary);
-      } catch (error) {
+      } catch {
         setTournamentSummary({
           totalPlayers: tournamentData.playerCount,
           roundsType: tournamentData.rounds
@@ -52,7 +59,7 @@ const GamePage = () => {
             : null,
         });
       } finally {
-        setLoadingMessage("");
+        setLoadingStates((prev) => ({ ...prev, message: "" }));
       }
     };
 
@@ -61,62 +68,59 @@ const GamePage = () => {
     }
   }, [tournamentData, getTournamentSummary]);
 
-  const showNotification = (message, type = "success") => {
+  const showNotification = useCallback((message, type = "success") => {
     setNotification({ message, type });
-  };
+  }, []);
 
-  const closeNotification = () => {
+  const closeNotification = useCallback(() => {
     setNotification(null);
-  };
+  }, []);
 
-  const isTournamentCompleted = () => {
+  const isTournamentCompleted = useCallback(() => {
     if (!tournamentSummary) return false;
-
     const rounds = tournamentData.rounds;
     return (
       rounds &&
       rounds !== "unlimited" &&
-      tournamentData.gameData.completedRounds >= parseInt(rounds, 10)
+      tournamentData.gameData?.completedRounds >= parseInt(rounds, 10)
     );
-  };
+  }, [tournamentSummary, tournamentData]);
 
-  const handleShowDeleteModal = () => {
-    setIsDeleteModalOpen(true);
-  };
+  const handleModalToggle = useCallback((modalType, isOpen) => {
+    setModals((prev) => ({ ...prev, [modalType]: isOpen }));
+  }, []);
 
   const handleDeleteAndGoHome = async () => {
-    setIsDeleteModalOpen(false);
-    setIsDeleting(true);
-    setLoadingMessage("Menghapus data tournament...");
+    handleModalToggle("delete", false);
+    setLoadingStates((prev) => ({
+      ...prev,
+      deleting: true,
+      message: "Menghapus data tournament...",
+    }));
 
     try {
       await clearAllData();
       showNotification("Tournament berhasil dihapus!", "success");
       router.push("/");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menghapus tournament", "error");
     } finally {
-      setIsDeleting(false);
-      setLoadingMessage("");
+      setLoadingStates((prev) => ({ ...prev, deleting: false, message: "" }));
     }
   };
 
-  const handleCancelDelete = () => {
-    setIsDeleteModalOpen(false);
-  };
-
-  const handleRankingChange = (rank, playerIndex) => {
+  const handleRankingChange = useCallback((rank, playerIndex) => {
     const value = playerIndex === "" ? "" : parseInt(playerIndex);
-    setSelectedRankings((prev) => ({
-      ...prev,
-      [rank]: value,
-    }));
-  };
+    setSelectedRankings((prev) => ({ ...prev, [rank]: value }));
+  }, []);
 
   const handleSubmitRound = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setLoadingMessage("Menyimpan hasil babak...");
+    setLoadingStates((prev) => ({
+      ...prev,
+      submitting: true,
+      message: "Menyimpan hasil babak...",
+    }));
 
     try {
       const totalPlayers = tournamentSummary.totalPlayers;
@@ -128,67 +132,66 @@ const GamePage = () => {
       await saveRoundResult(rankings);
       setSelectedRankings({});
       showNotification("Hasil babak berhasil disimpan!", "success");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat menyimpan hasil babak", "error");
     } finally {
-      setIsSubmitting(false);
-      setLoadingMessage("");
+      setLoadingStates((prev) => ({ ...prev, submitting: false, message: "" }));
     }
   };
 
-  const handleShowResetModal = () => {
-    setIsResetModalOpen(true);
-  };
-
   const handleResetTournament = async () => {
-    setIsResetModalOpen(false);
-    setIsResetting(true);
-    setLoadingMessage("Mereset tournament...");
+    handleModalToggle("reset", false);
+    setLoadingStates((prev) => ({
+      ...prev,
+      resetting: true,
+      message: "Mereset tournament...",
+    }));
 
     try {
       await resetTournamentData();
       setSelectedRankings({});
       showNotification("Tournament berhasil direset!", "info");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat reset tournament", "error");
     } finally {
-      setIsResetting(false);
-      setLoadingMessage("");
+      setLoadingStates((prev) => ({ ...prev, resetting: false, message: "" }));
     }
   };
 
-  const handleCancelReset = () => {
-    setIsResetModalOpen(false);
-  };
-
   const handleExportToPdf = async () => {
-    setIsExportingPdf(true);
-    setLoadingMessage("Mengekspor tournament ke PDF...");
+    setLoadingStates((prev) => ({
+      ...prev,
+      exportingPdf: true,
+      message: "Mengekspor tournament ke PDF...",
+    }));
 
     try {
       await exportTournamentToPdf(tournamentData, tournamentSummary);
       showNotification("PDF berhasil diekspor!", "success");
-    } catch (error) {
+    } catch {
       showNotification("Terjadi kesalahan saat mengekspor PDF", "error");
     } finally {
-      setIsExportingPdf(false);
-      setLoadingMessage("");
+      setLoadingStates((prev) => ({
+        ...prev,
+        exportingPdf: false,
+        message: "",
+      }));
     }
   };
 
-  const createRankingArray = (totalPlayers) => {
+  const createRankingArray = useCallback((totalPlayers) => {
     return Array.from({ length: totalPlayers }, (_, index) => index + 1);
-  };
+  }, []);
 
-  const getRankingLabel = (rank, totalPlayers) => {
+  const getRankingLabel = useCallback((rank, totalPlayers) => {
     if (rank === 1) return "Juara 1";
     if (rank === 2) return "Juara 2";
     if (rank === 3) return "Juara 3";
     if (rank === totalPlayers) return "Terakhir";
     return `Posisi ${rank}`;
-  };
+  }, []);
 
-  const calculatePlayerStats = (player, playerCount) => {
+  const calculatePlayerStats = useCallback((player, playerCount) => {
     let weighted = 0,
       totalPositionSum = 0,
       totalGames = 0;
@@ -206,17 +209,15 @@ const GamePage = () => {
       weightedScore: weighted,
       averagePosition: totalGames > 0 ? totalPositionSum / totalGames : 0,
     };
-  };
+  }, []);
 
-  const getLeaderboardData = () => {
+  const getLeaderboardData = useCallback(() => {
     const playerScores = tournamentData.gameData?.playerScores || [];
     const groupedByPosition = [];
     let currentPosition = 1;
 
     for (let i = 0; i < playerScores.length; i++) {
       const currentPlayer = playerScores[i];
-      const currentPlayerName =
-        tournamentSummary.players[currentPlayer.playerIndex];
       const tiedPlayers = [currentPlayer];
       let j = i + 1;
 
@@ -248,7 +249,9 @@ const GamePage = () => {
         (player) => tournamentSummary.players[player.playerIndex]
       );
       const displayName =
-        tiedPlayers.length > 1 ? playerNames.join(" & ") : currentPlayerName;
+        tiedPlayers.length > 1
+          ? playerNames.join(" & ")
+          : tournamentSummary.players[currentPlayer.playerIndex];
 
       groupedByPosition.push({
         position: currentPosition,
@@ -262,20 +265,24 @@ const GamePage = () => {
     }
 
     return groupedByPosition;
-  };
+  }, [
+    tournamentData.gameData?.playerScores,
+    tournamentSummary,
+    calculatePlayerStats,
+  ]);
 
   const isLoading =
-    isSubmitting ||
-    isResetting ||
-    isExportingPdf ||
-    isDeleting ||
+    loadingStates.submitting ||
+    loadingStates.resetting ||
+    loadingStates.exportingPdf ||
+    loadingStates.deleting ||
     !tournamentSummary;
 
   if (!tournamentSummary) {
     return (
       <div className={styles.gameContainer}>
         <Navbar />
-        <Loading message={loadingMessage || "Memuat data turnamen..."} />
+        <Loading message={loadingStates.message || "Memuat data turnamen..."} />
       </div>
     );
   }
@@ -294,31 +301,33 @@ const GamePage = () => {
       )}
 
       <ConfirmationModal
-        isOpen={isResetModalOpen}
+        isOpen={modals.reset}
         title="Reset Tournament"
         message="Apakah Anda yakin ingin reset tournament? Semua data akan hilang."
         confirmText="Ya, Reset"
         cancelText="Batal"
         onConfirm={handleResetTournament}
-        onClose={handleCancelReset}
+        onClose={() => handleModalToggle("reset", false)}
         type="danger"
       />
 
       <ConfirmationModal
-        isOpen={isDeleteModalOpen}
+        isOpen={modals.delete}
         title="Hapus Tournament"
         message="Apakah Anda yakin ingin menghapus tournament dan kembali ke halaman utama? Semua data pemain, skor, dan babak akan hilang permanen."
         confirmText="Ya, Hapus & Keluar"
         cancelText="Batal"
         onConfirm={handleDeleteAndGoHome}
-        onClose={handleCancelDelete}
+        onClose={() => handleModalToggle("delete", false)}
         type="danger"
       />
 
       <Loading
         isVisible={isLoading || isMaintenanceLoading}
         message={
-          isMaintenanceLoading ? "Memeriksa status sistem..." : loadingMessage
+          isMaintenanceLoading
+            ? "Memeriksa status sistem..."
+            : loadingStates.message
         }
       />
 
@@ -358,21 +367,27 @@ const GamePage = () => {
                     onClick={handleExportToPdf}
                     disabled={isLoading}
                   >
-                    {isExportingPdf ? "📄 Mengekspor..." : "📄 Simpan ke PDF"}
+                    {loadingStates.exportingPdf
+                      ? "📄 Mengekspor..."
+                      : "📄 Simpan ke PDF"}
                   </button>
                   <button
                     className={`${styles.btn} ${styles.btnDanger}`}
-                    onClick={handleShowResetModal}
+                    onClick={() => handleModalToggle("reset", true)}
                     disabled={isLoading}
                   >
-                    {isResetting ? "🔄 Mereset..." : "🔄 Reset Tournamen"}
+                    {loadingStates.resetting
+                      ? "🔄 Mereset..."
+                      : "🔄 Reset Tournamen"}
                   </button>
                   <button
                     className={`${styles.btn} ${styles.btnWarning}`}
-                    onClick={handleShowDeleteModal}
+                    onClick={() => handleModalToggle("delete", true)}
                     disabled={isLoading}
                   >
-                    {isDeleting ? "🏠 Menghapus..." : "🏠 Hapus & Keluar"}
+                    {loadingStates.deleting
+                      ? "🏠 Menghapus..."
+                      : "🏠 Hapus & Keluar"}
                   </button>
                 </div>
               </div>
@@ -419,9 +434,9 @@ const GamePage = () => {
                                     name={`rank${rank}`}
                                     required
                                     value={selectedRankings[rank] ?? ""}
-                                    onChange={(e) => {
-                                      handleRankingChange(rank, e.target.value);
-                                    }}
+                                    onChange={(e) =>
+                                      handleRankingChange(rank, e.target.value)
+                                    }
                                     className={styles.rankSelect}
                                     disabled={isLoading}
                                   >
@@ -479,7 +494,9 @@ const GamePage = () => {
                           className={styles.btn}
                           disabled={isLoading}
                         >
-                          {isSubmitting ? "Menyimpan..." : "Simpan Hasil Babak"}
+                          {loadingStates.submitting
+                            ? "Menyimpan..."
+                            : "Simpan Hasil Babak"}
                         </button>
                       </form>
                     )}

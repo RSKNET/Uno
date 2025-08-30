@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Loading from "@/components/Loading";
@@ -11,46 +11,46 @@ const ReportPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
+    checkAuth();
+  }, []);
 
-      try {
-        const response = await fetch("/api/verify-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-        const result = await response.json();
+    try {
+      const response = await fetch("/api/verify-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.ok && result.success) {
-          setUser(result.user);
-          setIsAuthenticated(true);
-        } else {
-          localStorage.removeItem("token");
-          router.push("/login");
-        }
-      } catch (error) {
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+      } else {
         localStorage.removeItem("token");
         router.push("/login");
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    checkAuth();
+    } catch {
+      localStorage.removeItem("token");
+      router.push("/login");
+    } finally {
+      setIsLoading(false);
+    }
   }, [router]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     router.push("/login");
-  };
+  }, [router]);
 
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;

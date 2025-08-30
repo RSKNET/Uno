@@ -1,4 +1,4 @@
-import { verifyToken } from "@/utils/auth";
+import { verifyToken } from "../../../utils/auth";
 
 export default function handler(req, res) {
   if (req.method !== "POST") {
