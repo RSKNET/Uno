@@ -8,7 +8,7 @@ import { useTournament } from "@/context/TournamentContext";
 import useMaintenance from "@/hooks/useMaintenance";
 import styles from "@/styles/pages/GamePage.module.css";
 import NoTournamentSetup from "@/pages/NoTournamentSetup";
-import { exportTournamentToPdf } from "@/utils/pdfExport";
+import { generateTournamentPdf } from "@/utils/pdfExport";
 
 const GamePage = () => {
   const router = useRouter();
@@ -48,6 +48,7 @@ const GamePage = () => {
         setTournamentSummary(summary);
       } catch {
         setTournamentSummary({
+          id: tournamentData.id,
           totalPlayers: tournamentData.playerCount,
           roundsType: tournamentData.rounds
             ? `${tournamentData.rounds} babak`
@@ -166,9 +167,28 @@ const GamePage = () => {
     }));
 
     try {
-      await exportTournamentToPdf(tournamentData, tournamentSummary);
+      const pdfDoc = generateTournamentPdf(tournamentData, tournamentSummary);
+      if (!pdfDoc) {
+        throw new Error("Gagal membuat PDF");
+      }
+
+      const dateStr = new Date().toISOString().split("T")[0];
+      const tournamentId = tournamentSummary?.id || tournamentData.id || "";
+      const shortId = tournamentId ? tournamentId.substring(0, 8) : "";
+      const filename = shortId
+        ? `Turnamen-UNO-${dateStr}-${shortId}.pdf`
+        : `Turnamen-UNO-${dateStr}.pdf`;
+      pdfDoc.save(filename);
+
+      setLoadingStates((prev) => ({
+        ...prev,
+        message: "Menyimpan history...",
+      }));
+
+      await saveToHistory(pdfDoc);
+
       showNotification("PDF berhasil diekspor!", "success");
-    } catch {
+    } catch (error) {
       showNotification("Terjadi kesalahan saat mengekspor PDF", "error");
     } finally {
       setLoadingStates((prev) => ({
@@ -177,6 +197,86 @@ const GamePage = () => {
         message: "",
       }));
     }
+  };
+
+  const saveToHistory = async (pdfDoc) => {
+    try {
+      const pdfBlob = pdfDoc.output("blob");
+      const pdfBuffer = await blobToBase64(pdfBlob);
+
+      const historyData = {
+        tournamentInfo: {
+          title: "TURNAMEN UNO",
+          totalPlayers: tournamentSummary.totalPlayers,
+          roundsType: tournamentSummary.roundsType,
+          completedRounds: tournamentData.gameData?.completedRounds || 0,
+        },
+        leaderboard:
+          tournamentData.gameData?.playerScores?.map((playerScore) => ({
+            playerName: tournamentSummary.players[playerScore.playerIndex],
+            totalScore: playerScore.totalScore,
+          })) || [],
+        playerStatistics:
+          tournamentData.gameData?.playerScores?.map((playerScore) => {
+            const statsData = [];
+            for (let i = 1; i <= tournamentSummary.totalPlayers; i++) {
+              const positionKey = `position${i}`;
+              const count = playerScore.wins[positionKey] || 0;
+              const label =
+                i === 1
+                  ? "Juara 1"
+                  : i === 2
+                  ? "Juara 2"
+                  : i === 3
+                  ? "Juara 3"
+                  : i === tournamentSummary.totalPlayers
+                  ? "Terakhir"
+                  : `Posisi ${i}`;
+              statsData.push({
+                position: label,
+                count: count,
+              });
+            }
+
+            return {
+              playerName: tournamentSummary.players[playerScore.playerIndex],
+              positionHistory: statsData,
+            };
+          }) || [],
+        metadata: {
+          tournamentId: tournamentSummary.id || tournamentData.id,
+          timestamp: new Date().toISOString(),
+          exportedAt: new Date().toISOString(),
+        },
+        pdfBuffer: pdfBuffer,
+      };
+
+      const response = await fetch("/api/history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(historyData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save history");
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result.split(",")[1];
+        resolve(base64String);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   };
 
   const createRankingArray = useCallback((totalPlayers) => {

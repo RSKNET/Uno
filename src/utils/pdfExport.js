@@ -1,56 +1,42 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-/**
- * Exports tournament data to PDF
- * @param {Object} tournamentData - Tournament data from the TournamentContext
- * @param {Object} tournamentSummary - Tournament summary from getTournamentSummary
- */
-export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
-  if (!tournamentData || !tournamentSummary) return;
+const createPlayerStats = (playerScores, players) => {
+  return playerScores.map((playerScore) => ({
+    id: playerScore.playerIndex,
+    name: players[playerScore.playerIndex],
+    wins: playerScore.wins || {},
+  }));
+};
 
-  const doc = new jsPDF();
+const createLeaderboardData = (playerScores, players) => {
+  return playerScores.map((playerScore) => [
+    players[playerScore.playerIndex],
+    playerScore.totalScore,
+  ]);
+};
 
-  const sortedPlayers = tournamentData.gameData?.playerScores || [];
-
-  const playerStats =
-    tournamentData.gameData?.playerScores.map((playerScore) => ({
-      id: playerScore.playerIndex,
-      name: tournamentSummary.players[playerScore.playerIndex],
-      wins: playerScore.wins || {},
-    })) || [];
-
-  doc.setFont("times", "normal");
-  doc.setFontSize(12);
-
+const addTournamentHeader = (doc) => {
+  doc.setFont("times", "bold");
   doc.setFontSize(18);
-  doc.setFont("times", "bold");
   doc.setTextColor(0, 0, 0);
-  doc.text("LAPORAN TURNAMEN UNO", 105, 20, { align: "center" });
-  doc.setFont("times", "normal");
-  doc.setFontSize(12);
+  doc.text("TURNAMEN UNO", 105, 20, { align: "center" });
+};
 
-  doc.setFontSize(12);
+const addTournamentInfo = (doc, tournamentSummary, completedRounds) => {
   doc.setFont("times", "bold");
+  doc.setFontSize(12);
   doc.text("Informasi Turnamen", 105, 35, { align: "center" });
   doc.setFont("times", "normal");
 
   doc.text(`Jumlah Pemain       : ${tournamentSummary.totalPlayers}`, 14, 45);
   doc.text(`Jumlah Babak         : ${tournamentSummary.roundsType}`, 14, 55);
-  doc.text(
-    `Babak Selesai         : ${tournamentData.gameData?.completedRounds || 0}`,
-    14,
-    65
-  );
+  doc.text(`Babak Selesai         : ${completedRounds}`, 14, 65);
+};
 
+const addLeaderboard = (doc, leaderboardData) => {
   doc.setFont("times", "bold");
   doc.text("Papan Skor", 105, 85, { align: "center" });
-  doc.setFont("times", "normal");
-
-  const leaderboardData = sortedPlayers.map((playerScore) => [
-    tournamentSummary.players[playerScore.playerIndex],
-    playerScore.totalScore,
-  ]);
 
   autoTable(doc, {
     startY: 90,
@@ -75,40 +61,63 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
     },
     margin: { left: 14 },
   });
+};
 
-  const currentY = doc.lastAutoTable?.finalY || 90;
+const getPositionLabel = (position, totalPlayers) => {
+  if (position === 1) return "Juara 1";
+  if (position === 2) return "Juara 2";
+  if (position === 3) return "Juara 3";
+  if (position === totalPlayers) return "Terakhir";
+  return `Posisi ${position}`;
+};
+
+const createPlayerStatsData = (player, totalPlayers) => {
+  const statsData = [];
+  for (let i = 1; i <= totalPlayers; i++) {
+    const positionKey = `position${i}`;
+    const count = player.wins[positionKey] || 0;
+    const label = getPositionLabel(i, totalPlayers);
+    statsData.push([label, `${count}x`]);
+  }
+  return statsData;
+};
+
+const addPlayerStatisticsSection = (doc, currentY) => {
   const sectionTitle = "Statistik Juara Setiap Pemain";
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  let statsYStart;
   if (currentY + 50 > pageHeight - 20) {
     doc.addPage();
     doc.setFont("times", "bold");
     doc.text(sectionTitle, 105, 20, { align: "center" });
-    doc.setFont("times", "normal");
-    statsYStart = 30;
-  } else {
-    doc.setFont("times", "bold");
-    doc.text(sectionTitle, 105, currentY + 20, { align: "center" });
-    doc.setFont("times", "normal");
-    statsYStart = currentY + 30;
+    return 30;
   }
+
+  doc.setFont("times", "bold");
+  doc.text(sectionTitle, 105, currentY + 20, { align: "center" });
+  return currentY + 30;
+};
+
+const addPlayerStatistics = (doc, playerStats, totalPlayers) => {
+  const currentY = doc.lastAutoTable?.finalY || 90;
+  const statsYStart = addPlayerStatisticsSection(doc, currentY);
 
   const columnWidth = 60;
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = (pageWidth - (columnWidth * 2 + 10)) / 2;
   const rowHeight = 50;
+  const pageHeight = doc.internal.pageSize.getHeight();
 
   let yPos = statsYStart;
-  let currentPage = 1;
 
   for (let i = 0; i < playerStats.length; i += 2) {
     if (yPos + rowHeight > pageHeight - 20) {
       doc.addPage();
-      currentPage++;
       yPos = 20;
       doc.setFont("times", "bold");
-      doc.text(`${sectionTitle} (lanjutan)`, 105, yPos, { align: "center" });
+      doc.text("Statistik Juara Setiap Pemain (lanjutan)", 105, yPos, {
+        align: "center",
+      });
       doc.setFont("times", "normal");
       yPos += 10;
     }
@@ -122,27 +131,10 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
 
       doc.setFontSize(12);
       doc.setFont("times", "bold");
-      doc.text(player.name, xPos + columnWidth / 2, yPos, {
-        align: "center",
-      });
+      doc.text(player.name, xPos + columnWidth / 2, yPos, { align: "center" });
       doc.setFont("times", "normal");
 
-      const statsData = [];
-      for (let i = 1; i <= tournamentSummary.totalPlayers; i++) {
-        const positionKey = `position${i}`;
-        const count = player.wins[positionKey] || 0;
-        const label =
-          i === 1
-            ? "Juara 1"
-            : i === 2
-            ? "Juara 2"
-            : i === 3
-            ? "Juara 3"
-            : i === tournamentSummary.totalPlayers
-            ? "Terakhir"
-            : `Posisi ${i}`;
-        statsData.push([label, `${count}x`]);
-      }
+      const statsData = createPlayerStatsData(player, totalPlayers);
 
       autoTable(doc, {
         startY: yPos + 5,
@@ -172,6 +164,49 @@ export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
 
     yPos = (doc.lastAutoTable?.finalY || yPos) + 10;
   }
+};
 
-  doc.save(`Laporan_Turnamen_UNO_${new Date().toISOString().slice(0, 10)}.pdf`);
+const generateFileName = (tournamentSummary, tournamentData) => {
+  const dateStr = new Date().toISOString().split("T")[0];
+  const tournamentId = tournamentSummary?.id || tournamentData?.id || "";
+  const shortId = tournamentId ? tournamentId.substring(0, 8) : "";
+
+  return shortId
+    ? `Turnamen-UNO-${dateStr}-${shortId}.pdf`
+    : `Turnamen-UNO-${dateStr}.pdf`;
+};
+
+export const generateTournamentPdf = (tournamentData, tournamentSummary) => {
+  if (!tournamentData || !tournamentSummary) return null;
+
+  const doc = new jsPDF();
+  const playerScores = tournamentData.gameData?.playerScores || [];
+  const completedRounds = tournamentData.gameData?.completedRounds || 0;
+
+  const playerStats = createPlayerStats(
+    playerScores,
+    tournamentSummary.players
+  );
+  const leaderboardData = createLeaderboardData(
+    playerScores,
+    tournamentSummary.players
+  );
+
+  doc.setFont("times", "normal");
+  doc.setFontSize(12);
+
+  addTournamentHeader(doc);
+  addTournamentInfo(doc, tournamentSummary, completedRounds);
+  addLeaderboard(doc, leaderboardData);
+  addPlayerStatistics(doc, playerStats, tournamentSummary.totalPlayers);
+
+  return doc;
+};
+
+export const exportTournamentToPdf = (tournamentData, tournamentSummary) => {
+  const doc = generateTournamentPdf(tournamentData, tournamentSummary);
+  if (!doc) return;
+
+  const filename = generateFileName(tournamentSummary, tournamentData);
+  doc.save(filename);
 };

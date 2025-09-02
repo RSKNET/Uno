@@ -10,6 +10,7 @@ const STORAGE_KEY = "unoTournamentData";
 const MIN_PLAYERS = 2;
 
 const INITIAL_TOURNAMENT_STATE = {
+  id: null,
   playerCount: 0,
   rounds: "",
   playerNames: [],
@@ -54,16 +55,6 @@ const calculateStatistics = (wins, playerCount) => {
   };
 };
 
-const TournamentContext = createContext();
-
-export const useTournament = () => {
-  const context = useContext(TournamentContext);
-  if (!context) {
-    throw new Error("useTournament must be used within a TournamentProvider");
-  }
-  return context;
-};
-
 const createPlayerScore = (playerIndex, playerCount) => ({
   playerIndex,
   totalScore: 0,
@@ -71,9 +62,8 @@ const createPlayerScore = (playerIndex, playerCount) => ({
   firstWinRound: null,
 });
 
-const calculatePoints = (totalPlayers, rank) => {
-  return Math.max(0, totalPlayers - rank - 1);
-};
+const calculatePoints = (totalPlayers, rank) =>
+  Math.max(0, totalPlayers - rank - 1);
 
 const createRoundHistory = (currentRound, rankings, playerCount) => ({
   round: currentRound,
@@ -124,6 +114,10 @@ const storageUtils = {
 };
 
 const migrateOldData = (data) => {
+  if (!data.id) {
+    data.id = crypto.randomUUID();
+  }
+
   if (!data.gameData) {
     return {
       ...data,
@@ -164,6 +158,16 @@ const migrateOldData = (data) => {
   return data;
 };
 
+const TournamentContext = createContext();
+
+export const useTournament = () => {
+  const context = useContext(TournamentContext);
+  if (!context) {
+    throw new Error("useTournament must be used within a TournamentProvider");
+  }
+  return context;
+};
+
 export const TournamentProvider = ({ children }) => {
   const [tournamentData, setTournamentData] = useState(
     INITIAL_TOURNAMENT_STATE
@@ -188,6 +192,7 @@ export const TournamentProvider = ({ children }) => {
   const saveTournamentData = useCallback(async (data) => {
     const tournamentInfo = {
       ...data,
+      id: crypto.randomUUID(),
       isSetup: true,
       createdAt: new Date().toISOString(),
       gameData: {
@@ -302,6 +307,7 @@ export const TournamentProvider = ({ children }) => {
     }
 
     return {
+      id: tournamentData.id,
       totalPlayers: tournamentData.playerCount,
       roundsType: tournamentData.rounds
         ? `${tournamentData.rounds} babak`
