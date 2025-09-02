@@ -1,4 +1,4 @@
-import supabase from "../../../../utils/supabase";
+import supabase from "../../../utils/supabase";
 
 const validatePaginationParams = (page, limit) => {
   const pageNum = parseInt(page) || 1;

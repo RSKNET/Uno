@@ -1,4 +1,4 @@
-import supabase from "../../../../utils/supabase";
+import supabase from "../../../utils/supabase";
 
 const validateHistoryId = (historyId) => {
   if (
