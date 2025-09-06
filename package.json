@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "node scripts/generate-version.js && next build",
     "start": "next start",
     "lint": "next lint",
-    "version:show": "node -e \"console.log('Current auto-version:', require('./src/utils/version').getVersionString())\""
+    "version:show": "node -e \"console.log('Current auto-version:', require('./src/utils/version').getVersionString())\"",
+    "version:generate": "node scripts/generate-version.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",

@@ -1,45 +1,105 @@
 import { execSync } from "child_process";
 
-export function getVersion() {
+const DEFAULT_VERSION = { version: "1.2.8", commitCount: 28 };
+const DEFAULT_FALLBACK = {
+  version: "1.2.8",
+  buildInfo: "dev",
+  commitCount: 28,
+  branch: "main",
+  timestamp: new Date().toISOString(),
+};
+
+const GIT_COMMANDS = {
+  commitCount: "git rev-list --count HEAD",
+  commitHash: "git rev-parse --short HEAD",
+  branch: "git rev-parse --abbrev-ref HEAD",
+};
+
+const EXEC_OPTIONS = {
+  encoding: "utf8",
+  cwd: process.cwd(),
+};
+
+function executeGitCommand(command) {
+  return execSync(command, EXEC_OPTIONS).trim();
+}
+
+function calculateVersionFromCommits(commitCount) {
+  const count = parseInt(commitCount);
+  return {
+    major: Math.floor(count / 100) || 1,
+    minor: Math.floor((count % 100) / 10),
+    patch: count % 10,
+  };
+}
+
+function getLocalVersionData() {
   try {
-    const commitCount = execSync("git rev-list --count HEAD", {
-      encoding: "utf8",
-      cwd: process.cwd(),
-    }).trim();
-
-    const commitHash = execSync("git rev-parse --short HEAD", {
-      encoding: "utf8",
-      cwd: process.cwd(),
-    }).trim();
-
-    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-      encoding: "utf8",
-      cwd: process.cwd(),
-    }).trim();
-
-    const major = Math.floor(parseInt(commitCount) / 100) || 1;
-    const minor = Math.floor((parseInt(commitCount) % 100) / 10);
-    const patch = parseInt(commitCount) % 10;
-
-    const version = `${major}.${minor}.${patch}`;
-    const buildInfo = `${commitHash}`;
+    const commitCount = executeGitCommand(GIT_COMMANDS.commitCount);
+    const { major, minor, patch } = calculateVersionFromCommits(commitCount);
 
     return {
-      version,
-      buildInfo,
+      version: `${major}.${minor}.${patch}`,
+      commitCount: parseInt(commitCount),
+    };
+  } catch {
+    return DEFAULT_VERSION;
+  }
+}
+
+function isProductionEnvironment() {
+  return (
+    typeof window === "undefined" &&
+    (process.env.VERCEL || process.env.NODE_ENV === "production")
+  );
+}
+
+function getProductionVersionInfo() {
+  const commitSha =
+    process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) ||
+    process.env.GITHUB_SHA?.substring(0, 7) ||
+    "prod";
+
+  const branch =
+    process.env.VERCEL_GIT_COMMIT_REF?.replace("refs/heads/", "") ||
+    process.env.GITHUB_REF_NAME ||
+    "main";
+
+  const { version, commitCount } = getLocalVersionData();
+
+  return {
+    version,
+    buildInfo: commitSha,
+    commitCount,
+    branch,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function getLocalVersionInfo() {
+  try {
+    const commitCount = executeGitCommand(GIT_COMMANDS.commitCount);
+    const commitHash = executeGitCommand(GIT_COMMANDS.commitHash);
+    const branch = executeGitCommand(GIT_COMMANDS.branch);
+
+    const { major, minor, patch } = calculateVersionFromCommits(commitCount);
+
+    return {
+      version: `${major}.${minor}.${patch}`,
+      buildInfo: commitHash,
       commitCount: parseInt(commitCount),
       branch,
       timestamp: new Date().toISOString(),
     };
-  } catch (error) {
-    return {
-      version: "1.0.0",
-      buildInfo: "dev",
-      commitCount: 0,
-      branch: "unknown",
-      timestamp: new Date().toISOString(),
-    };
+  } catch {
+    return DEFAULT_FALLBACK;
   }
+}
+
+export function getVersion() {
+  return isProductionEnvironment()
+    ? getProductionVersionInfo()
+    : getLocalVersionInfo();
 }
 
 export function getVersionString() {
