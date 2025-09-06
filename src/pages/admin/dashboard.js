@@ -3,12 +3,10 @@ import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
 import Loading from "@/components/Loading";
-import { useVersion } from "@/hooks/useVersion";
 import styles from "@/styles/pages/Dashboard.module.css";
 
 const Dashboard = () => {
   const router = useRouter();
-  const { versionInfo } = useVersion();
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -257,18 +255,6 @@ const Dashboard = () => {
                     <span className={styles.infoLabel}>Last Update:</span>
                     <span className={styles.infoValue}>
                       {new Date().toLocaleDateString("id-ID")}
-                    </span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Version:</span>
-                    <span className={styles.infoValue}>
-                      {versionInfo.version} ({versionInfo.buildInfo})
-                    </span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Build:</span>
-                    <span className={styles.infoValue}>
-                      #{versionInfo.commitCount} on {versionInfo.branch}
                     </span>
                   </div>
                 </div>
