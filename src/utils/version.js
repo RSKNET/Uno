@@ -2,11 +2,11 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-const DEFAULT_VERSION = { version: "1.3.1", commitCount: 31 };
+const DEFAULT_VERSION = { version: "1.3.3", commitCount: 33 };
 const DEFAULT_FALLBACK = {
-  version: "1.3.1",
+  version: "1.3.3",
   buildInfo: "dev",
-  commitCount: 31,
+  commitCount: 33,
   branch: "main",
   timestamp: new Date().toISOString(),
 };
@@ -43,24 +43,26 @@ function isProductionEnvironment() {
 }
 
 function getProductionVersionInfo() {
-  const commitSha =
-    process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) ||
-    process.env.GITHUB_SHA?.substring(0, 7) ||
-    "prod";
+  const commitSha = process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) ||
+                   process.env.GITHUB_SHA?.substring(0, 7) ||
+                   "prod";
 
-  const branch =
-    process.env.VERCEL_GIT_COMMIT_REF?.replace("refs/heads/", "") ||
-    process.env.GITHUB_REF_NAME ||
-    "main";
+  const branch = process.env.VERCEL_GIT_COMMIT_REF?.replace("refs/heads/", "") ||
+                process.env.GITHUB_REF_NAME ||
+                "main";
 
-  let versionInfo;
+  let versionInfo = DEFAULT_VERSION;
+  
   try {
     const versionPath = path.join(process.cwd(), "public", "version.json");
     const versionFile = JSON.parse(fs.readFileSync(versionPath, "utf8"));
-    versionInfo = {
-      version: versionFile.version,
-      commitCount: versionFile.commitCount,
-    };
+    
+    if (versionFile.version && versionFile.commitCount) {
+      versionInfo = {
+        version: versionFile.version,
+        commitCount: versionFile.commitCount,
+      };
+    }
   } catch {
     versionInfo = DEFAULT_VERSION;
   }
