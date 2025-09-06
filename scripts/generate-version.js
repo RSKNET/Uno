@@ -3,9 +3,9 @@ const { execSync } = require("child_process");
 const path = require("path");
 
 const DEFAULT_FALLBACK = {
-  version: "1.0.0",
+  version: "1.3.1",
   buildInfo: "unknown",
-  commitCount: 0,
+  commitCount: 31,
   branch: "unknown",
 };
 

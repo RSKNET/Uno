@@ -1,10 +1,12 @@
 import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
 
-const DEFAULT_VERSION = { version: "1.2.8", commitCount: 28 };
+const DEFAULT_VERSION = { version: "1.3.1", commitCount: 31 };
 const DEFAULT_FALLBACK = {
-  version: "1.2.8",
+  version: "1.3.1",
   buildInfo: "dev",
-  commitCount: 28,
+  commitCount: 31,
   branch: "main",
   timestamp: new Date().toISOString(),
 };
@@ -65,12 +67,22 @@ function getProductionVersionInfo() {
     process.env.GITHUB_REF_NAME ||
     "main";
 
-  const { version, commitCount } = getLocalVersionData();
+  let versionInfo;
+  try {
+    const versionPath = path.join(process.cwd(), "public", "version.json");
+    const versionFile = JSON.parse(fs.readFileSync(versionPath, "utf8"));
+    versionInfo = {
+      version: versionFile.version,
+      commitCount: versionFile.commitCount,
+    };
+  } catch {
+    versionInfo = DEFAULT_VERSION;
+  }
 
   return {
-    version,
+    version: versionInfo.version,
     buildInfo: commitSha,
-    commitCount,
+    commitCount: versionInfo.commitCount,
     branch,
     timestamp: new Date().toISOString(),
   };
