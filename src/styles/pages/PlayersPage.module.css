@@ -35,60 +35,6 @@
   font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.statCard {
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid #0f3460;
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.statCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-  border-color: #1a5490;
-}
-
-.statIcon {
-  font-size: 2.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 12px;
-  min-width: 60px;
-  text-align: center;
-}
-
-.statContent {
-  flex: 1;
-}
-
-.statNumber {
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 4px;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-}
-
-.statLabel {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-}
-
 .controls {
   display: flex;
   justify-content: space-between;
@@ -260,12 +206,6 @@
   color: white;
   font-weight: bold;
   font-size: 1rem;
-}
-
-.gameCount {
-  font-weight: 600;
-  color: #4ade80;
-  text-align: center;
 }
 
 .joinDate {
@@ -533,24 +473,6 @@
     font-size: 1rem;
   }
 
-  .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-  }
-
-  .statCard {
-    padding: 20px;
-  }
-
-  .statIcon {
-    font-size: 2rem;
-    min-width: 50px;
-  }
-
-  .statNumber {
-    font-size: 1.5rem;
-  }
-
   .controls {
     flex-direction: column;
     gap: 15px;
@@ -685,31 +607,6 @@
 
   .header {
     margin-bottom: 25px;
-  }
-
-  .statsGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 25px;
-  }
-
-  .statCard {
-    padding: 16px;
-    border-radius: 12px;
-  }
-
-  .statIcon {
-    font-size: 1.8rem;
-    min-width: 45px;
-    padding: 10px;
-  }
-
-  .statNumber {
-    font-size: 1.3rem;
-  }
-
-  .statLabel {
-    font-size: 0.8rem;
   }
 
   .controls {
@@ -850,11 +747,6 @@
 @media (max-width: 1024px) and (min-width: 769px) {
   .playersContainer {
     padding: 25px;
-  }
-
-  .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 18px;
   }
 
   .controls {

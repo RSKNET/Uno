@@ -3,19 +3,18 @@ import { useRouter } from "next/router";
 import AdminLayout from "@/components/AdminLayout";
 import Notification from "@/components/Notification";
 import Loading from "@/components/Loading";
+import { useVersion } from "@/hooks/useVersion";
 import styles from "@/styles/pages/Dashboard.module.css";
 
 const Dashboard = () => {
   const router = useRouter();
+  const { versionInfo } = useVersion();
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notification, setNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dashboardData, setDashboardData] = useState({
-    totalPlayers: 0,
-    totalTournaments: 0,
-    activeTournaments: 0,
     recentPlayers: [],
   });
 
@@ -81,7 +80,6 @@ const Dashboard = () => {
         const players = playersResult.data;
         setDashboardData((prev) => ({
           ...prev,
-          totalPlayers: players.length,
           recentPlayers: players.slice(-5).reverse(),
         }));
       }
@@ -152,44 +150,11 @@ const Dashboard = () => {
     <>
       <AdminLayout user={user} onLogout={handleLogout}>
         <div className={styles.dashboardContainer}>
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>👥</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {dashboardData.totalPlayers}
-                </h3>
-                <p className={styles.statLabel}>Total Pemain</p>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>🏆</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {dashboardData.totalTournaments}
-                </h3>
-                <p className={styles.statLabel}>Total Turnamen</p>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>🎮</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {dashboardData.activeTournaments}
-                </h3>
-                <p className={styles.statLabel}>Turnamen Aktif</p>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>📊</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>100%</h3>
-                <p className={styles.statLabel}>System Status</p>
-              </div>
-            </div>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Dashboard</h1>
+            <p className={styles.subtitle}>
+              Selamat datang di panel admin UNO tournament
+            </p>
           </div>
 
           <div className={styles.contentGrid}>
@@ -296,7 +261,15 @@ const Dashboard = () => {
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.infoLabel}>Version:</span>
-                    <span className={styles.infoValue}>1.0.0</span>
+                    <span className={styles.infoValue}>
+                      {versionInfo.version} ({versionInfo.buildInfo})
+                    </span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Build:</span>
+                    <span className={styles.infoValue}>
+                      #{versionInfo.commitCount} on {versionInfo.branch}
+                    </span>
                   </div>
                 </div>
               </div>

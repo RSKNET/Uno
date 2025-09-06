@@ -354,25 +354,6 @@ const PlayersPage = () => {
             <p className={styles.subtitle}>Kelola data pemain UNO tournament</p>
           </div>
 
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>👥</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>{players.length}</h3>
-                <p className={styles.statLabel}>Total Pemain</p>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>🎮</div>
-              <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>
-                  {players.reduce((sum, p) => sum + p.totalGames, 0)}
-                </h3>
-                <p className={styles.statLabel}>Total Game</p>
-              </div>
-            </div>
-          </div>
-
           <div className={styles.controls}>
             <div className={styles.searchContainer}>
               <input
@@ -399,8 +380,6 @@ const PlayersPage = () => {
                 <option value="name-desc">Nama (Z-A)</option>
                 <option value="joinDate-desc">Terbaru</option>
                 <option value="joinDate-asc">Terlama</option>
-                <option value="totalGames-desc">Game Terbanyak</option>
-                <option value="totalGames-asc">Game Tersedikit</option>
               </select>
 
               <button
@@ -436,14 +415,6 @@ const PlayersPage = () => {
                       {sortBy === "joinDate" &&
                         (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
-                    <th
-                      onClick={() => handleSort("totalGames")}
-                      className={`${styles.sortableHeader} ${styles.centerHeader}`}
-                    >
-                      Total Game{" "}
-                      {sortBy === "totalGames" &&
-                        (sortOrder === "asc" ? "↑" : "↓")}
-                    </th>
                     <th className={styles.centerHeader}>Aksi</th>
                   </tr>
                 </thead>
@@ -459,7 +430,6 @@ const PlayersPage = () => {
                       <td className={styles.joinDate}>
                         {new Date(player.joinDate).toLocaleDateString("id-ID")}
                       </td>
-                      <td className={styles.gameCount}>{player.totalGames}</td>
                       <td className={styles.actions}>
                         <button
                           onClick={() => handleEditPlayer(player)}

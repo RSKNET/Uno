@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "version:show": "node -e \"console.log('Current auto-version:', require('./src/utils/version').getVersionString())\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",

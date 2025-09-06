@@ -12,7 +12,6 @@ const formatPlayerName = (name) =>
 const transformPlayer = (player) => ({
   id: player.id,
   name: player.name,
-  totalGames: player.total_games,
   joinDate: player.created_at,
   updatedAt: player.updated_at,
 });
@@ -44,7 +43,7 @@ const handleGet = async (req, res) => {
 
     let query = supabase
       .from("players")
-      .select("id, name, total_games, created_at, updated_at");
+      .select("id, name, created_at, updated_at");
 
     if (search) query = query.ilike("name", `%${search}%`);
     if (id) query = query.eq("id", id);
@@ -86,8 +85,8 @@ const handlePost = async (req, res) => {
 
     const { data, error } = await supabase
       .from("players")
-      .insert({ name: formattedName, total_games: 0 })
-      .select("id, name, total_games, created_at, updated_at")
+      .insert({ name: formattedName })
+      .select("id, name, created_at, updated_at")
       .single();
 
     if (error) {
@@ -140,7 +139,7 @@ const handlePut = async (req, res) => {
       .from("players")
       .update({ name: formattedName })
       .eq("id", id)
-      .select("id, name, total_games, created_at, updated_at")
+      .select("id, name, created_at, updated_at")
       .single();
 
     if (error) {
