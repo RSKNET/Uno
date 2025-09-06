@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 
+const INITIAL_VERSION_STATE = {
+  version: "1.0.0",
+  buildInfo: "loading...",
+  commitCount: 0,
+  branch: "unknown",
+  timestamp: new Date().toISOString(),
+};
+
 export const useVersion = () => {
-  const [versionInfo, setVersionInfo] = useState({
-    version: "1.0.0",
-    buildInfo: "loading...",
-    commitCount: 0,
-    branch: "unknown",
-    timestamp: new Date().toISOString(),
-  });
+  const [versionInfo, setVersionInfo] = useState(INITIAL_VERSION_STATE);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,8 +21,7 @@ export const useVersion = () => {
         if (result.success) {
           setVersionInfo(result.data);
         }
-      } catch (error) {
-        console.error("Failed to fetch version:", error);
+      } catch {
       } finally {
         setIsLoading(false);
       }

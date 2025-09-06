@@ -35,20 +35,6 @@ function calculateVersionFromCommits(commitCount) {
   };
 }
 
-function getLocalVersionData() {
-  try {
-    const commitCount = executeGitCommand(GIT_COMMANDS.commitCount);
-    const { major, minor, patch } = calculateVersionFromCommits(commitCount);
-
-    return {
-      version: `${major}.${minor}.${patch}`,
-      commitCount: parseInt(commitCount),
-    };
-  } catch {
-    return DEFAULT_VERSION;
-  }
-}
-
 function isProductionEnvironment() {
   return (
     typeof window === "undefined" &&

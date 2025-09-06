@@ -68,13 +68,8 @@ function writeVersionFile(versionInfo) {
 function generateVersionInfo() {
   try {
     const versionInfo = createVersionInfo();
-    const outputPath = writeVersionFile(versionInfo);
-
-    console.log("Version info generated:", versionInfo);
-    console.log("Saved to:", outputPath);
+    writeVersionFile(versionInfo);
   } catch (error) {
-    console.error("Failed to generate version info:", error.message);
-
     const fallbackVersion = createFallbackVersion();
     writeVersionFile(fallbackVersion);
   }
