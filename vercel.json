@@ -5,7 +5,13 @@
   "framework": "nextjs",
   "functions": {
     "src/pages/api/**/*.js": {
-      "maxDuration": 10
+      "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/scheduled/refresh-urls",
+      "schedule": "0 2 * * 0"
+    }
+  ]
 }
