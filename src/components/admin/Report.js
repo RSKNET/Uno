@@ -74,8 +74,11 @@ const Report = ({ showNotification }) => {
       }
 
       if (typeof report.pdf === "string" && report.pdf.startsWith("http")) {
-        // Set PDF URL for preview
-        setPreviewData({ pdfUrl: report.pdf });
+        setPreviewData({
+          pdfUrl: report.pdf,
+          filename:
+            report.pdf_filename || `Tournament Report ${report.game_id}`,
+        });
         setShowPreview(true);
       } else {
         showNotification("Format URL PDF tidak valid", "error");
@@ -101,7 +104,6 @@ const Report = ({ showNotification }) => {
       }
 
       if (typeof report.json === "string") {
-        // Check if it's a URL - fetch data from URL
         if (report.json.startsWith("http")) {
           try {
             const response = await fetch(report.json);
@@ -119,7 +121,6 @@ const Report = ({ showNotification }) => {
             return;
           }
         } else {
-          // Try to parse as JSON string
           try {
             parsedData = JSON.parse(report.json);
           } catch (parseError) {
@@ -152,7 +153,6 @@ const Report = ({ showNotification }) => {
       }
 
       if (typeof report.pdf === "string" && report.pdf.startsWith("http")) {
-        // Download PDF from URL
         const response = await fetch(report.pdf);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -170,7 +170,6 @@ const Report = ({ showNotification }) => {
         window.URL.revokeObjectURL(url);
         showNotification("PDF berhasil diunduh!", "success");
       } else {
-        // Fallback to API download
         const token = localStorage.getItem("token");
         const response = await fetch(
           `/api/report?id=${report.id}&download=pdf`,
@@ -296,7 +295,7 @@ const Report = ({ showNotification }) => {
         <div className={styles.modal}>
           <div className={styles.modalContent + " " + styles.pdfPreviewModal}>
             <div className={styles.modalHeader}>
-              <h2>Preview PDF Tournament</h2>
+              <h2>{previewData.filename || "Preview PDF Tournament"}</h2>
               <button onClick={closePreview} className={styles.closeButton}>
                 ×
               </button>

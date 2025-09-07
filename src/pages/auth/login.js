@@ -140,21 +140,6 @@ const LoginPage = () => {
               </button>
             </form>
           </div>
-
-          <div className={styles.loginInfo}>
-            <div className={styles.infoCard}>
-              <h3>🔐 Info Login</h3>
-              <div className={styles.infoContent}>
-                <p>Panel admin untuk mengelola:</p>
-                <ul>
-                  <li>📊 Data Tournament</li>
-                  <li>👥 Data Players</li>
-                  <li>🏆 Hasil Pertandingan</li>
-                  <li>📈 Statistik</li>
-                </ul>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </main>
