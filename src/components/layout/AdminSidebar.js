@@ -9,9 +9,13 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth <= 768) {
+      const isMobileSize = window.innerWidth <= 768;
+      setIsMobile(isMobileSize);
+
+      if (isMobileSize) {
         setIsMinimized(true);
+      } else {
+        setIsMinimized(false);
       }
     };
 
@@ -56,8 +60,10 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
   );
 
   const toggleSidebar = useCallback(() => {
-    setIsMinimized(!isMinimized);
-  }, [isMinimized]);
+    if (isMobile) {
+      setIsMinimized(!isMinimized);
+    }
+  }, [isMinimized, isMobile]);
 
   return (
     <>
@@ -69,13 +75,6 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
             <span className={styles.logoIcon}>🎮</span>
             {!isMinimized && <span className={styles.logoText}>UNO Admin</span>}
           </div>
-          <button
-            className={styles.toggleButton}
-            onClick={toggleSidebar}
-            title={isMinimized ? "Expand sidebar" : "Minimize sidebar"}
-          >
-            {isMinimized ? "▶️" : "◀️"}
-          </button>
         </div>
 
         <nav className={styles.navigation}>
@@ -97,10 +96,27 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
         </nav>
 
         <div className={styles.sidebarFooter}>
-          <div className={styles.userSection}>
-            <div className={styles.userAvatar}>👤</div>
+          {isMobile && (
+            <button
+              className={styles.footerButton}
+              onClick={toggleSidebar}
+              title={isMinimized ? "Expand sidebar" : "Minimize sidebar"}
+            >
+              <span className={styles.buttonIcon}>
+                {isMinimized ? "▶️" : "◀️"}
+              </span>
+              {!isMinimized && (
+                <span className={styles.buttonText}>
+                  {isMinimized ? "Expand" : "Minimize"}
+                </span>
+              )}
+            </button>
+          )}
+
+          <div className={styles.footerButton}>
+            <span className={styles.buttonIcon}>👤</span>
             {!isMinimized && (
-              <div className={styles.userInfo}>
+              <div className={styles.buttonText}>
                 <div className={styles.username}>{user?.username}</div>
                 <div className={styles.userRole}>Admin</div>
               </div>
@@ -108,12 +124,12 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
           </div>
 
           <button
-            className={styles.logoutButton}
+            className={`${styles.footerButton} ${styles.logout}`}
             onClick={onLogout}
             title={isMinimized ? "Logout" : ""}
           >
-            <span className={styles.logoutIcon}>🚪</span>
-            {!isMinimized && <span className={styles.logoutText}>Logout</span>}
+            <span className={styles.buttonIcon}>🚪</span>
+            {!isMinimized && <span className={styles.buttonText}>Logout</span>}
           </button>
         </div>
       </div>

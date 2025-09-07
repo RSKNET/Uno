@@ -18,7 +18,8 @@
 
 @media (max-width: 768px) {
   .mainContent {
-    margin-left: 60px;
+    margin-left: 0;
+    margin-right: 60px;
     padding: 15px;
     box-sizing: border-box;
   }
@@ -26,7 +27,8 @@
 
 @media (max-width: 480px) {
   .mainContent {
-    margin-left: 50px;
+    margin-left: 0;
+    margin-right: 50px;
     padding: 10px;
     box-sizing: border-box;
   }
