@@ -1,0 +1,166 @@
+@font-face {
+  font-family: "PirataOne";
+  src: url("/fonts/PirataOne-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.promptContainer {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 40, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  max-width: 400px;
+  width: 90%;
+  z-index: 1000;
+  animation: slideUp 0.6s ease-out;
+  font-family: "Roboto Condensed", "Arial", sans-serif;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.promptContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+}
+
+.promptIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.logoImage {
+  object-fit: contain;
+}
+
+.iconText {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: "PirataOne", cursive;
+  text-shadow: 0 2px 10px rgba(26, 26, 46, 0.5);
+}
+
+.promptText h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  font-family: "PirataOne", cursive;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.promptText p {
+  margin: 0;
+  font-size: 1rem;
+  color: #e1e8ed;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.promptActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+}
+
+.installButton,
+.dismissButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  font-family: "Roboto Condensed", "Arial", sans-serif;
+}
+
+.installButton {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 50%, #3d8b40 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  border: 2px solid rgba(76, 175, 80, 0.2);
+  font-weight: 700;
+}
+
+.installButton:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 50%, #2e7d32 100%);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  transform: translateY(-2px);
+}
+
+.dismissButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.dismissButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .promptContainer {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    width: auto;
+    max-width: none;
+    padding: 20px;
+  }
+
+  .promptActions {
+    justify-content: stretch;
+  }
+
+  .installButton,
+  .dismissButton {
+    flex: 1;
+  }
+
+  .promptIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .iconText {
+    font-size: 18px;
+  }
+
+  .promptText h3 {
+    font-size: 1.2rem;
+  }
+
+  .promptText p {
+    font-size: 0.9rem;
+  }
+}

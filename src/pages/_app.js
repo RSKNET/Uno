@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { TournamentProvider } from "@/context/TournamentContext";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }) {
@@ -10,6 +11,7 @@ export default function App({ Component, pageProps }) {
       </Head>
       <TournamentProvider>
         <Component {...pageProps} />
+        <PWAInstallPrompt />
       </TournamentProvider>
     </>
   );
