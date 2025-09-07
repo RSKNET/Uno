@@ -2,7 +2,7 @@
   "name": "UNO Admin",
   "short_name": "UNO Admin",
   "description": "Aplikasi administrasi turnamen UNO",
-  "start_url": "/login",
+  "start_url": "/auth/login",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#1a1a2e",

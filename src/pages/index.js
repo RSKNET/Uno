@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
-import Navbar from "@/components/Navbar";
-import Notification from "@/components/Notification";
-import Loading from "@/components/Loading";
+import Navbar from "@/components/layout/Navbar";
+import Notification from "@/components/ui/Notification";
+import Loading from "@/components/ui/Loading";
 import { useTournament } from "@/context/TournamentContext";
-import useMaintenance from "@/hooks/useMaintenance";
 import useSettings from "@/hooks/useSettings";
 import styles from "@/styles/pages/IndexPage.module.css";
 
@@ -12,7 +11,6 @@ const Index = () => {
   const router = useRouter();
   const { tournamentData, saveTournamentData, resetTournamentData } =
     useTournament();
-  const { isLoading: isMaintenanceLoading } = useMaintenance();
   const { settings } = useSettings();
 
   const [formData, setFormData] = useState({
@@ -21,15 +19,22 @@ const Index = () => {
     playerNames: tournamentData.playerNames || [],
   });
   const [notification, setNotification] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("");
-  const [playerSuggestions, setPlayerSuggestions] = useState([]);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
-  const [showSuggestions, setShowSuggestions] = useState({});
+  const [loadingState, setLoadingState] = useState({
+    isLoading: false,
+    message: "",
+  });
+  const [suggestionState, setSuggestionState] = useState({
+    playerSuggestions: [],
+    activeSuggestionIndex: -1,
+    showSuggestions: {},
+  });
   const [formErrors, setFormErrors] = useState({ playerCount: "", rounds: "" });
   const [isFormValid, setIsFormValid] = useState(false);
 
   const { playerCount, rounds, playerNames } = formData;
+  const { isLoading, message: loadingMessage } = loadingState;
+  const { playerSuggestions, activeSuggestionIndex, showSuggestions } =
+    suggestionState;
 
   useEffect(() => {
     fetchPlayerSuggestions();
@@ -57,13 +62,15 @@ const Index = () => {
       const response = await fetch("/api/players");
       if (!response.ok) throw new Error("Failed to fetch players");
       const result = await response.json();
-      setPlayerSuggestions(
-        result.success && result.data
-          ? result.data.map((player) => player.name)
-          : []
-      );
+      setSuggestionState((prev) => ({
+        ...prev,
+        playerSuggestions:
+          result.success && result.data
+            ? result.data.map((player) => player.name)
+            : [],
+      }));
     } catch {
-      setPlayerSuggestions([]);
+      setSuggestionState((prev) => ({ ...prev, playerSuggestions: [] }));
     }
   };
 
@@ -123,50 +130,40 @@ const Index = () => {
           const exactMatch = searchResult.data.find(
             (player) => player.name.toLowerCase() === trimmedName.toLowerCase()
           );
+          const selectedPlayer = exactMatch || searchResult.data[0];
           playersData.push({
-            id: (exactMatch || searchResult.data[0]).id,
-            name: (exactMatch || searchResult.data[0]).name,
+            id: selectedPlayer.id,
+            name: selectedPlayer.name,
           });
         } else {
-          const createResponse = await fetch("/api/players", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: trimmedName }),
-          });
-          if (createResponse.ok) {
-            const createResult = await createResponse.json();
-            playersData.push({
-              id: createResult.data.id,
-              name: createResult.data.name,
-            });
-          }
+          const createResult = await createPlayer(trimmedName);
+          if (createResult) playersData.push(createResult);
         }
       } catch {
-        try {
-          const createResponse = await fetch("/api/players", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: trimmedName }),
-          });
-          if (createResponse.ok) {
-            const createResult = await createResponse.json();
-            playersData.push({
-              id: createResult.data.id,
-              name: createResult.data.name,
-            });
-          }
-        } catch {}
+        const createResult = await createPlayer(trimmedName);
+        if (createResult) playersData.push(createResult);
       }
     }
     return playersData;
   };
 
+  const createPlayer = async (name) => {
+    try {
+      const response = await fetch("/api/players", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        return { id: result.data.id, name: result.data.name };
+      }
+    } catch {}
+    return null;
+  };
+
   const showNotification = useCallback((message, type = "success") => {
     setNotification({ message, type });
-  }, []);
-
-  const closeNotification = useCallback(() => {
-    setNotification(null);
   }, []);
 
   const handlePlayerCountChange = (e) => {
@@ -188,21 +185,31 @@ const Index = () => {
           suggestion.toLowerCase().includes(name.toLowerCase()) &&
           suggestion.toLowerCase() !== name.toLowerCase()
       );
-      setShowSuggestions((prev) => ({
+      setSuggestionState((prev) => ({
         ...prev,
-        [index]: filteredSuggestions.length > 0 ? filteredSuggestions : [],
+        showSuggestions: {
+          ...prev.showSuggestions,
+          [index]: filteredSuggestions.length > 0 ? filteredSuggestions : [],
+        },
+        activeSuggestionIndex: -1,
       }));
     } else {
-      setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
+      setSuggestionState((prev) => ({
+        ...prev,
+        showSuggestions: { ...prev.showSuggestions, [index]: [] },
+        activeSuggestionIndex: -1,
+      }));
     }
-    setActiveSuggestionIndex(-1);
   };
 
   const handleSuggestionClick = (index, suggestion) => {
     const updatedNames = [...playerNames];
     updatedNames[index] = suggestion;
     updateFormData({ playerNames: updatedNames });
-    setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
+    setSuggestionState((prev) => ({
+      ...prev,
+      showSuggestions: { ...prev.showSuggestions, [index]: [] },
+    }));
   };
 
   const handleKeyDown = (e, index) => {
@@ -211,36 +218,47 @@ const Index = () => {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveSuggestionIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : 0
-      );
+      setSuggestionState((prev) => ({
+        ...prev,
+        activeSuggestionIndex:
+          prev.activeSuggestionIndex < suggestions.length - 1
+            ? prev.activeSuggestionIndex + 1
+            : 0,
+      }));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveSuggestionIndex((prev) =>
-        prev > 0 ? prev - 1 : suggestions.length - 1
-      );
+      setSuggestionState((prev) => ({
+        ...prev,
+        activeSuggestionIndex:
+          prev.activeSuggestionIndex > 0
+            ? prev.activeSuggestionIndex - 1
+            : suggestions.length - 1,
+      }));
     } else if (e.key === "Enter" && activeSuggestionIndex >= 0) {
       e.preventDefault();
       handleSuggestionClick(index, suggestions[activeSuggestionIndex]);
     } else if (e.key === "Escape") {
-      setShowSuggestions((prev) => ({ ...prev, [index]: [] }));
-      setActiveSuggestionIndex(-1);
+      setSuggestionState((prev) => ({
+        ...prev,
+        showSuggestions: { ...prev.showSuggestions, [index]: [] },
+        activeSuggestionIndex: -1,
+      }));
     }
   };
 
-  const validateForm = () => validateFormRealtime();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateFormRealtime()) return;
 
-    setIsLoading(true);
-    setLoadingMessage("Memproses data pemain...");
+    setLoadingState({ isLoading: true, message: "Memproses data pemain..." });
 
     try {
       const playersData = await findOrCreatePlayers(playerNames);
       await fetchPlayerSuggestions();
-      setLoadingMessage("Menyimpan data turnamen...");
+      setLoadingState((prev) => ({
+        ...prev,
+        message: "Menyimpan data turnamen...",
+      }));
 
       const tournamentInfo = {
         playerCount,
@@ -255,19 +273,20 @@ const Index = () => {
         `Turnamen berhasil dibuat dengan ${playerCount} pemain dan ${roundsText}!`,
         "success"
       );
-      setLoadingMessage("Mengalihkan ke halaman game...");
-      router.push("/GamePage");
+      setLoadingState((prev) => ({
+        ...prev,
+        message: "Mengalihkan ke halaman game...",
+      }));
+      router.push("/game");
     } catch {
       showNotification("Terjadi kesalahan saat menyimpan data!", "error");
     } finally {
-      setIsLoading(false);
-      setLoadingMessage("");
+      setLoadingState({ isLoading: false, message: "" });
     }
   };
 
   const handleReset = async () => {
-    setIsLoading(true);
-    setLoadingMessage("Mereset data turnamen...");
+    setLoadingState({ isLoading: true, message: "Mereset data turnamen..." });
 
     try {
       updateFormData({ playerCount: 0, rounds: "", playerNames: [] });
@@ -276,8 +295,7 @@ const Index = () => {
     } catch {
       showNotification("Terjadi kesalahan saat mereset data!", "error");
     } finally {
-      setIsLoading(false);
-      setLoadingMessage("");
+      setLoadingState({ isLoading: false, message: "" });
     }
   };
 
@@ -296,16 +314,11 @@ const Index = () => {
           <Notification
             message={notification.message}
             type={notification.type}
-            onClose={closeNotification}
+            onClose={() => setNotification(null)}
             duration={4000}
           />
         )}
-        <Loading
-          isVisible={isLoading || isMaintenanceLoading}
-          message={
-            isMaintenanceLoading ? "Memeriksa status sistem..." : loadingMessage
-          }
-        />
+        <Loading isVisible={isLoading} message={loadingMessage} />
 
         <div className={styles.mainContainer}>
           <div className={styles.formContainer}>
@@ -400,14 +413,13 @@ const Index = () => {
                                 }
                                 onKeyDown={(e) => handleKeyDown(e, index)}
                                 onBlur={() =>
-                                  setTimeout(
-                                    () =>
-                                      setShowSuggestions((prev) => ({
-                                        ...prev,
-                                        [index]: [],
-                                      })),
-                                    200
-                                  )
+                                  setSuggestionState((prev) => ({
+                                    ...prev,
+                                    showSuggestions: {
+                                      ...prev.showSuggestions,
+                                      [index]: [],
+                                    },
+                                  }))
                                 }
                                 required
                                 disabled={isLoading}
@@ -424,12 +436,13 @@ const Index = () => {
                                             ? styles.active
                                             : ""
                                         }`}
-                                        onClick={() =>
+                                        onMouseDown={(e) => {
+                                          e.preventDefault();
                                           handleSuggestionClick(
                                             index,
                                             suggestion
-                                          )
-                                        }
+                                          );
+                                        }}
                                       >
                                         {suggestion}
                                       </div>

@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/router";
 import useInterval from "./useInterval";
 
 const useMaintenance = () => {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
   const previousMaintenanceRef = useRef(false);
 
   const checkMaintenanceStatus = async () => {
@@ -15,28 +13,8 @@ const useMaintenance = () => {
 
       if (result.success) {
         const maintenanceStatus = result.data.maintenance;
-        const previousMaintenanceStatus = previousMaintenanceRef.current;
-
         setIsMaintenance(maintenanceStatus);
         previousMaintenanceRef.current = maintenanceStatus;
-
-        if (maintenanceStatus && !previousMaintenanceStatus) {
-          const currentPath = router.asPath;
-          if (currentPath !== "/maintenance") {
-            localStorage.setItem("lastAccessedPage", currentPath);
-          }
-          router.push("/maintenance");
-        }
-
-        if (!maintenanceStatus && previousMaintenanceStatus) {
-          const lastPage = localStorage.getItem("lastAccessedPage");
-          if (lastPage && lastPage !== "/maintenance") {
-            localStorage.removeItem("lastAccessedPage");
-            router.push(lastPage);
-          } else {
-            router.push("/");
-          }
-        }
       }
     } catch (error) {
     } finally {

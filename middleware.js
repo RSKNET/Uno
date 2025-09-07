@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const EXCLUDED_PAGES = ["/", "/GamePage", "/maintenance", "/NoTournamentSetup"];
+const EXCLUDED_PAGES = ["/", "/game", "/maintenance", "/NoTournamentSetup"];
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;

@@ -1,105 +1,44 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
-import AdminLayout from "@/components/AdminLayout";
-import Notification from "@/components/Notification";
-import Loading from "@/components/Loading";
+import { useAuth } from "@/context/AuthContext";
+import AdminLayout from "@/components/layout/AdminLayout";
+import Notification from "@/components/ui/Notification";
+import Loading from "@/components/ui/Loading";
+import Dashboard from "@/components/admin/Dashboard";
+import Players from "@/components/admin/Players";
+import Settings from "@/components/admin/Settings";
+import Report from "@/components/admin/Report";
 
 const AdminPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [notification, setNotification] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentView, setCurrentView] = useState("dashboard");
 
   useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-
-    if (!token || !userData) {
+    if (!authLoading && !isAuthenticated) {
       showNotification(
         "Akses ditolak. Silakan login terlebih dahulu.",
         "error"
       );
-      router.push("/login");
-      setIsLoading(false);
-      return;
+      router.push("/auth/login");
     }
-
-    try {
-      const response = await fetch("/api/verify-token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setUser(JSON.parse(userData));
-        setIsAuthenticated(true);
-        router.push("/admin/dashboard");
-      } else {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        showNotification("Session expired. Silakan login kembali.", "error");
-        router.push("/login");
-      }
-    } catch {
-      showNotification("Terjadi kesalahan. Silakan coba lagi.", "error");
-      router.push("/login");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
+  }, [authLoading, isAuthenticated, router]);
 
   const showNotification = useCallback((message, type) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
   }, []);
 
+  const handleNavigate = useCallback((view) => {
+    setCurrentView(view);
+  }, []);
+
   const handleLogout = useCallback(async () => {
-    const token = localStorage.getItem("token");
+    await logout();
+  }, [logout]);
 
-    if (!token) {
-      showNotification("Token tidak ditemukan", "error");
-      router.push("/login");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        showNotification("Logout berhasil", "success");
-        router.push("/login");
-      } else {
-        showNotification(data.error || "Gagal logout", "error");
-      }
-    } catch {
-      showNotification("Terjadi kesalahan saat logout", "error");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      router.push("/login");
-    }
-  }, [router]);
-
-  if (isLoading) {
+  if (authLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
 
@@ -107,9 +46,34 @@ const AdminPage = () => {
     return null;
   }
 
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case "players":
+        return <Players showNotification={showNotification} />;
+      case "settings":
+        return <Settings showNotification={showNotification} />;
+      case "report":
+        return <Report showNotification={showNotification} />;
+      default:
+        return (
+          <Dashboard
+            onNavigate={handleNavigate}
+            showNotification={showNotification}
+          />
+        );
+    }
+  };
+
   return (
     <>
-      <AdminLayout user={user} onLogout={handleLogout}></AdminLayout>
+      <AdminLayout
+        user={user}
+        onLogout={handleLogout}
+        currentView={currentView}
+        onNavigate={handleNavigate}
+      >
+        {renderCurrentView()}
+      </AdminLayout>
       {notification && (
         <Notification
           message={notification.message}

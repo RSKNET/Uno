@@ -1,6 +1,8 @@
 import Head from "next/head";
 import { TournamentProvider } from "@/context/TournamentContext";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { AuthProvider } from "@/context/AuthContext";
+import MaintenanceWrapper from "@/components/maintenance/MaintenanceWrapper";
+import PWAInstallPrompt from "@/components/ui/PWAInstallPrompt";
 import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }) {
@@ -9,10 +11,14 @@ export default function App({ Component, pageProps }) {
       <Head>
         <title>UNO Tournament</title>
       </Head>
-      <TournamentProvider>
-        <Component {...pageProps} />
-        <PWAInstallPrompt />
-      </TournamentProvider>
+      <AuthProvider>
+        <TournamentProvider>
+          <MaintenanceWrapper>
+            <Component {...pageProps} />
+          </MaintenanceWrapper>
+          <PWAInstallPrompt />
+        </TournamentProvider>
+      </AuthProvider>
     </>
   );
 }

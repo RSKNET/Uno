@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-const EXCLUDED_PAGES = ["/", "/GamePage", "/maintenance", "/NoTournamentSetup"];
+const EXCLUDED_PAGES = ["/", "/game"];
 
 export const usePWA = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
