@@ -16,6 +16,9 @@ const ReportPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [detailData, setDetailData] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reportsPerPage] = useState(5);
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -64,6 +67,20 @@ const ReportPage = () => {
     router.push("/login");
   }, [router]);
 
+  const getPaginatedReports = useCallback(() => {
+    const startIndex = (currentPage - 1) * reportsPerPage;
+    const endIndex = startIndex + reportsPerPage;
+    return reportData.slice(startIndex, endIndex);
+  }, [reportData, currentPage, reportsPerPage]);
+
+  const getTotalPages = useCallback(() => {
+    return Math.ceil(reportData.length / reportsPerPage);
+  }, [reportData.length, reportsPerPage]);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
   const fetchReportData = async () => {
     setIsLoadingData(true);
     const token = localStorage.getItem("token");
@@ -81,6 +98,7 @@ const ReportPage = () => {
 
       if (response.ok && result.success) {
         setReportData(result.data);
+        setCurrentPage(1);
       }
     } catch (error) {
       setReportData([]);
@@ -161,7 +179,7 @@ const ReportPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reportData.map((item) => (
+                  {getPaginatedReports().map((item) => (
                     <tr key={item.id}>
                       <td>{formatDate(item.created_at)}</td>
                       <td className={styles.actionCell}>
@@ -193,7 +211,7 @@ const ReportPage = () => {
             </div>
 
             <div className={styles.cardContainer}>
-              {reportData.map((item) => (
+              {getPaginatedReports().map((item) => (
                 <div key={item.id} className={styles.card}>
                   <div className={styles.cardHeader}>
                     <h3 className={styles.cardTitle}>Report Data</h3>
@@ -223,6 +241,45 @@ const ReportPage = () => {
                 </div>
               ))}
             </div>
+
+            {reportData.length > reportsPerPage && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  Menampilkan {(currentPage - 1) * reportsPerPage + 1} -{" "}
+                  {Math.min(currentPage * reportsPerPage, reportData.length)}{" "}
+                  dari {reportData.length} report
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.paginationButton}
+                  >
+                    ‹ Sebelumnya
+                  </button>
+
+                  {Array.from({ length: getTotalPages() }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`${styles.paginationButton} ${
+                        currentPage === index + 1 ? styles.active : ""
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === getTotalPages()}
+                    className={styles.paginationButton}
+                  >
+                    Selanjutnya ›
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

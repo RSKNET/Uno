@@ -429,7 +429,13 @@ const GamePage = () => {
       <ConfirmationModal
         isOpen={modals.reset}
         title="Reset Tournament"
-        message="Apakah Anda yakin ingin reset tournament? Semua data akan hilang."
+        message={
+          <>
+            Apakah Anda yakin ingin reset tournament?
+            <br />
+            Semua data akan hilang.
+          </>
+        }
         confirmText="Ya, Reset"
         cancelText="Batal"
         onConfirm={handleResetTournament}
@@ -440,7 +446,14 @@ const GamePage = () => {
       <ConfirmationModal
         isOpen={modals.delete}
         title="Hapus Tournament"
-        message="Apakah Anda yakin ingin menghapus tournament dan kembali ke halaman utama? Semua data pemain, skor, dan babak akan hilang permanen."
+        message={
+          <>
+            Apakah Anda yakin ingin menghapus tournament dan kembali ke halaman
+            utama?
+            <br />
+            Semua data pemain, skor, dan babak akan hilang permanen.
+          </>
+        }
         confirmText="Ya, Hapus & Keluar"
         cancelText="Batal"
         onConfirm={handleDeleteAndGoHome}

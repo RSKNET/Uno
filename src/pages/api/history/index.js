@@ -24,7 +24,10 @@ const validateHistoryData = (data) => {
 };
 
 const generateFileName = (type, tournamentId) => {
-  const dateStr = new Date().toISOString().split("T")[0];
+  const indonesiaTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+  );
+  const dateStr = indonesiaTime.toISOString().split("T")[0];
   const shortId = tournamentId ? tournamentId.substring(0, 8) : "";
 
   if (type === "pdf") {
@@ -45,7 +48,10 @@ const createHistoryData = (
   metadata
 ) => {
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[:.]/g, "-");
+  const indonesiaTime = new Date(
+    now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+  );
+  const timestamp = indonesiaTime.toISOString().replace(/[:.]/g, "-");
 
   return {
     tournamentInfo: {
@@ -59,7 +65,7 @@ const createHistoryData = (
     metadata: {
       tournamentId: metadata?.tournamentId,
       timestamp,
-      exportedAt: metadata?.exportedAt || now.toISOString(),
+      exportedAt: metadata?.exportedAt || indonesiaTime.toISOString(),
     },
   };
 };
@@ -145,7 +151,6 @@ const saveHistoryRecord = async (
         json: jsonUrl,
         pdf_filename: pdfFileName,
         json_filename: jsonFileName,
-        updated_at: new Date().toISOString(),
       })
       .eq("game_id", gameId)
       .select()

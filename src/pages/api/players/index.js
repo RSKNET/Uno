@@ -48,8 +48,8 @@ const handleGet = async (req, res) => {
     if (search) query = query.ilike("name", `%${search}%`);
     if (id) query = query.eq("id", id);
 
-    const { data, error } = await query.order("created_at", {
-      ascending: false,
+    const { data, error } = await query.order("updated_at", {
+      ascending: true,
     });
 
     if (error) {

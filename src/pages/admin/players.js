@@ -22,6 +22,9 @@ const PlayersPage = () => {
   const [isSavingPlayer, setIsSavingPlayer] = useState(false);
   const [isDeletingPlayer, setIsDeletingPlayer] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [playersPerPage] = useState(5);
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -89,6 +92,7 @@ const PlayersPage = () => {
     });
 
     setFilteredPlayers(sorted);
+    setCurrentPage(1);
   }, [searchTerm, sortBy, sortOrder, players]);
 
   const checkAuthentication = useCallback(async () => {
@@ -337,6 +341,20 @@ const PlayersPage = () => {
     [sortBy, sortOrder]
   );
 
+  const getPaginatedPlayers = useCallback(() => {
+    const startIndex = (currentPage - 1) * playersPerPage;
+    const endIndex = startIndex + playersPerPage;
+    return filteredPlayers.slice(startIndex, endIndex);
+  }, [filteredPlayers, currentPage, playersPerPage]);
+
+  const getTotalPages = useCallback(() => {
+    return Math.ceil(filteredPlayers.length / playersPerPage);
+  }, [filteredPlayers.length, playersPerPage]);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
   if (isLoading) {
     return <Loading isVisible={true} message="Memverifikasi autentikasi..." />;
   }
@@ -419,7 +437,7 @@ const PlayersPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPlayers.map((player) => (
+                  {getPaginatedPlayers().map((player) => (
                     <tr key={player.id} className={styles.tableRow}>
                       <td className={styles.playerName}>
                         <div className={styles.playerAvatar}>
@@ -463,6 +481,141 @@ const PlayersPage = () => {
                     ? "Coba ubah kata kunci pencarian"
                     : "Belum ada pemain yang terdaftar"}
                 </p>
+              </div>
+            )}
+
+            {!isLoadingPlayers && filteredPlayers.length > playersPerPage && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  Menampilkan {(currentPage - 1) * playersPerPage + 1} -{" "}
+                  {Math.min(
+                    currentPage * playersPerPage,
+                    filteredPlayers.length
+                  )}{" "}
+                  dari {filteredPlayers.length} pemain
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.paginationButton}
+                  >
+                    ‹ Sebelumnya
+                  </button>
+
+                  {Array.from({ length: getTotalPages() }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`${styles.paginationButton} ${
+                        currentPage === index + 1 ? styles.active : ""
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === getTotalPages()}
+                    className={styles.paginationButton}
+                  >
+                    Selanjutnya ›
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.cardContainer}>
+            {getPaginatedPlayers().map((player) => (
+              <div key={player.id} className={styles.playerCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.playerCardInfo}>
+                    <div className={styles.playerAvatar}>
+                      {player.name.charAt(0).toUpperCase()}
+                    </div>
+                    <h3 className={styles.cardTitle}>{player.name}</h3>
+                  </div>
+                </div>
+                <div className={styles.cardContent}>
+                  <div className={styles.cardRow}>
+                    <span className={styles.cardLabel}>Tanggal Bergabung:</span>
+                    <span className={styles.cardValue}>
+                      {new Date(player.joinDate).toLocaleDateString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.cardActions}>
+                  <button
+                    onClick={() => handleEditPlayer(player)}
+                    className={styles.editCardButton}
+                    disabled={isSavingPlayer || isDeletingPlayer}
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeletePlayer(player)}
+                    className={styles.deleteCardButton}
+                    disabled={isSavingPlayer || isDeletingPlayer}
+                  >
+                    🗑️ Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {filteredPlayers.length === 0 && (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>👥</div>
+                <h3>Tidak ada pemain ditemukan</h3>
+                <p>
+                  {searchTerm
+                    ? "Coba ubah kata kunci pencarian"
+                    : "Belum ada pemain yang terdaftar"}
+                </p>
+              </div>
+            )}
+
+            {filteredPlayers.length > playersPerPage && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  Menampilkan {(currentPage - 1) * playersPerPage + 1} -{" "}
+                  {Math.min(
+                    currentPage * playersPerPage,
+                    filteredPlayers.length
+                  )}{" "}
+                  dari {filteredPlayers.length} pemain
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.paginationButton}
+                  >
+                    ‹ Sebelumnya
+                  </button>
+
+                  {Array.from({ length: getTotalPages() }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`${styles.paginationButton} ${
+                        currentPage === index + 1 ? styles.active : ""
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === getTotalPages()}
+                    className={styles.paginationButton}
+                  >
+                    Selanjutnya ›
+                  </button>
+                </div>
               </div>
             )}
           </div>

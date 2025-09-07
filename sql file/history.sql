@@ -7,14 +7,14 @@ CREATE TABLE history (
     json TEXT NOT NULL,
     pdf_filename TEXT NOT NULL,
     json_filename TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'Asia/Jakarta'),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'Asia/Jakarta')
 );
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = NOW() AT TIME ZONE 'Asia/Jakarta';
     RETURN NEW;
 END;
 $$ language 'plpgsql';
