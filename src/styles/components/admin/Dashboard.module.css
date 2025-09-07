@@ -1,24 +1,3 @@
-:root {
-  --primary-bg: rgba(20, 20, 40, 0.95);
-  --border-color: #0f3460;
-  --border-hover: #1a5490;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --overlay-light: rgba(255, 255, 255, 0.05);
-  --overlay-medium: rgba(255, 255, 255, 0.1);
-  --overlay-dark: rgba(255, 255, 255, 0.2);
-  --status-online: #4ade80;
-  --shadow-light: 0 20px 40px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 24px 48px rgba(0, 0, 0, 0.4);
-  --border-radius: 20px;
-  --border-radius-small: 12px;
-  --gap-large: 30px;
-  --gap-medium: 20px;
-  --gap-small: 12px;
-  --font-family: "Roboto Condensed", Arial, sans-serif;
-}
-
 .dashboardContainer {
   padding: var(--gap-large);
   max-width: 1400px;
