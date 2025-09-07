@@ -28,12 +28,14 @@ const GamePage = () => {
   const [modals, setModals] = useState({
     reset: false,
     delete: false,
+    download: false,
   });
   const [loadingStates, setLoadingStates] = useState({
     submitting: false,
     resetting: false,
     deleting: false,
     exportingPdf: false,
+    savingToDatabase: false,
     message: "",
   });
 
@@ -162,8 +164,38 @@ const GamePage = () => {
   const handleExportToPdf = async () => {
     setLoadingStates((prev) => ({
       ...prev,
+      savingToDatabase: true,
+      message: "Menyimpan Skor Permainan...",
+    }));
+
+    try {
+      const pdfDoc = generateTournamentPdf(tournamentData, tournamentSummary);
+      if (!pdfDoc) {
+        throw new Error("Gagal membuat PDF");
+      }
+
+      await saveToHistory(pdfDoc);
+
+      showNotification("Data berhasil disimpan!", "success");
+
+      handleModalToggle("download", true);
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat menyimpan", "error");
+    } finally {
+      setLoadingStates((prev) => ({
+        ...prev,
+        savingToDatabase: false,
+        message: "",
+      }));
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    handleModalToggle("download", false);
+    setLoadingStates((prev) => ({
+      ...prev,
       exportingPdf: true,
-      message: "Mengekspor tournament ke PDF...",
+      message: "Mengunduh PDF...",
     }));
 
     try {
@@ -178,18 +210,11 @@ const GamePage = () => {
       const filename = shortId
         ? `Turnamen-UNO-${dateStr}-${shortId}.pdf`
         : `Turnamen-UNO-${dateStr}.pdf`;
+
       pdfDoc.save(filename);
-
-      setLoadingStates((prev) => ({
-        ...prev,
-        message: "Menyimpan history...",
-      }));
-
-      await saveToHistory(pdfDoc);
-
-      showNotification("PDF berhasil diekspor!", "success");
+      showNotification("PDF berhasil diunduh!", "success");
     } catch (error) {
-      showNotification("Terjadi kesalahan saat mengekspor PDF", "error");
+      showNotification("Terjadi kesalahan saat mengunduh PDF", "error");
     } finally {
       setLoadingStates((prev) => ({
         ...prev,
@@ -375,6 +400,7 @@ const GamePage = () => {
     loadingStates.submitting ||
     loadingStates.resetting ||
     loadingStates.exportingPdf ||
+    loadingStates.savingToDatabase ||
     loadingStates.deleting ||
     !tournamentSummary;
 
@@ -422,6 +448,23 @@ const GamePage = () => {
         type="danger"
       />
 
+      <ConfirmationModal
+        isOpen={modals.download}
+        title="Unduh PDF"
+        message={
+          <>
+            Skor telah berhasil disimpan.
+            <br />
+            Apakah Anda ingin mengunduh PDF?
+          </>
+        }
+        confirmText="Ya, Unduh"
+        cancelText="Tidak"
+        onConfirm={handleDownloadPdf}
+        onClose={() => handleModalToggle("download", false)}
+        type="success"
+      />
+
       <Loading
         isVisible={isLoading || isMaintenanceLoading}
         message={
@@ -467,9 +510,9 @@ const GamePage = () => {
                     onClick={handleExportToPdf}
                     disabled={isLoading}
                   >
-                    {loadingStates.exportingPdf
-                      ? "📄 Mengekspor..."
-                      : "📄 Simpan ke PDF"}
+                    {loadingStates.savingToDatabase
+                      ? "📄 Menyimpan..."
+                      : "📄 Simpan Skor Permainan"}
                   </button>
                   <button
                     className={`${styles.btn} ${styles.btnDanger}`}
