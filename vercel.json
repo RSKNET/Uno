@@ -10,7 +10,7 @@
   },
   "crons": [
     {
-      "path": "/api/scheduled/refresh-urls",
+      "path": "/api/scheduled",
       "schedule": "0 2 * * 0"
     }
   ]
