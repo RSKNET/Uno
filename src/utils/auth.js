@@ -30,28 +30,3 @@ export const authMiddleware = (handler) => {
     return handler(req, res);
   };
 };
-
-export const getTokenFromRequest = (req) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader.slice(7);
-  }
-  return null;
-};
-
-export const requireAuth = async (req, res, next) => {
-  const token = getTokenFromRequest(req);
-
-  if (!token) {
-    return res.status(401).json({ error: "Akses ditolak. Token diperlukan" });
-  }
-
-  const verification = verifyToken(token);
-
-  if (!verification.success) {
-    return res.status(401).json({ error: verification.error });
-  }
-
-  req.user = verification.data;
-  next();
-};

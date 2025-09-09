@@ -1,4 +1,4 @@
-import supabase from "../../../utils/supabase";
+import supabase from "../../../../utils/supabase";
 
 const validateHistoryData = (data) => {
   const { tournamentInfo, leaderboard, playerStatistics, pdfBuffer, metadata } =

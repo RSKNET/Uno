@@ -292,7 +292,7 @@ export const TournamentProvider = ({ children }) => {
       const fetchedPlayers = await Promise.all(
         tournamentData.playerIds.map(async (playerId, index) => {
           try {
-            const response = await fetch(`/api/players?id=${playerId}`);
+            const response = await fetch(`/api/player/players?id=${playerId}`);
             if (response.ok) {
               const result = await response.json();
               if (result.success && result.data?.length > 0) {

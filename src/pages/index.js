@@ -59,7 +59,7 @@ const Index = () => {
 
   const fetchPlayerSuggestions = async () => {
     try {
-      const response = await fetch("/api/players");
+      const response = await fetch("/api/player/players");
       if (!response.ok) throw new Error("Failed to fetch players");
       const result = await response.json();
       setSuggestionState((prev) => ({
@@ -121,7 +121,7 @@ const Index = () => {
 
       try {
         const searchResponse = await fetch(
-          `/api/players?search=${encodeURIComponent(trimmedName)}`
+          `/api/player/players?search=${encodeURIComponent(trimmedName)}`
         );
         if (!searchResponse.ok) throw new Error("Search failed");
         const searchResult = await searchResponse.json();
@@ -149,7 +149,7 @@ const Index = () => {
 
   const createPlayer = async (name) => {
     try {
-      const response = await fetch("/api/players", {
+      const response = await fetch("/api/player/players", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),

@@ -1,29 +1,11 @@
-import supabase from "../../../utils/supabase";
-import { verifyToken } from "../../../utils/auth";
+import supabase from "../../../../utils/supabase";
+import { authMiddleware } from "../../../../utils/auth";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({
       success: false,
       error: "Method tidak didukung",
-    });
-  }
-
-  const token = req.headers.authorization?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      error: "Token tidak ditemukan. Akses ditolak",
-    });
-  }
-
-  const verification = verifyToken(token);
-
-  if (!verification.success) {
-    return res.status(401).json({
-      success: false,
-      error: verification.error,
     });
   }
 
@@ -51,3 +33,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+export default authMiddleware(handler);

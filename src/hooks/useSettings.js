@@ -10,7 +10,7 @@ const useSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch("/api/settings-status");
+      const response = await fetch("/api/player/settings-status");
       if (!response.ok) throw new Error("Failed to fetch settings");
       const result = await response.json();
       if (result.success && result.data) {

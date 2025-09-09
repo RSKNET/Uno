@@ -1,5 +1,5 @@
-import supabase from "../../../utils/supabase";
-import { verifyToken } from "../../../utils/auth";
+import supabase from "../../../../utils/supabase";
+import { authMiddleware } from "../../../../utils/auth";
 
 const buildSelectQuery = () => `
   id,
@@ -191,25 +191,7 @@ const handlePut = async (req, res) => {
   }
 };
 
-export default async function handler(req, res) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      error: "Token tidak ditemukan. Akses ditolak",
-    });
-  }
-
-  const verification = verifyToken(token);
-
-  if (!verification.success) {
-    return res.status(401).json({
-      success: false,
-      error: verification.error,
-    });
-  }
-
+async function handler(req, res) {
   switch (req.method) {
     case "GET":
       return handleGet(res);
@@ -224,3 +206,5 @@ export default async function handler(req, res) {
       });
   }
 }
+
+export default authMiddleware(handler);

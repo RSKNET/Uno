@@ -263,7 +263,7 @@ const GamePage = () => {
         pdfBuffer: pdfBuffer,
       };
 
-      const response = await fetch("/api/history", {
+      const response = await fetch("/api/player/history", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

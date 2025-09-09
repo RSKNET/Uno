@@ -32,41 +32,39 @@ export const useApi = () => {
       const params = {};
       if (search) params.search = search;
       if (id) params.id = id;
-      return apiGet("/api/players", null, params);
+      return apiGet("/api/admin/players", null, params);
     },
     [apiGet]
   );
 
   const createPlayer = useCallback(
-    async (playerData) => apiPost("/api/players", playerData),
+    async (playerData) => apiPost("/api/admin/players", playerData),
     [apiPost]
   );
 
   const updatePlayer = useCallback(
-    async (playerData) => apiPut("/api/players", playerData),
+    async (playerData) => apiPut("/api/admin/players", playerData),
     [apiPut]
   );
 
   const deletePlayer = useCallback(
-    async (playerId) => apiDelete("/api/players", null, { id: playerId }),
+    async (playerId) => apiDelete("/api/admin/players", null, { id: playerId }),
     [apiDelete]
   );
 
-  const fetchReports = useCallback(async () => apiGet("/api/report"), [apiGet]);
+  const fetchReports = useCallback(
+    async () => apiGet("/api/admin/report"),
+    [apiGet]
+  );
 
   const fetchSettings = useCallback(
-    async () => apiGet("/api/settings"),
+    async () => apiGet("/api/admin/settings"),
     [apiGet]
   );
 
   const updateSettings = useCallback(
-    async (settingsData) => apiPut("/api/settings", settingsData),
+    async (settingsData) => apiPut("/api/admin/settings", settingsData),
     [apiPut]
-  );
-
-  const fetchSettingsStatus = useCallback(
-    async () => apiGet("/api/settings-status"),
-    [apiGet]
   );
 
   return {
@@ -77,7 +75,6 @@ export const useApi = () => {
     fetchReports,
     fetchSettings,
     updateSettings,
-    fetchSettingsStatus,
   };
 };
 

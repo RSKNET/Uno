@@ -1,4 +1,4 @@
-import supabase from "../../../utils/supabase";
+import supabase from "../../../../utils/supabase";
 
 const formatPlayerName = (name) =>
   name
@@ -26,11 +26,13 @@ const validateName = (name) => {
   return null;
 };
 
-const checkExistingPlayer = async (name, excludeId = null) => {
-  const query = supabase.from("players").select("id").eq("name", name);
-  if (excludeId) query.neq("id", excludeId);
+const checkExistingPlayer = async (name) => {
+  const { data, error } = await supabase
+    .from("players")
+    .select("id")
+    .eq("name", name)
+    .single();
 
-  const { data, error } = await query.single();
   if (error && error.code !== "PGRST116") {
     throw new Error("Gagal memeriksa data pemain");
   }
@@ -105,100 +107,12 @@ const handlePost = async (req, res) => {
   }
 };
 
-const handlePut = async (req, res) => {
-  try {
-    const { id, name } = req.body;
-    const validationError = validateName(name);
-    if (validationError || !id) {
-      return res.status(400).json({
-        error: !id ? "ID dan nama pemain harus diisi" : validationError,
-      });
-    }
-
-    const { data: existingPlayer, error: checkError } = await supabase
-      .from("players")
-      .select("id, name")
-      .eq("id", id)
-      .single();
-
-    if (checkError || !existingPlayer) {
-      return res.status(404).json({ error: "Pemain tidak ditemukan" });
-    }
-
-    const formattedName = formatPlayerName(name.trim());
-    if (name.trim() !== existingPlayer.name) {
-      const duplicatePlayer = await checkExistingPlayer(formattedName, id);
-      if (duplicatePlayer) {
-        return res.status(409).json({
-          error: "Nama pemain sudah digunakan oleh pemain lain",
-        });
-      }
-    }
-
-    const { data, error } = await supabase
-      .from("players")
-      .update({ name: formattedName })
-      .eq("id", id)
-      .select("id, name, created_at, updated_at")
-      .single();
-
-    if (error) {
-      return res.status(500).json({ error: "Gagal mengupdate pemain" });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Pemain berhasil diupdate",
-      data: transformPlayer(data),
-    });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ error: error.message || "Terjadi kesalahan server" });
-  }
-};
-
-const handleDelete = async (req, res) => {
-  try {
-    const { id } = req.query;
-    if (!id) {
-      return res.status(400).json({ error: "ID pemain harus disertakan" });
-    }
-
-    const { data: existingPlayer, error: checkError } = await supabase
-      .from("players")
-      .select("id, name")
-      .eq("id", id)
-      .single();
-
-    if (checkError || !existingPlayer) {
-      return res.status(404).json({ error: "Pemain tidak ditemukan" });
-    }
-
-    const { error } = await supabase.from("players").delete().eq("id", id);
-    if (error) {
-      return res.status(500).json({ error: "Gagal menghapus pemain" });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Pemain berhasil dihapus",
-    });
-  } catch {
-    return res.status(500).json({ error: "Terjadi kesalahan server" });
-  }
-};
-
 export default async function handler(req, res) {
   switch (req.method) {
     case "GET":
       return handleGet(req, res);
     case "POST":
       return handlePost(req, res);
-    case "PUT":
-      return handlePut(req, res);
-    case "DELETE":
-      return handleDelete(req, res);
     default:
       return res.status(405).json({ error: "Method not allowed" });
   }

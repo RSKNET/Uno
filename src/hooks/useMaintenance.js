@@ -8,15 +8,24 @@ const useMaintenance = () => {
 
   const checkMaintenanceStatus = async () => {
     try {
-      const response = await fetch("/api/settings-status");
+      const response = await fetch("/api/player/settings-status");
+
+      if (!response.ok) {
+        setIsLoading(false);
+        return;
+      }
+
       const result = await response.json();
 
-      if (result.success) {
-        const maintenanceStatus = result.data.maintenance;
+      if (result.success && result.data) {
+        const maintenanceStatus = Boolean(result.data.maintenance);
         setIsMaintenance(maintenanceStatus);
         previousMaintenanceRef.current = maintenanceStatus;
+      } else {
+        setIsMaintenance(false);
       }
     } catch (error) {
+      setIsMaintenance(false);
     } finally {
       setIsLoading(false);
     }

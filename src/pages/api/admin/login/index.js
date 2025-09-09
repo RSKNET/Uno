@@ -1,4 +1,4 @@
-import supabase from "../../../utils/supabase";
+import supabase from "../../../../utils/supabase";
 import jwt from "jsonwebtoken";
 
 const validateCredentials = (username, password) => {

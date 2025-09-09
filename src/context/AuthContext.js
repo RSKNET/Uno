@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (authState.token) {
-        await fetch("/api/logout", {
+        await fetch("/api/admin/logout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
