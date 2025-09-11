@@ -14,6 +14,7 @@ CREATE INDEX idx_users_username ON users(username);
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
+    SET search_path = 'public';
     NEW.updated_at = NOW() AT TIME ZONE 'Asia/Jakarta';
     RETURN NEW;
 END;
@@ -29,10 +30,10 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- Membuat policy untuk mengizinkan pengguna mengakses data mereka sendiri
 CREATE POLICY "Users can view own data" ON users
-    FOR SELECT USING (auth.uid()::text = id::text);
+    FOR SELECT USING ((select auth.uid())::text = id::text);
 
 CREATE POLICY "Users can update own data" ON users
-    FOR UPDATE USING (auth.uid()::text = id::text);
+    FOR UPDATE USING ((select auth.uid())::text = id::text);
 
 -- Policy untuk registrasi (insert) - bisa disesuaikan sesuai kebutuhan
 CREATE POLICY "Enable insert for authenticated users" ON users

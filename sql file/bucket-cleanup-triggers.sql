@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION cleanup_history_storage_files()
 RETURNS TRIGGER AS $$
 BEGIN
+    SET search_path = 'public, storage';
     DELETE FROM storage.objects 
     WHERE bucket_id = 'history-pdf' AND name = OLD.pdf_filename;
     
@@ -19,6 +20,7 @@ CREATE OR REPLACE TRIGGER cleanup_history_files_on_delete
 CREATE OR REPLACE FUNCTION cleanup_history_storage_files_on_update()
 RETURNS TRIGGER AS $$
 BEGIN
+    SET search_path = 'public, storage';
     IF OLD.pdf_filename IS DISTINCT FROM NEW.pdf_filename AND OLD.pdf_filename IS NOT NULL THEN
         DELETE FROM storage.objects 
         WHERE bucket_id = 'history-pdf' AND name = OLD.pdf_filename;

@@ -14,6 +14,7 @@ CREATE TABLE history (
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
+    SET search_path = 'public';
     NEW.updated_at = NOW() AT TIME ZONE 'Asia/Jakarta';
     RETURN NEW;
 END;
@@ -32,10 +33,10 @@ CREATE POLICY "Enable read access for all users" ON history
     FOR SELECT USING (true);
 
 CREATE POLICY "Enable insert for authenticated users only" ON history
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    FOR INSERT WITH CHECK ((select auth.role()) = 'authenticated');
 
 CREATE POLICY "Enable update for authenticated users only" ON history
-    FOR UPDATE USING (auth.role() = 'authenticated');
+    FOR UPDATE USING ((select auth.role()) = 'authenticated');
 
 CREATE POLICY "Enable delete for authenticated users only" ON history
-    FOR DELETE USING (auth.role() = 'authenticated');
+    FOR DELETE USING ((select auth.role()) = 'authenticated');

@@ -16,6 +16,7 @@ CREATE INDEX idx_players_total_games ON players(total_games);
 CREATE OR REPLACE FUNCTION update_players_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
+    SET search_path = 'public';
     NEW.updated_at = NOW() AT TIME ZONE 'Asia/Jakarta';
     RETURN NEW;
 END;
