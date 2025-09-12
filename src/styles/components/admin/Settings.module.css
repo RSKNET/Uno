@@ -1,5 +1,5 @@
 .settingsContainer {
-  padding: var(--settings-spacing-xl);
+  padding: 30px;
   max-width: 1400px;
   margin: 0 auto;
   animation: fadeIn 0.6s ease-out;
@@ -29,106 +29,106 @@
 }
 
 .settingsHeader {
-  margin-bottom: var(--settings-spacing-xl);
+  margin-bottom: 30px;
 }
 
 .settingsHeader h1 {
-  color: var(--settings-primary-color);
+  color: #ffffff;
   font-size: 2.5rem;
   font-weight: bold;
-  margin: 0 0 var(--settings-spacing-xs) 0;
-  font-family: var(--settings-font-family);
+  margin: 0 0 8px 0;
+  font-family: "Roboto Condensed", Arial, sans-serif;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .settingsHeader p {
-  color: var(--settings-secondary-color);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1.2rem;
   margin: 0;
-  font-family: var(--settings-font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .settingsContent {
   display: flex;
   flex-direction: column;
-  gap: var(--settings-spacing-xl);
+  gap: 30px;
 }
 
 .settingsSection {
-  background: var(--settings-bg-primary);
+  background: rgba(20, 20, 40, 0.95);
   backdrop-filter: blur(10px);
-  border: 2px solid var(--settings-border-primary);
-  border-radius: var(--settings-border-radius);
-  padding: var(--settings-spacing-xl);
-  box-shadow: var(--settings-shadow-primary);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.4s ease-out;
 }
 
 .settingsSection h2 {
-  color: var(--settings-primary-color);
+  color: #ffffff;
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0 0 24px 0;
-  font-family: var(--settings-font-family);
-  border-bottom: 1px solid var(--settings-border-secondary);
-  padding-bottom: var(--settings-spacing-sm);
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
 }
 
 .settingsGrid {
   display: flex;
   flex-direction: column;
-  gap: var(--settings-spacing-lg);
-  margin-bottom: var(--settings-spacing-xl);
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 .inputRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--settings-spacing-lg);
+  gap: 20px;
 }
 
 .checkboxRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--settings-spacing-lg);
+  gap: 20px;
   align-items: start;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--settings-spacing-xs);
+  gap: 8px;
 }
 
 .formGroup label {
-  color: var(--settings-primary-color);
+  color: #ffffff;
   font-weight: 500;
   font-size: 0.95rem;
   margin: 0;
-  font-family: var(--settings-font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .settingsInput {
-  padding: var(--settings-spacing-sm) 16px;
-  background: var(--settings-bg-secondary);
-  border: 2px solid var(--settings-border-secondary);
-  border-radius: var(--settings-border-radius-small);
-  color: var(--settings-primary-color);
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #ffffff;
   font-size: 1rem;
-  font-family: var(--settings-font-family);
-  transition: var(--settings-transition);
+  font-family: "Roboto Condensed", Arial, sans-serif;
+  transition: all 0.3s ease-in-out;
   box-sizing: border-box;
 }
 
 .settingsInput:focus {
   outline: none;
-  border-color: var(--settings-accent-color);
-  background: var(--settings-bg-tertiary);
-  box-shadow: var(--settings-shadow-tertiary);
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
 }
 
 .settingsInput::placeholder {
-  color: var(--settings-quaternary-color);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .settingsInput[type="number"]::-webkit-outer-spin-button,
@@ -145,11 +145,11 @@
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: var(--settings-spacing-sm);
-  color: var(--settings-primary-color);
+  gap: 12px;
+  color: #ffffff;
   font-weight: 500;
   font-size: 0.95rem;
-  font-family: var(--settings-font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   cursor: pointer;
   margin: 0;
 }
@@ -158,18 +158,18 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  background: var(--settings-border-secondary);
-  border: 2px solid var(--settings-border-tertiary);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   cursor: pointer;
-  transition: var(--settings-transition);
+  transition: all 0.3s ease-in-out;
   position: relative;
   box-sizing: border-box;
 }
 
 .checkbox:checked {
-  background: var(--settings-accent-gradient);
-  border-color: var(--settings-accent-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
 }
 
 .checkbox:checked::before {
@@ -178,58 +178,58 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: var(--settings-primary-color);
+  color: #ffffff;
   font-size: 14px;
   font-weight: bold;
 }
 
 .helpText {
-  color: var(--settings-tertiary-color);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
   margin: 4px 0 0 32px;
-  font-family: var(--settings-font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .settingsActions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--settings-spacing-md);
+  gap: 15px;
   margin-top: 25px;
-  padding-top: var(--settings-spacing-md);
+  padding-top: 12px;
 }
 
 .resetButton,
 .saveButton {
   padding: 14px 28px;
   border: none;
-  border-radius: var(--settings-border-radius-button);
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  font-family: var(--settings-font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   cursor: pointer;
-  transition: var(--settings-transition);
+  transition: all 0.3s ease-in-out;
   display: flex;
   align-items: center;
-  gap: var(--settings-spacing-xs);
+  gap: 8px;
   box-sizing: border-box;
 }
 
 .resetButton {
-  background: var(--settings-danger-bg);
-  color: var(--settings-danger-color);
-  border: 1px solid var(--settings-danger-border);
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .resetButton:hover {
-  background: var(--settings-danger-border);
+  background: rgba(239, 68, 68, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
 }
 
 .saveButton {
-  background: var(--settings-accent-gradient);
-  color: var(--settings-primary-color);
-  box-shadow: var(--settings-shadow-secondary);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .saveButton:hover:not(:disabled) {
@@ -241,13 +241,13 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: var(--settings-shadow-secondary);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
   .settingsContent {
-    gap: var(--settings-spacing-lg);
+    gap: 20px;
   }
   .settingsGrid {
     gap: 16px;
@@ -262,7 +262,7 @@
 
 @media (max-width: 768px) {
   .settingsContainer {
-    padding: var(--settings-spacing-lg);
+    padding: 20px;
   }
   .settingsHeader h1 {
     font-size: 2rem;
@@ -271,7 +271,7 @@
     font-size: 1rem;
   }
   .settingsSection {
-    padding: var(--settings-spacing-lg);
+    padding: 20px;
   }
   .settingsSection h2 {
     font-size: 1.5rem;
@@ -289,7 +289,7 @@
   }
   .settingsActions {
     flex-direction: column;
-    gap: var(--settings-spacing-sm);
+    gap: 12px;
   }
   .resetButton,
   .saveButton {
@@ -301,7 +301,7 @@
 
 @media (max-width: 480px) {
   .settingsContainer {
-    padding: var(--settings-spacing-md);
+    padding: 15px;
   }
   .settingsHeader h1 {
     font-size: 1.8rem;
@@ -312,30 +312,30 @@
     text-align: center;
   }
   .settingsSection {
-    padding: var(--settings-spacing-md);
+    padding: 15px;
     border-radius: 16px;
   }
   .settingsSection h2 {
     font-size: 1.3rem;
-    margin-bottom: var(--settings-spacing-lg);
+    margin-bottom: 20px;
   }
   .settingsGrid {
-    gap: var(--settings-spacing-sm);
-    margin-bottom: var(--settings-spacing-lg);
+    gap: 12px;
+    margin-bottom: 20px;
   }
   .inputRow {
     grid-template-columns: 1fr;
-    gap: var(--settings-spacing-sm);
+    gap: 12px;
   }
   .checkboxRow {
     grid-template-columns: 1fr;
-    gap: var(--settings-spacing-sm);
+    gap: 12px;
   }
   .formGroup label {
     font-size: 0.9rem;
   }
   .settingsInput {
-    padding: 10px var(--settings-spacing-sm);
+    padding: 10px 12px;
     font-size: 0.9rem;
   }
   .checkboxLabel {
@@ -346,13 +346,13 @@
     margin-left: 28px;
   }
   .settingsActions {
-    margin-top: var(--settings-spacing-lg);
+    margin-top: 20px;
     padding-top: 10px;
     gap: 10px;
   }
   .resetButton,
   .saveButton {
-    padding: 14px var(--settings-spacing-lg);
+    padding: 14px 20px;
     font-size: 0.95rem;
   }
 }

@@ -1,5 +1,5 @@
 .dashboardContainer {
-  padding: var(--gap-large);
+  padding: 30px;
   max-width: 1400px;
   margin: 0 auto;
   animation: fadeIn 0.6s ease-out;
@@ -17,45 +17,45 @@
 }
 
 .dashboardHeader {
-  margin-bottom: var(--gap-large);
+  margin-bottom: 30px;
 }
 
 .dashboardHeader h1 {
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 8px;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .dashboardHeader p {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1.2rem;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
 }
 
 .dashboardContent {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--gap-large);
+  gap: 30px;
 }
 
 .contentCard {
-  background: var(--primary-bg);
+  background: rgba(20, 20, 40, 0.95);
   backdrop-filter: blur(10px);
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-light);
+  border: 2px solid #0f3460;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   transition: all 0.3s ease-in-out;
 }
 
 .contentCard:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--border-hover);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  border-color: #1a5490;
 }
 
 .cardHeader {
@@ -63,31 +63,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--gap-medium);
+  margin-bottom: 20px;
 }
 
 .cardTitle {
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 1.3rem;
   font-weight: bold;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
 }
 
 .viewAllBtn {
-  background: var(--overlay-medium);
-  border: 1px solid var(--overlay-dark);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .viewAllBtn:hover {
-  background: var(--overlay-dark);
+  background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
 }
 
@@ -99,21 +99,21 @@
 .actionsList {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-small);
+  gap: 12px;
 }
 
 .playerItem {
   display: flex;
   align-items: center;
-  gap: var(--gap-small);
-  padding: var(--gap-small);
-  background: var(--overlay-light);
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   transition: all 0.3s ease-in-out;
 }
 
 .playerItem:hover {
-  background: var(--overlay-medium);
+  background: rgba(255, 255, 255, 0.1);
   transform: translateX(4px);
 }
 
@@ -125,17 +125,17 @@
 }
 
 .playerName {
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 500;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
   font-size: 1rem;
 }
 
 .playerDate {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
 }
 
@@ -144,9 +144,9 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: var(--overlay-light);
-  border: 1px solid var(--overlay-medium);
-  border-radius: var(--border-radius-small);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
   text-align: left;
@@ -155,8 +155,8 @@
 }
 
 .actionBtn:hover {
-  background: var(--overlay-medium);
-  border-color: var(--overlay-dark);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
 
@@ -176,17 +176,17 @@
 }
 
 .actionTitle {
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 500;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
   font-size: 1rem;
 }
 
 .actionDesc {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
 }
 
@@ -200,8 +200,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--gap-small) 0;
-  border-bottom: 1px solid var(--overlay-medium);
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .infoItem:last-child {
@@ -209,27 +209,27 @@
 }
 
 .infoLabel {
-  color: var(--text-secondary);
-  font-family: var(--font-family);
+  color: rgba(255, 255, 255, 0.8);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   font-size: 0.9rem;
 }
 
 .infoValue {
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 500;
-  font-family: var(--font-family);
+  font-family: "Roboto Condensed", Arial, sans-serif;
   font-size: 0.9rem;
 }
 
 .statusOnline {
-  color: var(--status-online) !important;
+  color: #4ade80 !important;
 }
 
 .emptyState {
   text-align: center;
   padding: 40px 20px;
-  color: var(--text-muted);
-  font-family: var(--font-family);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .emptyState p {
@@ -245,7 +245,7 @@
 
 @media (max-width: 768px) {
   .dashboardContainer {
-    padding: var(--gap-medium);
+    padding: 20px;
   }
 
   .dashboardHeader h1 {
@@ -258,22 +258,22 @@
 
   .dashboardContent {
     grid-template-columns: 1fr;
-    gap: var(--gap-medium);
+    gap: 20px;
   }
 
   .cardHeader {
-    padding: var(--gap-medium) var(--gap-medium) 0;
+    padding: 20px 20px 0;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
   .cardContent {
-    padding: 0 var(--gap-medium) var(--gap-medium);
+    padding: 0 20px 20px;
   }
 
   .actionBtn {
-    padding: var(--gap-small);
+    padding: 12px;
   }
 }
 
@@ -295,7 +295,7 @@
   }
 
   .actionBtn {
-    gap: var(--gap-small);
+    gap: 12px;
     padding: 10px;
   }
 
