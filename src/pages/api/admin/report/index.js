@@ -22,9 +22,34 @@ async function handler(req, res) {
       });
     }
 
+    const enrichedData = await Promise.all(
+      data.map(async (record) => {
+        try {
+          const [pdfUrl, jsonUrl] = await Promise.all([
+            supabase.storage
+              .from("history-pdf")
+              .createSignedUrl(record.pdf_filename, 60 * 60 * 24 * 365)
+              .then((res) => res.data?.signedUrl || record.pdf),
+            supabase.storage
+              .from("history-json")
+              .createSignedUrl(record.json_filename, 60 * 60 * 24 * 365)
+              .then((res) => res.data?.signedUrl || record.json),
+          ]);
+
+          return {
+            ...record,
+            pdf: pdfUrl,
+            json: jsonUrl,
+          };
+        } catch (err) {
+          return record;
+        }
+      }),
+    );
+
     return res.status(200).json({
       success: true,
-      data: data,
+      data: enrichedData,
     });
   } catch (error) {
     return res.status(500).json({
