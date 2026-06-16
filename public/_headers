@@ -2,3 +2,10 @@
 # https://opennext.js.org/cloudflare/caching#static-assets-caching
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
+
+/manifest.json
+  Content-Type: application/manifest+json
+  Cache-Control: public,max-age=3600
+
+/favicon.ico
+  Cache-Control: public,max-age=31536000,immutable
