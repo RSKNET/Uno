@@ -25,3 +25,5 @@ export default withPWA({
   buildExcludes: [/middleware-manifest\.json$/],
   publicExcludes: ["!icon-*.png", "!manifest.json"],
 })(nextConfig);
+
+import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());
