@@ -285,34 +285,14 @@ export const TournamentProvider = ({ children }) => {
     return INITIAL_TOURNAMENT_STATE;
   }, []);
 
-  const getTournamentSummary = useCallback(async () => {
-    let players = tournamentData.playerNames;
-
-    if (tournamentData.playerIds?.length > 0) {
-      const fetchedPlayers = await Promise.all(
-        tournamentData.playerIds.map(async (playerId, index) => {
-          try {
-            const response = await fetch(`/api/player/players?id=${playerId}`);
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success && result.data?.length > 0) {
-                return result.data[0].name;
-              }
-            }
-          } catch {}
-          return tournamentData.playerNames[index] || `Player ${index + 1}`;
-        })
-      );
-      players = fetchedPlayers;
-    }
-
+  const getTournamentSummary = useCallback(() => {
     return {
       id: tournamentData.id,
       totalPlayers: tournamentData.playerCount,
       roundsType: tournamentData.rounds
         ? `${tournamentData.rounds} babak`
         : "Unlimited",
-      players,
+      players: tournamentData.playerNames,
       isValid:
         tournamentData.isSetup && tournamentData.playerCount >= MIN_PLAYERS,
       createdDate: tournamentData.createdAt

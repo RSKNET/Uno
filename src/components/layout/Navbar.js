@@ -5,10 +5,7 @@ const Navbar = () => {
   return (
     <nav className={styles.navigation}>
       <div className={styles.logo}>
-        <h1>
-          <span>🎮</span>
-          <span>UNO Tournament</span>
-        </h1>
+        <h1>UNO Tournament</h1>
       </div>
     </nav>
   );

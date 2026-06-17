@@ -1,27 +1,24 @@
 .adminLayout {
   display: flex;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
-  box-sizing: border-box;
+  min-height: 100dvh;
+  background: var(--bg-primary);
 }
 
 .mainContent {
   flex: 1;
   margin-left: 280px;
-  transition: margin-left 0.3s ease-in-out;
-  min-height: 100vh;
-  padding: 20px;
+  transition: margin-left var(--duration-slow) var(--ease-out);
+  min-height: 100dvh;
+  padding: 0 20px 20px;
   overflow-x: hidden;
   position: relative;
-  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .mainContent {
     margin-left: 0;
     margin-right: 60px;
-    padding: 15px;
-    box-sizing: border-box;
+    padding: 0 15px 15px;
   }
 }
 
@@ -29,7 +26,6 @@
   .mainContent {
     margin-left: 0;
     margin-right: 50px;
-    padding: 10px;
-    box-sizing: border-box;
+    padding: 0 10px 10px;
   }
 }

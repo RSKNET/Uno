@@ -16,50 +16,82 @@ const createLeaderboardData = (playerScores, players) => {
   ]);
 };
 
-const addTournamentHeader = (doc) => {
-  doc.setFont("times", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(0, 0, 0);
-  doc.text("TURNAMEN UNO", 105, 20, { align: "center" });
-};
+const addTournamentHeaderAndInfo = (doc, tournamentSummary, completedRounds) => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  
+  // Header Background
+  doc.setFillColor(248, 250, 252);
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  // Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(15, 23, 42); // Slate 900
+  doc.text("LAPORAN TURNAMEN UNO", 14, 22);
+  
+  // Subtitle
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139); // Slate 500
+  doc.text("Dihasilkan secara otomatis oleh sistem", 14, 28);
+  
+  // Info Cards on Right
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+  
+  // Align right values
+  const rightAlign = pageWidth - 14;
+  
+  doc.text(`Pemain:`, rightAlign - 30, 18);
+  doc.text(`Babak:`, rightAlign - 30, 24);
+  doc.text(`Selesai:`, rightAlign - 30, 30);
+  
+  doc.setFont("helvetica", "normal");
+  doc.text(`${tournamentSummary.totalPlayers}`, rightAlign, 18, { align: "right" });
+  doc.text(`${tournamentSummary.roundsType}`, rightAlign, 24, { align: "right" });
+  doc.text(`${completedRounds}`, rightAlign, 30, { align: "right" });
 
-const addTournamentInfo = (doc, tournamentSummary, completedRounds) => {
-  doc.setFont("times", "bold");
-  doc.setFontSize(12);
-  doc.text("Informasi Turnamen", 105, 35, { align: "center" });
-  doc.setFont("times", "normal");
-
-  doc.text(`Jumlah Pemain       : ${tournamentSummary.totalPlayers}`, 14, 45);
-  doc.text(`Jumlah Babak         : ${tournamentSummary.roundsType}`, 14, 55);
-  doc.text(`Babak Selesai         : ${completedRounds}`, 14, 65);
+  // Subtle divider
+  doc.setDrawColor(226, 232, 240); // Slate 200
+  doc.setLineWidth(0.5);
+  doc.line(14, 40, pageWidth - 14, 40);
 };
 
 const addLeaderboard = (doc, leaderboardData) => {
-  doc.setFont("times", "bold");
-  doc.text("Papan Skor", 105, 85, { align: "center" });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(15, 23, 42);
+  doc.text("Papan Skor Akhir", 14, 55);
 
   autoTable(doc, {
-    startY: 90,
+    startY: 60,
     head: [["Nama Pemain", "Total Skor"]],
     body: leaderboardData,
+    theme: 'grid',
     headStyles: {
-      fillColor: [41, 128, 185],
+      fillColor: [30, 41, 59], // Slate 800
       textColor: 255,
       fontStyle: "bold",
-      halign: "center",
-      font: "times",
+      halign: "left",
+      font: "helvetica",
     },
     columnStyles: {
-      0: { cellWidth: "auto", halign: "center", font: "times" },
-      1: { cellWidth: "auto", halign: "center", font: "times" },
+      0: { cellWidth: "auto", halign: "left", font: "helvetica" },
+      1: { cellWidth: 50, halign: "center", font: "helvetica", fontStyle: "bold" },
     },
     styles: {
-      cellPadding: 5,
-      fontSize: 11,
-      halign: "center",
-      font: "times",
+      cellPadding: 6,
+      fontSize: 10,
+      font: "helvetica",
+      lineColor: [226, 232, 240], // Slate 200
+      lineWidth: 0.1,
+      textColor: [51, 65, 85], // Slate 700
     },
-    margin: { left: 14 },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252], // Slate 50
+    },
+    margin: { left: 14, right: 14 },
   });
 };
 
@@ -82,29 +114,34 @@ const createPlayerStatsData = (player, totalPlayers) => {
   return statsData;
 };
 
-const addPlayerStatisticsSection = (doc, currentY) => {
-  const sectionTitle = "Statistik Juara Setiap Pemain";
+const addPlayerStatisticsSectionTitle = (doc, currentY) => {
+  const sectionTitle = "Statistik Juara Detail";
   const pageHeight = doc.internal.pageSize.getHeight();
 
   if (currentY + 50 > pageHeight - 20) {
     doc.addPage();
-    doc.setFont("times", "bold");
-    doc.text(sectionTitle, 105, 20, { align: "center" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text(sectionTitle, 14, 20);
     return 30;
   }
 
-  doc.setFont("times", "bold");
-  doc.text(sectionTitle, 105, currentY + 20, { align: "center" });
-  return currentY + 30;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(15, 23, 42);
+  doc.text(sectionTitle, 14, currentY + 15);
+  return currentY + 25;
 };
 
 const addPlayerStatistics = (doc, playerStats, totalPlayers) => {
   const currentY = doc.lastAutoTable?.finalY || 90;
-  const statsYStart = addPlayerStatisticsSection(doc, currentY);
+  const statsYStart = addPlayerStatisticsSectionTitle(doc, currentY);
 
-  const columnWidth = 60;
   const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = (pageWidth - (columnWidth * 2 + 10)) / 2;
+  const margin = 14;
+  const gap = 10;
+  const columnWidth = (pageWidth - (margin * 2) - gap) / 2;
   const rowHeight = 50;
   const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -114,12 +151,10 @@ const addPlayerStatistics = (doc, playerStats, totalPlayers) => {
     if (yPos + rowHeight > pageHeight - 20) {
       doc.addPage();
       yPos = 20;
-      doc.setFont("times", "bold");
-      doc.text("Statistik Juara Setiap Pemain (lanjutan)", 105, yPos, {
-        align: "center",
-      });
-      doc.setFont("times", "normal");
-      yPos += 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("Statistik Juara Detail (lanjutan)", 14, yPos);
+      yPos += 15;
     }
 
     for (let j = 0; j < 2; j++) {
@@ -127,42 +162,40 @@ const addPlayerStatistics = (doc, playerStats, totalPlayers) => {
       if (playerIndex >= playerStats.length) break;
 
       const player = playerStats[playerIndex];
-      const xPos = margin + j * (columnWidth + 10);
+      const xPos = margin + j * (columnWidth + gap);
 
-      doc.setFontSize(12);
-      doc.setFont("times", "bold");
-      doc.text(player.name, xPos + columnWidth / 2, yPos, { align: "center" });
-      doc.setFont("times", "normal");
+      // Player Name Header for Mini Table
+      doc.setFillColor(241, 245, 249); // Slate 100
+      doc.rect(xPos, yPos, columnWidth, 8, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text(player.name, xPos + 4, yPos + 5.5);
 
       const statsData = createPlayerStatsData(player, totalPlayers);
 
       autoTable(doc, {
-        startY: yPos + 5,
+        startY: yPos + 8,
         margin: { left: xPos },
-        head: [["Posisi", "Jumlah"]],
+        head: [], // No standard header row, we drew a custom block above
         body: statsData,
         tableWidth: columnWidth,
-        headStyles: {
-          fillColor: [52, 152, 219],
-          textColor: 255,
-          fontStyle: "bold",
-          halign: "center",
-          font: "times",
-        },
+        theme: 'plain',
         columnStyles: {
-          0: { halign: "center", font: "times" },
-          1: { halign: "center", font: "times" },
+          0: { halign: "left", font: "helvetica", textColor: [100, 116, 139] }, // Slate 500
+          1: { halign: "right", font: "helvetica", fontStyle: "bold", textColor: [15, 23, 42] },
         },
         styles: {
           cellPadding: 3,
-          fontSize: 10,
-          halign: "center",
-          font: "times",
+          fontSize: 9,
+          lineColor: [241, 245, 249],
+          lineWidth: { bottom: 0.1 }, // Only bottom borders
         },
       });
     }
 
-    yPos = (doc.lastAutoTable?.finalY || yPos) + 10;
+    yPos = (doc.lastAutoTable?.finalY || yPos) + 15;
   }
 };
 
@@ -192,11 +225,10 @@ export const generateTournamentPdf = (tournamentData, tournamentSummary) => {
     tournamentSummary.players
   );
 
-  doc.setFont("times", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
 
-  addTournamentHeader(doc);
-  addTournamentInfo(doc, tournamentSummary, completedRounds);
+  addTournamentHeaderAndInfo(doc, tournamentSummary, completedRounds);
   addLeaderboard(doc, leaderboardData);
   addPlayerStatistics(doc, playerStats, tournamentSummary.totalPlayers);
 

@@ -1,27 +1,19 @@
-@font-face {
-  font-family: "PirataOne";
-  src: url("/fonts/PirataOne-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 
 .promptContainer {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid #0f3460;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  padding: 25px;
-  max-width: 400px;
+  background: var(--bg-elevated);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 22px;
+  max-width: 380px;
   width: 90%;
-  z-index: 1000;
-  animation: slideUp 0.6s ease-out;
-  font-family: "Roboto Condensed", "Arial", sans-serif;
+  z-index: var(--z-notification);
+  animation: slideUp 0.5s var(--ease-spring);
 }
 
 @keyframes slideUp {
@@ -38,7 +30,7 @@
 .promptContent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
   text-align: center;
 }
@@ -47,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .logoImage {
@@ -55,76 +47,68 @@
 }
 
 .iconText {
-  color: white;
-  font-size: 20px;
+  color: var(--text-primary);
+  font-size: 18px;
   font-weight: bold;
-  font-family: "PirataOne", cursive;
-  text-shadow: 0 2px 10px rgba(26, 26, 46, 0.5);
 }
 
 .promptText h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #ffffff;
-  font-family: "PirataOne", cursive;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .promptText p {
   margin: 0;
-  font-size: 1rem;
-  color: #e1e8ed;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
   line-height: 1.4;
   font-weight: 400;
 }
 
 .promptActions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   width: 100%;
 }
 
 .installButton,
 .dismissButton {
-  padding: 12px 24px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 100px;
-  font-family: "Roboto Condensed", "Arial", sans-serif;
+  transition: all var(--duration-normal) var(--ease-out);
+  min-width: 90px;
 }
 
 .installButton {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 50%, #3d8b40 100%);
+  background: var(--accent);
   color: white;
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-  border: 2px solid rgba(76, 175, 80, 0.2);
-  font-weight: 700;
 }
 
 .installButton:hover {
-  background: linear-gradient(135deg, #45a049 0%, #3d8b40 50%, #2e7d32 100%);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-  transform: translateY(-2px);
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.installButton:active {
+  transform: scale(0.97) translateY(1px);
 }
 
 .dismissButton {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
 }
 
 .dismissButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
 }
 
 @media (max-width: 480px) {
@@ -135,7 +119,7 @@
     transform: none;
     width: auto;
     max-width: none;
-    padding: 20px;
+    padding: 18px;
   }
 
   .promptActions {
@@ -148,19 +132,19 @@
   }
 
   .promptIcon {
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
   }
 
   .iconText {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .promptText h3 {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .promptText p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 }

@@ -11,6 +11,7 @@ const Report = ({ showNotification }) => {
   const [previewData, setPreviewData] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [detailData, setDetailData] = useState(null);
+  const [loadingAction, setLoadingAction] = useState({ type: null, id: null });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [reportsPerPage] = useState(5);
@@ -34,7 +35,11 @@ const Report = ({ showNotification }) => {
   }, []);
 
   const fetchReportData = async () => {
-    setIsLoadingData(true);
+    let isShowingLoader = false;
+    const timer = setTimeout(() => {
+      isShowingLoader = true;
+      setIsLoadingData(true);
+    }, 100); // 100ms delay to prevent flash if cached
 
     try {
       const result = await fetchReports();
@@ -49,7 +54,8 @@ const Report = ({ showNotification }) => {
         showNotification("Terjadi kesalahan saat memuat data", "error");
       }
     } finally {
-      setIsLoadingData(false);
+      clearTimeout(timer);
+      if (isShowingLoader) setIsLoadingData(false);
     }
   };
 
@@ -64,6 +70,7 @@ const Report = ({ showNotification }) => {
   };
 
   const handlePreview = async (report) => {
+    setLoadingAction({ type: "preview", id: report.id });
     try {
       console.log("Report data:", report);
       console.log("Report pdf field:", report.pdf);
@@ -87,10 +94,13 @@ const Report = ({ showNotification }) => {
     } catch (error) {
       console.error("Preview error:", error);
       showNotification("Gagal memuat preview PDF: " + error.message, "error");
+    } finally {
+      setLoadingAction({ type: null, id: null });
     }
   };
 
   const handleDetail = async (report) => {
+    setLoadingAction({ type: "detail", id: report.id });
     try {
       console.log("Detail Report data:", report);
       console.log("Detail json field type:", typeof report.json);
@@ -142,10 +152,13 @@ const Report = ({ showNotification }) => {
     } catch (error) {
       console.error("Detail error:", error);
       showNotification("Gagal memuat detail data: " + error.message, "error");
+    } finally {
+      setLoadingAction({ type: null, id: null });
     }
   };
 
   const handleDownloadPdf = async (report) => {
+    setLoadingAction({ type: "download", id: report.id });
     try {
       if (!report.pdf) {
         showNotification("URL PDF tidak tersedia", "error");
@@ -202,6 +215,8 @@ const Report = ({ showNotification }) => {
         "Terjadi kesalahan saat mengunduh: " + error.message,
         "error"
       );
+    } finally {
+      setLoadingAction({ type: null, id: null });
     }
   };
 
@@ -247,20 +262,23 @@ const Report = ({ showNotification }) => {
                       <button
                         onClick={() => handlePreview(report)}
                         className={styles.previewBtn}
+                        disabled={loadingAction.id === report.id}
                       >
-                        👁️ Preview
+                        {loadingAction.id === report.id && loadingAction.type === "preview" ? "⏳ Memuat..." : "👁️ Preview"}
                       </button>
                       <button
                         onClick={() => handleDetail(report)}
                         className={styles.detailBtn}
+                        disabled={loadingAction.id === report.id}
                       >
-                        📊 Detail
+                        {loadingAction.id === report.id && loadingAction.type === "detail" ? "⏳ Memuat..." : "📊 Detail"}
                       </button>
                       <button
                         onClick={() => handleDownloadPdf(report)}
                         className={styles.downloadBtn}
+                        disabled={loadingAction.id === report.id}
                       >
-                        📄 Download PDF
+                        {loadingAction.id === report.id && loadingAction.type === "download" ? "⏳ Mengunduh..." : "📄 Download PDF"}
                       </button>
                     </div>
                   </div>

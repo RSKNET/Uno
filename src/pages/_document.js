@@ -12,9 +12,10 @@ export default function Document() {
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/icons/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#1a1a2e" />
+        <meta name="msapplication-TileColor" content="#0c0c0f" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#1a1a2e" />
+        <meta name="theme-color" content="#0c0c0f" />
+
 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link

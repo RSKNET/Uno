@@ -1,15 +1,14 @@
 .reportContainer {
-  padding: 30px;
+  padding: 28px;
   max-width: 1400px;
   margin: 0 auto;
-  animation: fadeIn 0.6s ease-out;
-  box-sizing: border-box;
+  animation: fadeIn 0.5s var(--ease-out);
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -18,24 +17,21 @@
 }
 
 .reportHeader {
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .reportHeader h1 {
-  color: #ffffff;
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-  margin: 0 0 8px 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
 }
 
 .reportHeader p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.2rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
   margin: 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
 }
 
 .reportContent {
@@ -45,46 +41,41 @@
 .loadingState,
 .emptyState {
   text-align: center;
-  padding: 60px 20px;
-  color: rgba(255, 255, 255, 0.6);
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid #0f3460;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 48px 20px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md), var(--shadow-inner);
 }
 
 .loadingState p,
 .emptyState p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .reportList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .reportCard {
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid #0f3460;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-md), var(--shadow-inner);
+  transition: all var(--duration-normal) var(--ease-out);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
 }
 
 .reportCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-  border-color: #1a5490;
+  border-color: var(--border-active);
 }
 
 .reportInfo {
@@ -92,29 +83,26 @@
 }
 
 .reportTitle {
-  color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-  margin: 0 0 8px 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
 }
 
 .reportMeta {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
 }
 
 .reportDate {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
 .reportActions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -122,107 +110,98 @@
 .previewBtn,
 .detailBtn,
 .downloadBtn {
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
   font-weight: 600;
-  font-family: "Roboto Condensed", Arial, sans-serif;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--duration-normal) var(--ease-out);
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-sizing: border-box;
+  gap: 5px;
 }
 
 .previewBtn {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--info-muted);
+  color: var(--info);
+  border: 1px solid rgba(58, 122, 140, 0.2);
 }
 
 .previewBtn:hover {
-  background: rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  background: rgba(58, 122, 140, 0.2);
 }
 
 .detailBtn {
-  background: rgba(255, 193, 7, 0.2);
-  color: #fbbf24;
-  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: var(--warning-muted);
+  color: var(--warning);
+  border: 1px solid rgba(196, 154, 60, 0.2);
 }
 
 .detailBtn:hover {
-  background: rgba(255, 193, 7, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+  background: rgba(196, 154, 60, 0.2);
 }
 
 .downloadBtn {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: var(--success-muted);
+  color: var(--success);
+  border: 1px solid rgba(74, 140, 94, 0.2);
   display: none;
 }
 
 .downloadBtn:hover {
-  background: rgba(34, 197, 94, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+  background: rgba(74, 140, 94, 0.2);
 }
+
+/* ── Pagination ── */
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-top: 30px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  gap: 6px;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
 .pageButton {
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.9rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  transition: all 0.3s ease;
-  min-width: 40px;
-  box-sizing: border-box;
+  font-size: 0.85rem;
+  transition: all var(--duration-normal) var(--ease-out);
+  min-width: 36px;
 }
 
 .pageButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
 }
 
 .pageButton:disabled {
-  opacity: 0.5;
+  opacity: 0.35;
   cursor: not-allowed;
-  transform: none;
 }
 
 .activePage {
-  background: #667eea !important;
-  border-color: #667eea !important;
-  color: #ffffff !important;
-  font-weight: bold;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: white !important;
+  font-weight: 700;
 }
 
 .activePage:hover {
-  background: #5a6fd8 !important;
-  border-color: #5a6fd8 !important;
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
 }
+
+/* ── Modal ── */
 
 .modal {
   position: fixed;
@@ -230,24 +209,24 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(12, 12, 15, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
+  z-index: var(--z-modal);
+  backdrop-filter: blur(8px);
 }
 
 .modalContent {
-  background: rgba(20, 20, 40, 0.98);
-  border: 2px solid #0f3460;
-  border-radius: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-  animation: modalSlideIn 0.3s ease-out;
+  box-shadow: var(--shadow-lg);
+  animation: modalSlideIn 0.25s var(--ease-spring);
 }
 
 .largeModal {
@@ -269,7 +248,7 @@
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(12px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -281,13 +260,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 22px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .pdfPreviewModal .modalHeader {
   flex-shrink: 0;
-  padding: 16px 24px;
+  padding: 16px 22px;
 }
 
 .pdfPreviewModal .modalBody {
@@ -308,97 +287,98 @@
 
 .pdfIframe {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .modalHeader h2 {
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: bold;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
   margin: 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .closeButton {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.5rem;
+  color: var(--text-muted);
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
 .closeButton:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .modalBody {
-  padding: 24px;
+  padding: 22px;
 }
+
+/* ── Preview cards ── */
 
 .previewGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 20px;
 }
 
 .previewCard {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
 }
 
 .previewCard h3 {
-  color: #ffffff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 16px;
-  margin: 0 0 16px 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
 }
 
 .previewCard p {
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 8px;
-  margin: 0 0 8px 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
 }
 
 .winnerItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
 }
 
 .rank {
-  color: #fbbf24;
-  font-weight: bold;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--warning);
+  font-weight: 700;
+  font-size: 0.85rem;
 }
 
 .playerName {
-  color: #ffffff;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-primary);
   flex: 1;
-  margin-left: 12px;
+  margin-left: 10px;
+  font-size: 0.85rem;
 }
 
 .score {
-  color: #4ade80;
-  font-weight: bold;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
+
+/* ── Detail tabs ── */
 
 .detailTabs {
   width: 100%;
@@ -409,175 +389,174 @@
 }
 
 .tabContent h3 {
-  color: #ffffff;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 16px;
-  margin: 0 0 16px 0;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
 }
 
 .tournamentInfoCard {
-  background: rgba(15, 52, 96, 0.3);
-  border: 1px solid #0f3460;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 30px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 24px;
 }
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
 }
 
 .infoItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
 }
 
 .infoLabel {
-  color: rgba(255, 255, 255, 0.7);
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-muted);
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .infoValue {
-  color: #ffffff;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
+
+/* ── Leaderboard table ── */
 
 .leaderboardTable {
   overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid #0f3460;
-  margin-bottom: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 24px;
 }
 
 .leaderboardTable table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(15, 52, 96, 0.3);
+  background: var(--bg-tertiary);
 }
 
 .leaderboardTable th {
-  background: rgba(15, 52, 96, 0.8);
-  color: #ffffff;
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  padding: 10px 12px;
   text-align: center;
-  font-family: "Roboto Condensed", Arial, sans-serif;
   font-weight: 600;
-  border-bottom: 2px solid #0f3460;
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .leaderboardTable td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(15, 52, 96, 0.5);
-  color: rgba(255, 255, 255, 0.9);
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   text-align: center;
+  font-size: 0.85rem;
 }
+
+/* ── Stats grid ── */
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
 }
 
 .playerStatCard {
-  background: rgba(15, 52, 96, 0.3);
-  border: 1px solid rgba(15, 52, 96, 0.5);
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
 }
 
 .playerStatCard h4 {
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: bold;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  margin-bottom: 12px;
-  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
 }
 
 .positionStats {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .statRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
 }
 
 .statRow span:first-child {
-  color: rgba(255, 255, 255, 0.8);
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
 }
 
 .statRow span:last-child {
-  color: #ffffff;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  font-weight: bold;
-  background: rgba(26, 84, 144, 0.6);
+  color: var(--text-primary);
+  font-weight: 700;
+  background: var(--accent-muted);
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Responsive Design */
+/* ── Responsive ── */
+
 @media (max-width: 768px) {
   .reportContainer {
     padding: 20px;
-    box-sizing: border-box;
   }
 
   .reportHeader h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 
   .reportHeader p {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .reportCard {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
-    padding: 20px;
+    gap: 14px;
+    padding: 18px;
   }
 
   .reportActions {
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .previewBtn,
   .detailBtn,
   .downloadBtn {
     flex: 1;
-    min-width: 120px;
-    padding: 12px 16px;
-    font-size: 0.85rem;
+    min-width: 110px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
 
   .previewBtn {
@@ -590,7 +569,7 @@
 
   .previewGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .modal .modalContent {
@@ -601,11 +580,11 @@
 
   .modalHeader,
   .modalBody {
-    padding: 20px;
+    padding: 18px;
   }
 
   .modalHeader h2 {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
 
   .statsGrid {
@@ -614,58 +593,57 @@
 
   .infoGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .infoItem {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
-    padding: 12px;
+    gap: 3px;
+    padding: 10px;
   }
 
   .pagination {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
-    padding: 15px;
+    gap: 4px;
+    padding: 12px;
   }
 
   .pageButton {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    min-width: 35px;
+    padding: 5px 9px;
+    font-size: 0.75rem;
+    min-width: 32px;
   }
 }
 
 @media (max-width: 480px) {
   .reportContainer {
     padding: 15px;
-    box-sizing: border-box;
   }
 
   .reportHeader h1 {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     text-align: center;
   }
 
   .reportHeader p {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     text-align: center;
   }
 
   .reportCard {
-    padding: 16px;
-    border-radius: 16px;
+    padding: 14px;
+    border-radius: var(--radius-md);
   }
 
   .reportTitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .reportActions {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .previewBtn,
@@ -673,8 +651,8 @@
   .downloadBtn {
     width: 100%;
     justify-content: center;
-    padding: 12px;
-    font-size: 0.9rem;
+    padding: 10px;
+    font-size: 0.85rem;
   }
 
   .previewBtn {
@@ -692,55 +670,55 @@
   }
 
   .modalHeader {
-    padding: 16px;
+    padding: 14px;
   }
 
   .modalBody {
-    padding: 16px;
+    padding: 14px;
   }
 
   .modalHeader h2 {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .closeButton {
-    font-size: 1.3rem;
-    padding: 6px;
+    font-size: 1.1rem;
+    padding: 4px;
   }
 
   .previewCard {
-    padding: 16px;
+    padding: 14px;
   }
 
   .leaderboardTable table {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .playerStatCard {
-    padding: 16px;
+    padding: 14px;
   }
 
   .tournamentInfoCard {
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 14px;
+    margin-bottom: 18px;
   }
 
   .infoItem {
-    padding: 10px;
+    padding: 8px;
   }
 
   .infoLabel,
   .infoValue {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .pagination {
-    padding: 12px;
+    padding: 10px;
   }
 
   .pageButton {
-    padding: 6px 8px;
-    font-size: 0.75rem;
-    min-width: 32px;
+    padding: 5px 7px;
+    font-size: 0.7rem;
+    min-width: 30px;
   }
 }

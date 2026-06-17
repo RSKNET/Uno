@@ -120,6 +120,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      // Clear admin data caches
+      localStorage.removeItem("admin_cache_players");
+      localStorage.removeItem("admin_cache_settings");
+      localStorage.removeItem("admin_cache_reports");
       clearAuthState();
       router.push("/auth/login");
     }

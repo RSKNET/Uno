@@ -28,13 +28,15 @@ const Index = () => {
     activeSuggestionIndex: -1,
     showSuggestions: {},
   });
-  const [formErrors, setFormErrors] = useState({ playerCount: "", rounds: "" });
+  const [formErrors, setFormErrors] = useState({ playerCount: "", rounds: "", playerNames: "" });
   const [isFormValid, setIsFormValid] = useState(false);
 
   const { playerCount, rounds, playerNames } = formData;
   const { isLoading, message: loadingMessage } = loadingState;
   const { playerSuggestions, activeSuggestionIndex, showSuggestions } =
     suggestionState;
+
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     fetchPlayerSuggestions();
@@ -94,14 +96,14 @@ const Index = () => {
     if (playerCount >= 2) {
       const emptyNames = playerNames.filter((name) => !name.trim());
       if (emptyNames.length > 0) {
-        errors.playerCount = "Mohon isi semua nama pemain!";
+        errors.playerNames = "Mohon isi semua nama pemain!";
       } else {
         const filledNames = playerNames
           .map((name) => name.trim().toLowerCase())
           .filter((name) => name);
         const uniqueNames = [...new Set(filledNames)];
         if (filledNames.length !== uniqueNames.length) {
-          errors.playerCount =
+          errors.playerNames =
             "Nama pemain tidak boleh sama! Mohon gunakan nama yang berbeda.";
         }
       }
@@ -114,37 +116,37 @@ const Index = () => {
   }, [playerCount, rounds, playerNames, settings]);
 
   const findOrCreatePlayers = async (names) => {
-    const playersData = [];
-    for (const name of names) {
-      const trimmedName = name.trim();
-      if (!trimmedName) continue;
+    const playersData = await Promise.all(
+      names.map(async (name) => {
+        const trimmedName = name.trim();
+        if (!trimmedName) return null;
 
-      try {
-        const searchResponse = await fetch(
-          `/api/player/players?search=${encodeURIComponent(trimmedName)}`
-        );
-        if (!searchResponse.ok) throw new Error("Search failed");
-        const searchResult = await searchResponse.json();
-
-        if (searchResult.success && searchResult.data?.length > 0) {
-          const exactMatch = searchResult.data.find(
-            (player) => player.name.toLowerCase() === trimmedName.toLowerCase()
+        try {
+          const searchResponse = await fetch(
+            `/api/player/players?search=${encodeURIComponent(trimmedName)}`
           );
-          const selectedPlayer = exactMatch || searchResult.data[0];
-          playersData.push({
-            id: selectedPlayer.id,
-            name: selectedPlayer.name,
-          });
-        } else {
-          const createResult = await createPlayer(trimmedName);
-          if (createResult) playersData.push(createResult);
+          if (!searchResponse.ok) throw new Error("Search failed");
+          const searchResult = await searchResponse.json();
+
+          if (searchResult.success && searchResult.data?.length > 0) {
+            const exactMatch = searchResult.data.find(
+              (player) => player.name.toLowerCase() === trimmedName.toLowerCase()
+            );
+            const selectedPlayer = exactMatch || searchResult.data[0];
+            return {
+              id: selectedPlayer.id,
+              name: selectedPlayer.name,
+            };
+          } else {
+            return await createPlayer(trimmedName);
+          }
+        } catch {
+          return await createPlayer(trimmedName);
         }
-      } catch {
-        const createResult = await createPlayer(trimmedName);
-        if (createResult) playersData.push(createResult);
-      }
-    }
-    return playersData;
+      })
+    );
+    
+    return playersData.filter(Boolean);
   };
 
   const createPlayer = async (name) => {
@@ -291,6 +293,7 @@ const Index = () => {
     try {
       updateFormData({ playerCount: 0, rounds: "", playerNames: [] });
       await resetTournamentData();
+      setCurrentStep(1);
       showNotification("Form berhasil direset!", "info");
     } catch {
       showNotification("Terjadi kesalahan saat mereset data!", "error");
@@ -306,232 +309,305 @@ const Index = () => {
       ? rounds && (!settings.maxRounds || rounds <= settings.maxRounds)
       : true);
 
+  const filledCount = playerNames.filter((n) => n.trim()).length;
+
   return (
     <main className={styles.container}>
-      <div className={styles.body}>
-        <Navbar />
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-            duration={4000}
-          />
-        )}
-        <Loading isVisible={isLoading} message={loadingMessage} />
+      <Navbar />
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+          duration={4000}
+        />
+      )}
+      <Loading isVisible={isLoading} message={loadingMessage} />
 
-        <div className={styles.mainContainer}>
-          <div className={styles.formContainer}>
-            <div className={styles.content}>
-              <h2>Setup Turnamen UNO</h2>
-              <p>
-                Silakan isi informasi di bawah ini untuk memulai turnamen UNO
-                Anda.
-              </p>
+      <div className={styles.swipeViewport}>
+        <form 
+          onSubmit={handleSubmit} 
+          className={styles.swipeTrack}
+          style={{ transform: `translateY(${currentStep === 1 ? '0' : '-50%'})` }}
+        >
+          {/* STEP 1: Main Setup */}
+          <div className={styles.screenStep}>
+            <div className={styles.body}>
+              {/* Left Side: Massive Typography */}
+              <div className={styles.editorialLeft}>
+                <h1 className={styles.massiveTitle}>
+                  UNO<br />Tournament
+                </h1>
+                <p className={styles.editorialSub}>
+                  Set up the game. Crush your friends. Ethereal UI.
+                </p>
+              </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="playerCount">
-                    Masukkan jumlah pemain:
-                    {settings.maxPlayers &&
-                      ` (Maksimal ${settings.maxPlayers})`}
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    id="playerCount"
-                    name="playerCount"
-                    placeholder={`Minimal 2${
-                      settings.maxPlayers
-                        ? `, maksimal ${settings.maxPlayers}`
-                        : ""
-                    } pemain`}
-                    value={playerCount || ""}
-                    onChange={handlePlayerCountChange}
-                    required
-                    disabled={isLoading}
-                  />
-                  {formErrors.playerCount && (
-                    <div className={styles.errorMessage}>
-                      {formErrors.playerCount}
+              {/* Right Side: Interactive Form Card */}
+              <div className={styles.formRight}>
+                <div className={`${styles.formWrapper} double-bezel`}>
+                  <div className={`${styles.formCard} double-bezel-inner`}>
+                    {/* Header */}
+                    <div className={styles.header}>
+                      <h2>Setup Turnamen</h2>
+                      <p>Atur jumlah pemain dan babak untuk memulai</p>
                     </div>
-                  )}
-                </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="rounds">
-                    Masukkan jumlah babak:
-                    {settings.allowUnlimited
-                      ? " (Opsional, kosongkan untuk unlimited)"
-                      : ` (Wajib, maksimal ${
-                          settings.maxRounds || "tidak terbatas"
-                        })`}
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    id="rounds"
-                    name="rounds"
-                    placeholder={
-                      settings.allowUnlimited
-                        ? "Kosongkan untuk unlimited"
-                        : `Maksimal ${settings.maxRounds || "tidak terbatas"}`
-                    }
-                    value={rounds}
-                    onChange={(e) => updateFormData({ rounds: e.target.value })}
-                    required={!settings.allowUnlimited}
-                    disabled={isLoading}
-                  />
-                  {formErrors.rounds && (
-                    <div className={styles.errorMessage}>
-                      {formErrors.rounds}
-                    </div>
-                  )}
-                </div>
+                    {/* Summary strip */}
+                    {(playerCount >= 2 || rounds) && (
+                      <div className={styles.summaryStrip}>
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryValue}>
+                            {playerCount >= 2 ? playerCount : "-"}
+                          </span>
+                          <span className={styles.summaryLabel}>Pemain</span>
+                        </div>
+                        <div className={styles.summaryDivider} />
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryValue}>
+                            {rounds || "\u221E"}
+                          </span>
+                          <span className={styles.summaryLabel}>Babak</span>
+                        </div>
+                      </div>
+                    )}
 
-                {isPlayersFormVisible && (
-                  <div className={styles.playersContainer}>
-                    <div className={styles.formGroup}>
-                      <label>Nama Pemain:</label>
-                      <div className={styles.playerInputs}>
-                        {playerNames.map((name, index) => (
-                          <div key={index} className={styles.playerInput}>
-                            <div className={styles.playerNumber}>
-                              {index + 1}
-                            </div>
-                            <div className={styles.inputWrapper}>
-                              <input
-                                type="text"
-                                placeholder={`Masukkan nama pemain ${
-                                  index + 1
-                                }`}
-                                value={name}
-                                onChange={(e) =>
-                                  handlePlayerNameChange(index, e.target.value)
-                                }
-                                onKeyDown={(e) => handleKeyDown(e, index)}
-                                onBlur={() =>
-                                  setSuggestionState((prev) => ({
-                                    ...prev,
-                                    showSuggestions: {
-                                      ...prev.showSuggestions,
-                                      [index]: [],
-                                    },
-                                  }))
-                                }
-                                required
-                                disabled={isLoading}
-                              />
-                              {showSuggestions[index]?.length > 0 && (
-                                <div className={styles.suggestions}>
-                                  {showSuggestions[index].map(
-                                    (suggestion, suggestionIndex) => (
-                                      <div
-                                        key={suggestionIndex}
-                                        className={`${styles.suggestionItem} ${
-                                          suggestionIndex ===
-                                          activeSuggestionIndex
-                                            ? styles.active
-                                            : ""
-                                        }`}
-                                        onMouseDown={(e) => {
-                                          e.preventDefault();
-                                          handleSuggestionClick(
-                                            index,
-                                            suggestion
-                                          );
-                                        }}
-                                      >
-                                        {suggestion}
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                    {/* Top Inputs */}
+                    <div className={styles.inputRow}>
+                      <div className={styles.formGroup}>
+                        <label htmlFor="playerCount">
+                          Jumlah Pemain
+                          {settings.maxPlayers && (
+                            <span className={styles.labelHint}>
+                              {" "}
+                              maks. {settings.maxPlayers}
+                            </span>
+                          )}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          id="playerCount"
+                          name="playerCount"
+                          placeholder="Min. 2"
+                          value={playerCount || ""}
+                          onChange={handlePlayerCountChange}
+                          required
+                          disabled={isLoading}
+                        />
+                        {formErrors.playerCount && (
+                          <div className={styles.errorMessage}>
+                            {formErrors.playerCount}
                           </div>
-                        ))}
+                        )}
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="rounds">
+                          Jumlah Babak
+                          {settings.allowUnlimited && (
+                            <span className={styles.labelHint}> opsional</span>
+                          )}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          id="rounds"
+                          name="rounds"
+                          placeholder={
+                            settings.allowUnlimited ? "Unlimited" : "Wajib diisi"
+                          }
+                          value={rounds}
+                          onChange={(e) => updateFormData({ rounds: e.target.value })}
+                          required={!settings.allowUnlimited}
+                          disabled={isLoading}
+                        />
+                        {formErrors.rounds && (
+                          <div className={styles.errorMessage}>
+                            {formErrors.rounds}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.ctaButtons}>
+                      {isPlayersFormVisible ? (
+                        <button
+                          type="button"
+                          className={styles.primaryBtn}
+                          onClick={() => setCurrentStep(2)}
+                        >
+                          <span>Isi Nama Pemain</span>
+                          <div className={styles.primaryBtnIcon}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.secondaryBtn}
+                          onClick={handleReset}
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Mereset..." : "Reset"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 2: Player Names (Scroll down) */}
+          <div className={styles.screenStep}>
+            {isPlayersFormVisible && (
+              <div className={styles.bottomSection}>
+                <div className={styles.bottomSectionInner}>
+                  <div className={styles.bottomSectionGrid}>
+                    {/* Left: Player Names */}
+                    <div className={`${styles.playersSectionWrapper} double-bezel`}>
+                      <div className={`${styles.playersSection} double-bezel-inner`}>
+                        <label className={styles.sectionLabel}>
+                          Nama Pemain
+                          <span className={styles.labelHint}>
+                            {" "}
+                            {filledCount}/{playerCount}
+                          </span>
+                        </label>
+                        <div className={`${styles.playerInputs} ${playerCount > 10 ? styles.twoColumns : ""}`}>
+                          {playerNames.map((name, index) => (
+                            <div key={index} className={styles.playerInput}>
+                              <span className={styles.playerNumber}>
+                                {index + 1}
+                              </span>
+                              <div className={styles.inputWrapper}>
+                                <input
+                                  type="text"
+                                  placeholder={`Pemain ${index + 1}`}
+                                  value={name}
+                                  onChange={(e) =>
+                                    handlePlayerNameChange(index, e.target.value)
+                                  }
+                                  onKeyDown={(e) => handleKeyDown(e, index)}
+                                  onBlur={() =>
+                                    setSuggestionState((prev) => ({
+                                      ...prev,
+                                      showSuggestions: {
+                                        ...prev.showSuggestions,
+                                        [index]: [],
+                                      },
+                                    }))
+                                  }
+                                  required
+                                  disabled={isLoading}
+                                />
+                                {showSuggestions[index]?.length > 0 && (
+                                  <div className={styles.suggestions}>
+                                    {showSuggestions[index].map(
+                                      (suggestion, suggestionIndex) => (
+                                        <div
+                                          key={suggestionIndex}
+                                          className={`${styles.suggestionItem} ${
+                                            suggestionIndex ===
+                                            activeSuggestionIndex
+                                              ? styles.active
+                                              : ""
+                                          }`}
+                                          onMouseDown={(e) => {
+                                            e.preventDefault();
+                                            handleSuggestionClick(
+                                              index,
+                                              suggestion
+                                            );
+                                          }}
+                                        >
+                                          {suggestion}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Preview */}
+                    <div className={`${styles.previewWrapper} double-bezel`}>
+                      <div className={`${styles.previewCard} double-bezel-inner`}>
+                        <div className={styles.previewHeader}>
+                          <h4>Preview Turnamen</h4>
+                        </div>
+                        <div className={styles.previewGrid}>
+                          <div className={styles.previewStat}>
+                            <span className={styles.previewStatValue}>{playerCount}</span>
+                            <span className={styles.previewStatLabel}>Pemain</span>
+                          </div>
+                          <div className={styles.previewStat}>
+                            <span className={styles.previewStatValue}>
+                              {rounds || "\u221E"}
+                            </span>
+                            <span className={styles.previewStatLabel}>Babak</span>
+                          </div>
+                          <div className={styles.previewStat}>
+                            <span className={styles.previewStatValue}>
+                              {playerCount > 0 ? playerCount - 1 : 0}
+                            </span>
+                            <span className={styles.previewStatLabel}>Poin Maks</span>
+                          </div>
+                        </div>
+                        <div className={styles.previewPlayers}>
+                          {playerNames.map((name, index) => (
+                            <div key={index} className={styles.previewPlayerChip}>
+                              <span className={styles.previewPlayerPos}>{index + 1}</span>
+                              <span className={styles.previewPlayerName}>{name || `Pemain ${index + 1}`}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Bottom CTA Buttons inside Preview */}
+                        <div className={styles.previewCta}>
+                          {formErrors.playerNames && (
+                            <div className={styles.errorMessage} style={{ marginBottom: "12px", textAlign: "center" }}>
+                              {formErrors.playerNames}
+                            </div>
+                          )}
+                          <button
+                            type="submit"
+                            className={styles.primaryBtn}
+                            disabled={isLoading || !isFormValid}
+                          >
+                            <span>{isLoading ? "Memproses..." : "Mulai Permainan"}</span>
+                            <div className={styles.primaryBtnIcon}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                              </svg>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.secondaryBtn}
+                            onClick={handleReset}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? "Mereset..." : "Reset"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                )}
-
-                <div className={styles.ctaButtons}>
-                  <button
-                    type="submit"
-                    className={styles.primaryBtn}
-                    disabled={isLoading || !isFormValid}
-                  >
-                    {isLoading ? "Memproses..." : "Mulai Turnamen"}
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.secondaryBtn}
-                    onClick={handleReset}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Mereset..." : "Reset Form"}
-                  </button>
                 </div>
-              </form>
-            </div>
+              </div>
+            )}
           </div>
-
-          <div className={styles.infoContainer}>
-            <div className={styles.infoCard}>
-              <h3>📋 Info Tournamen</h3>
-              {playerCount >= 2 || rounds ? (
-                <div className={styles.tournamentInfo}>
-                  <table className={styles.infoTable}>
-                    <tbody>
-                      <tr>
-                        <td>Jumlah Pemain</td>
-                        <td>:</td>
-                        <td>
-                          <span className={styles.infoValue}>
-                            {playerCount >= 2 ? playerCount : "-"}
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>Jumlah Babak</td>
-                        <td>:</td>
-                        <td>
-                          <span className={styles.infoValue}>
-                            {rounds ? rounds : "Unlimited"}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  {playerCount >= 2 && (
-                    <div className={styles.playersInfoContainer}>
-                      <div className={styles.infoLabel}>Daftar Pemain:</div>
-                      <div className={styles.playersInfoList}>
-                        {playerNames.map((name, index) => (
-                          <div key={index} className={styles.playerInfoItem}>
-                            <span className={styles.playerInfoNumber}>
-                              {index + 1}
-                            </span>
-                            <span className={styles.playerInfoName}>
-                              {name || `Pemain ${index + 1}`}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className={styles.infoPlaceholder}>
-                  💡 Isi form di sebelah kiri untuk melihat info tournamen
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        </form>
       </div>
     </main>
   );

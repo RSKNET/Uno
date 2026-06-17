@@ -1,14 +1,14 @@
 .dashboardContainer {
-  padding: 30px;
+  padding: 28px;
   max-width: 1400px;
   margin: 0 auto;
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.5s var(--ease-out);
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -17,103 +17,103 @@
 }
 
 .dashboardHeader {
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .dashboardHeader h1 {
-  color: #ffffff;
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
 .dashboardHeader p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.2rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-secondary);
+  font-size: 1rem;
   margin: 0;
 }
 
 .dashboardContent {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  gap: 24px;
+}
+
+.contentCardWrapper {
+  padding: 6px;
+  height: 100%;
 }
 
 .contentCard {
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid #0f3460;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
+  border-radius: calc(var(--radius-lg) - 6px);
   overflow: hidden;
-  transition: all 0.3s ease-in-out;
-}
-
-.contentCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-  border-color: #1a5490;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardHeader {
-  padding: 24px 24px 0;
+  padding: 22px 22px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .cardTitle {
-  color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: bold;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
   margin: 0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 .viewAllBtn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  transition: all var(--duration-normal) var(--ease-out);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .viewAllBtn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
 }
 
 .cardContent {
-  padding: 0 24px 24px;
+  padding: 0 22px 22px;
+  flex: 1;
 }
 
 .playersList,
 .actionsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .playerItem {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  transition: all 0.3s ease-in-out;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
 .playerItem:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
   transform: translateX(4px);
 }
 
@@ -125,121 +125,127 @@
 }
 
 .playerName {
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 500;
-  font-family: "Roboto Condensed", Arial, sans-serif;
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .playerDate {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-muted);
+  font-size: 0.75rem;
   margin: 0;
 }
 
 .actionBtn {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: all var(--duration-normal) var(--ease-out);
   text-align: left;
   width: 100%;
   color: inherit;
 }
 
 .actionBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-active);
   transform: translateY(-2px);
 }
 
 .actionIcon {
-  font-size: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   min-width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 .actionText {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .actionTitle {
-  color: #ffffff;
-  font-weight: 500;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-primary);
+  font-weight: 600;
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .actionDesc {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  color: var(--text-muted);
+  font-size: 0.8rem;
   margin: 0;
 }
 
 .systemInfo {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .infoItem {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.infoItem:last-child {
-  border-bottom: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  flex: 1;
+  min-width: 200px;
 }
 
 .infoLabel {
-  color: rgba(255, 255, 255, 0.8);
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
 }
 
 .infoValue {
-  color: #ffffff;
-  font-weight: 500;
-  font-family: "Roboto Condensed", Arial, sans-serif;
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
 .statusOnline {
-  color: #4ade80 !important;
+  color: var(--success) !important;
 }
 
 .emptyState {
   text-align: center;
-  padding: 40px 20px;
-  color: rgba(255, 255, 255, 0.6);
-  font-family: "Roboto Condensed", Arial, sans-serif;
+  padding: 36px 20px;
+  color: var(--text-muted);
 }
 
 .emptyState p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1200px) {
   .dashboardContent {
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -249,27 +255,27 @@
   }
 
   .dashboardHeader h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 
   .dashboardHeader p {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .dashboardContent {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 18px;
   }
 
   .cardHeader {
-    padding: 20px 20px 0;
+    padding: 18px 18px 0;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
   .cardContent {
-    padding: 0 20px 20px;
+    padding: 0 18px 18px;
   }
 
   .actionBtn {
@@ -283,7 +289,7 @@
   }
 
   .dashboardHeader h1 {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
   }
 
   .cardHeader {
@@ -295,12 +301,12 @@
   }
 
   .actionBtn {
-    gap: 12px;
+    gap: 10px;
     padding: 10px;
   }
 
   .actionIcon {
-    font-size: 1.3rem;
-    min-width: 28px;
+    font-size: 1.1rem;
+    min-width: 24px;
   }
 }

@@ -1,6 +1,29 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCallback } from "react";
 
+// Helper functions for safe localstorage operations
+const getCache = (key) => {
+  try {
+    const cached = localStorage.getItem(key);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {
+    return null;
+  }
+  return null;
+};
+
+const setCache = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {}
+};
+
+const clearCache = (key) => {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {}
+};
+
 export const useApi = () => {
   const { apiCall } = useAuth();
 
@@ -29,41 +52,87 @@ export const useApi = () => {
 
   const fetchPlayers = useCallback(
     async (search = "", id = "") => {
+      const isCacheable = !search && !id;
+      const CACHE_KEY = "admin_cache_players";
+
+      if (isCacheable) {
+        const cachedData = getCache(CACHE_KEY);
+        if (cachedData) return cachedData;
+      }
+
       const params = {};
       if (search) params.search = search;
       if (id) params.id = id;
-      return apiGet("/api/admin/players", null, params);
+      
+      const response = await apiGet("/api/admin/players", null, params);
+      
+      if (isCacheable && response?.success) {
+        setCache(CACHE_KEY, response);
+      }
+      return response;
     },
     [apiGet]
   );
 
   const createPlayer = useCallback(
-    async (playerData) => apiPost("/api/admin/players", playerData),
+    async (playerData) => {
+      const response = await apiPost("/api/admin/players", playerData);
+      if (response?.success) clearCache("admin_cache_players");
+      return response;
+    },
     [apiPost]
   );
 
   const updatePlayer = useCallback(
-    async (playerData) => apiPut("/api/admin/players", playerData),
+    async (playerData) => {
+      const response = await apiPut("/api/admin/players", playerData);
+      if (response?.success) clearCache("admin_cache_players");
+      return response;
+    },
     [apiPut]
   );
 
   const deletePlayer = useCallback(
-    async (playerId) => apiDelete("/api/admin/players", null, { id: playerId }),
+    async (playerId) => {
+      const response = await apiDelete("/api/admin/players", null, { id: playerId });
+      if (response?.success) clearCache("admin_cache_players");
+      return response;
+    },
     [apiDelete]
   );
 
   const fetchReports = useCallback(
-    async () => apiGet("/api/admin/report"),
+    async () => {
+      const CACHE_KEY = "admin_cache_reports";
+      const cachedData = getCache(CACHE_KEY);
+      if (cachedData) return cachedData;
+
+      const response = await apiGet("/api/admin/report");
+      if (response?.success) setCache(CACHE_KEY, response);
+      return response;
+    },
     [apiGet]
   );
 
   const fetchSettings = useCallback(
-    async () => apiGet("/api/admin/settings"),
+    async () => {
+      const CACHE_KEY = "admin_cache_settings";
+      const cachedData = getCache(CACHE_KEY);
+      if (cachedData) return cachedData;
+
+      const response = await apiGet("/api/admin/settings");
+      if (response?.success) setCache(CACHE_KEY, response);
+      return response;
+    },
     [apiGet]
   );
 
   const updateSettings = useCallback(
-    async (settingsData) => apiPut("/api/admin/settings", settingsData),
+    async (settingsData) => {
+      const response = await apiPut("/api/admin/settings", settingsData);
+      if (response?.success) clearCache("admin_cache_settings");
+      return response;
+    },
     [apiPut]
   );
 

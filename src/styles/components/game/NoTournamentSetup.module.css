@@ -1,38 +1,46 @@
 .noTournamentMessage {
   text-align: center;
-  padding: 2rem;
-  color: #b8c5d6;
-  background: rgba(20, 20, 40, 0.95);
-  border-radius: 20px;
-  border: 2px solid #0f3460;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md), var(--shadow-inner);
 }
 
 .noTournamentMessage h2 {
-  color: #00bfff;
-  margin-bottom: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  font-size: 1.4em;
+  letter-spacing: -0.02em;
+}
+
+.noTournamentMessage p {
+  color: var(--text-muted);
+  font-size: 0.95em;
 }
 
 .setupButton {
-  background: linear-gradient(135deg, #00bfff, #0080ff);
+  background: var(--accent);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   margin-top: 1.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+  transition: all var(--duration-normal) var(--ease-out);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .setupButton:hover {
-  background: linear-gradient(135deg, #0080ff, #0060cc);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 191, 255, 0.4);
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .setupButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(0, 191, 255, 0.3);
+  transform: scale(0.97) translateY(1px);
 }

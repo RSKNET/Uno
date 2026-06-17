@@ -19,7 +19,8 @@ const GamePage = () => {
     clearAllData,
   } = useTournament();
 
-  const [tournamentSummary, setTournamentSummary] = useState(null);
+  const [activeTab, setActiveTab] = useState("input");
+  const [currentHistoryPage, setCurrentHistoryPage] = useState(0);
   const [selectedRankings, setSelectedRankings] = useState({});
   const [notification, setNotification] = useState(null);
   const [modals, setModals] = useState({
@@ -36,42 +37,20 @@ const GamePage = () => {
     message: "",
   });
 
-  useEffect(() => {
-    const createTournamentSummary = (isValid = false) => ({
-      id: tournamentData.id || null,
-      totalPlayers: tournamentData.playerCount || 0,
-      roundsType: tournamentData.rounds
-        ? `${tournamentData.rounds} babak`
-        : "Unlimited",
-      players: tournamentData.playerNames || [],
-      isValid,
-      createdDate: tournamentData.createdAt
-        ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
-        : null,
-    });
-
-    const loadTournamentSummary = async () => {
-      updateLoadingState({ message: "Memuat data turnamen..." });
-      try {
-        const summary = await getTournamentSummary();
-        setTournamentSummary(summary);
-      } catch {
-        setTournamentSummary(
-          createTournamentSummary(
-            tournamentData.isSetup && tournamentData.playerCount >= 2
-          )
-        );
-      } finally {
-        updateLoadingState({ message: "" });
-      }
-    };
-
-    if (tournamentData.isSetup && tournamentData.playerCount >= 2) {
-      loadTournamentSummary();
-    } else {
-      setTournamentSummary(createTournamentSummary(false));
-    }
-  }, [tournamentData, getTournamentSummary]);
+  const tournamentSummary = tournamentData.isSetup && tournamentData.playerCount >= 2
+    ? getTournamentSummary()
+    : {
+        id: tournamentData.id || null,
+        totalPlayers: tournamentData.playerCount || 0,
+        roundsType: tournamentData.rounds
+          ? `${tournamentData.rounds} babak`
+          : "Unlimited",
+        players: tournamentData.playerNames || [],
+        isValid: false,
+        createdDate: tournamentData.createdAt
+          ? new Date(tournamentData.createdAt).toLocaleDateString("id-ID")
+          : null,
+      };
 
   const showNotification = useCallback((message, type = "success") => {
     setNotification({ message, type });
@@ -138,6 +117,7 @@ const GamePage = () => {
 
       await saveRoundResult(rankings);
       setSelectedRankings({});
+      setCurrentHistoryPage(0); // Reset to newest round
       showNotification("Hasil babak berhasil disimpan!", "success");
     } catch {
       showNotification("Terjadi kesalahan saat menyimpan hasil babak", "error");
@@ -382,15 +362,6 @@ const GamePage = () => {
     loadingStates.savingToDatabase ||
     loadingStates.deleting;
 
-  if (!tournamentSummary) {
-    return (
-      <div className={styles.gameContainer}>
-        <Navbar />
-        <Loading message={loadingStates.message || "Memuat data turnamen..."} />
-      </div>
-    );
-  }
-
   return (
     <main className={styles.gameContainer}>
       <div className={styles.gameBody}>
@@ -465,308 +436,350 @@ const GamePage = () => {
           </div>
         ) : (
           <div className={styles.mainContainer}>
-            <div className={styles.contentContainer}>
-              <div className={styles.leftSection}>
-                <div className={styles.infoContainer}>
-                  <h3>📋 Informasi Tournamen</h3>
-                  <div className={styles.infoGrid}>
-                    <div className={styles.infoItem}>
-                      <div className={styles.infoLabel}>Jumlah Pemain</div>
-                      <div className={styles.infoValue}>
-                        {tournamentSummary.totalPlayers}
-                      </div>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <div className={styles.infoLabel}>Jumlah Babak</div>
-                      <div className={styles.infoValue}>
-                        {tournamentSummary.roundsType}
-                      </div>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <div className={styles.infoLabel}>Babak Selesai</div>
-                      <div className={styles.infoValue}>
-                        {tournamentData.gameData?.completedRounds || 0}
-                      </div>
-                    </div>
+            {/* Top bar: tournament info + actions */}
+            <div className={`${styles.topBarWrapper} double-bezel`}>
+              <div className={`${styles.topBar} double-bezel-inner`}>
+                <div className={styles.topBarInfo}>
+                  <div className={styles.topBarItem}>
+                    <span className={styles.topBarValue}>
+                      {tournamentSummary.totalPlayers}
+                    </span>
+                    <span className={styles.topBarLabel}>Pemain</span>
                   </div>
-                  <div className={styles.buttonGroup}>
-                    <button
-                      className={`${styles.btn} ${styles.btnPdf}`}
-                      onClick={handleExportToPdf}
-                      disabled={isLoading}
-                    >
-                      {loadingStates.savingToDatabase
-                        ? "📄 Menyimpan..."
-                        : "📄 Simpan Skor Permainan"}
-                    </button>
-                    <button
-                      className={`${styles.btn} ${styles.btnDanger}`}
-                      onClick={() => handleModalToggle("reset", true)}
-                      disabled={isLoading}
-                    >
-                      {loadingStates.resetting
-                        ? "🔄 Mereset..."
-                        : "🔄 Reset Tournamen"}
-                    </button>
-                    <button
-                      className={`${styles.btn} ${styles.btnWarning}`}
-                      onClick={() => handleModalToggle("delete", true)}
-                      disabled={isLoading}
-                    >
-                      {loadingStates.deleting
-                        ? "🏠 Menghapus..."
-                        : "🏠 Hapus & Keluar"}
-                    </button>
+                  <div className={styles.topBarDivider} />
+                  <div className={styles.topBarItem}>
+                    <span className={styles.topBarValue}>
+                      {tournamentSummary.roundsType}
+                    </span>
+                    <span className={styles.topBarLabel}>Target</span>
+                  </div>
+                  <div className={styles.topBarDivider} />
+                  <div className={styles.topBarItem}>
+                    <span className={styles.topBarValue}>
+                      {tournamentData.gameData?.completedRounds || 0}
+                    </span>
+                    <span className={styles.topBarLabel}>Selesai</span>
                   </div>
                 </div>
+                <div className={styles.topBarActions}>
+                  <button
+                    className={`${styles.topBtn} ${styles.topBtnPrimary}`}
+                    onClick={handleExportToPdf}
+                    disabled={isLoading}
+                  >
+                    {loadingStates.savingToDatabase
+                      ? "Menyimpan..."
+                      : "Simpan Skor"}
+                  </button>
+                  <button
+                    className={`${styles.topBtn} ${styles.topBtnGhost}`}
+                    onClick={() => handleModalToggle("reset", true)}
+                    disabled={isLoading}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    className={`${styles.topBtn} ${styles.topBtnDanger}`}
+                    onClick={() => handleModalToggle("delete", true)}
+                    disabled={isLoading}
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                <div className={styles.scoreSection}>
-                  <div className={styles.formContainer}>
-                    <div className={styles.formSection}>
-                      <h3>➕ Tambah Poin Kemenangan</h3>
-                      <div className={styles.currentRound}>
-                        {isTournamentCompleted() ? (
-                          <span className={styles.tournamentCompleted}>
-                            Turnamen Selesai
-                          </span>
-                        ) : (
-                          <>
-                            Babak {tournamentData.gameData?.currentRound || 1}
-                          </>
-                        )}
+            {/* Tab Navigation */}
+            <div className={styles.tabContainer}>
+              <button
+                className={`${styles.tabBtn} ${activeTab === "input" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("input")}
+              >
+                Input & Riwayat
+              </button>
+              <button
+                className={`${styles.tabBtn} ${activeTab === "skor" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("skor")}
+              >
+                Skor & Statistik
+              </button>
+            </div>
+
+            {/* Main content */}
+            <div className={`${styles.contentGrid} ${activeTab === "skor" ? styles.scoreLayout : ""}`}>
+              {/* LEFT COLUMN */}
+              <div className={styles.primaryColumn}>
+                {activeTab === "input" && (
+                  <div className={`${styles.cardWrapper} double-bezel`}>
+                    <div className={`${styles.card} double-bezel-inner`}>
+                      <div className={styles.cardHeader}>
+                        <h3>Tambah Poin</h3>
+                        <div className={styles.roundBadge}>
+                          {isTournamentCompleted() ? (
+                            <span className={styles.completedBadge}>Selesai</span>
+                          ) : (
+                            <>Babak {tournamentData.gameData?.currentRound || 1}</>
+                          )}
+                        </div>
                       </div>
 
                       {isTournamentCompleted() ? (
-                        <div className={styles.tournamentCompletedMessage}>
-                          <p>
-                            Turnamen telah mencapai jumlah babak maksimum yang
-                            ditentukan.
-                          </p>
-                          <p>
-                            Anda dapat melihat hasil akhir pada Papan Skor dan
-                            Statistik Pemain.
-                          </p>
+                        <div className={styles.completedMessage}>
+                          <p>Turnamen telah selesai. Lihat hasil akhir di Papan Skor.</p>
                         </div>
                       ) : (
-                        <form onSubmit={handleSubmitRound}>
-                          <div className={styles.formGroup}>
-                            <label>
-                              Urutan Juara (dari Juara 1 sampai terakhir):
-                            </label>
-                            <div className={styles.rankingContainer}>
-                              {createRankingArray(
-                                tournamentSummary.totalPlayers
-                              ).map((rank) => (
-                                <div key={rank} className={styles.rankItem}>
-                                  <div className={styles.rankNumber}>
-                                    {rank}
-                                  </div>
-                                  <div className={styles.rankPlayer}>
-                                    <select
-                                      name={`rank${rank}`}
-                                      required
-                                      value={selectedRankings[rank] ?? ""}
-                                      onChange={(e) =>
-                                        handleRankingChange(
-                                          rank,
-                                          e.target.value
-                                        )
-                                      }
-                                      className={styles.rankSelect}
-                                      disabled={isLoading}
-                                    >
-                                      <option value="">
-                                        Pilih Pemain{" "}
-                                        {getRankingLabel(
-                                          rank,
-                                          tournamentSummary.totalPlayers
-                                        )}
-                                      </option>
-                                      {tournamentSummary.players.map(
-                                        (player, index) => {
-                                          const isAlreadySelected =
-                                            Object.entries(
-                                              selectedRankings
-                                            ).some(
-                                              ([selectedRank, selectedIndex]) =>
-                                                selectedRank !==
-                                                  rank.toString() &&
-                                                selectedIndex === index
-                                            );
-
-                                          return (
-                                            <option
-                                              key={index}
-                                              value={index}
-                                              disabled={isAlreadySelected}
-                                              className={
-                                                isAlreadySelected
-                                                  ? styles.disabledOption
-                                                  : ""
-                                              }
-                                            >
-                                              {player}{" "}
-                                              {isAlreadySelected
-                                                ? "(Sudah dipilih)"
-                                                : ""}
-                                            </option>
-                                          );
-                                        }
-                                      )}
-                                    </select>
-                                  </div>
-                                  <div className={styles.rankScore}>
-                                    +
-                                    {Math.max(
-                                      0,
-                                      tournamentSummary.totalPlayers - rank
+                        <form onSubmit={handleSubmitRound} style={{display: 'flex', flexDirection: 'column', flex: 1}}>
+                          <div className={styles.rankingList}>
+                            {createRankingArray(
+                              tournamentSummary.totalPlayers
+                            ).map((rank) => (
+                              <div key={rank} className={styles.rankItem}>
+                                <div className={styles.rankNumber}>{rank}</div>
+                                <select
+                                  name={`rank${rank}`}
+                                  required
+                                  value={selectedRankings[rank] ?? ""}
+                                  onChange={(e) =>
+                                    handleRankingChange(rank, e.target.value)
+                                  }
+                                  className={styles.rankSelect}
+                                  disabled={isLoading}
+                                >
+                                  <option value="">
+                                    {getRankingLabel(
+                                      rank,
+                                      tournamentSummary.totalPlayers
                                     )}
-                                  </div>
+                                  </option>
+                                  {tournamentSummary.players.map(
+                                    (player, index) => {
+                                      const isAlreadySelected =
+                                        Object.entries(selectedRankings).some(
+                                          ([selectedRank, selectedIndex]) =>
+                                            selectedRank !== rank.toString() &&
+                                            selectedIndex === index
+                                        );
+
+                                      return (
+                                        <option
+                                          key={index}
+                                          value={index}
+                                          disabled={isAlreadySelected}
+                                        >
+                                          {player}
+                                          {isAlreadySelected
+                                            ? " (Sudah dipilih)"
+                                            : ""}
+                                        </option>
+                                      );
+                                    }
+                                  )}
+                                </select>
+                                <div className={styles.rankScore}>
+                                  +
+                                  {Math.max(
+                                    0,
+                                    tournamentSummary.totalPlayers - rank
+                                  )}
                                 </div>
-                              ))}
-                            </div>
+                              </div>
+                            ))}
                           </div>
                           <button
                             type="submit"
-                            className={styles.btn}
+                            className={styles.submitBtn}
                             disabled={isLoading}
                           >
                             {loadingStates.submitting
                               ? "Menyimpan..."
-                              : "Simpan Hasil Babak"}
+                              : "Simpan Hasil"}
                           </button>
                         </form>
                       )}
                     </div>
                   </div>
+                )}
 
-                  <div className={styles.leaderboardContainer}>
-                    <div className={styles.leaderboard}>
-                      <h3>🏆 Papan Skor</h3>
-                      <div className={styles.leaderboardGrid}>
+                {activeTab === "skor" && (
+                  <div className={`${styles.cardWrapper} double-bezel`}>
+                    <div className={`${styles.card} double-bezel-inner`}>
+                      <div className={styles.cardHeader}>
+                        <h3>Papan Skor</h3>
+                      </div>
+                      <div className={styles.leaderboardList}>
                         {getLeaderboardData().map((entry, index) => (
-                          <div key={index} className={styles.playerScore}>
-                            <div className={styles.playerInfo}>
-                              <div className={styles.playerName}>
-                                {entry.position === 1 && "🥇 "}
-                                {entry.position === 2 && "🥈 "}
-                                {entry.position === 3 && "🥉 "}
-                                {entry.position > 3 && `${entry.position}. `}
+                          <div key={index} className={styles.leaderboardItem}>
+                            <div className={styles.leaderboardLeft}>
+                              <span className={`${styles.positionBadge} ${
+                                entry.position === 1
+                                  ? styles.gold
+                                  : entry.position === 2
+                                  ? styles.silver
+                                  : entry.position === 3
+                                  ? styles.bronze
+                                  : ""
+                              }`}>
+                                {entry.position}
+                              </span>
+                              <span className={styles.leaderboardName}>
                                 {entry.displayName}
-                                {entry.isTied && " (Seri)"}
-                              </div>
+                                {entry.isTied && (
+                                  <span className={styles.tiedLabel}> Seri</span>
+                                )}
+                              </span>
                             </div>
-                            <div className={styles.playerTotalScore}>
+                            <span className={styles.leaderboardScore}>
                               {entry.totalScore}
-                            </div>
+                            </span>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className={styles.winnerStats}>
-                  <h3>📊 Statistik Pemain</h3>
-                  <div className={styles.statsGrid}>
-                    {(tournamentData.gameData?.playerScores || []).map(
-                      (playerScore) => {
-                        const playerName =
-                          tournamentSummary.players[playerScore.playerIndex];
-                        return (
-                          <div
-                            key={playerScore.playerIndex}
-                            className={styles.playerStats}
-                          >
-                            <h4>{playerName}</h4>
-                            {createRankingArray(
-                              tournamentSummary.totalPlayers
-                            ).map((rank) => (
-                              <div key={rank} className={styles.statItem}>
-                                <span className={styles.statLabel}>
-                                  {getRankingLabel(
-                                    rank,
-                                    tournamentSummary.totalPlayers
-                                  )}
-                                  :
-                                </span>
-                                <span className={styles.statValue}>
-                                  {playerScore.wins?.[`position${rank}`] || 0}x
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
+                )}
               </div>
 
-              <div className={styles.rightSection}>
-                <div className={styles.historyContainer}>
-                  <div className={styles.historySection}>
-                    <h3>📚 Riwayat Babak</h3>
-                    <div className={styles.historyList}>
-                      {tournamentData.gameData?.roundHistory?.length > 0 ? (
-                        [...tournamentData.gameData.roundHistory]
-                          .reverse()
-                          .map((round) => (
-                            <div
-                              key={round.round}
-                              className={styles.historyItem}
-                            >
-                              <div className={styles.historyHeader}>
-                                <h4>Babak {round.round}</h4>
-                                <div className={styles.historyTimestamp}>
-                                  {new Date(round.timestamp).toLocaleDateString(
-                                    "id-ID",
-                                    {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
+              {/* RIGHT COLUMN */}
+              <div className={styles.secondaryColumn}>
+                {activeTab === "input" && (
+                  <div className={`${styles.cardWrapper} double-bezel`}>
+                    <div className={`${styles.card} double-bezel-inner`}>
+                      <div className={styles.cardHeader}>
+                        <h3>Riwayat Babak</h3>
+                      </div>
+                      <div className={styles.historyList}>
+                        {tournamentData.gameData?.roundHistory?.length > 0 ? (
+                          (() => {
+                            const allRounds = [...tournamentData.gameData.roundHistory].reverse();
+                            const totalPages = allRounds.length;
+                            const round = allRounds[currentHistoryPage];
+
+                            if (!round) return null;
+
+                            return (
+                              <>
+                                <div className={styles.historyItem}>
+                                  <div className={styles.historyHeader}>
+                                    <span className={styles.historyRound}>
+                                      Babak {round.round}
+                                    </span>
+                                    <span className={styles.historyTime}>
+                                      {new Date(round.timestamp).toLocaleDateString(
+                                        "id-ID",
+                                        {
+                                          day: "numeric",
+                                          month: "short",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        }
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className={`${styles.historyRankings} ${round.rankings.length > 5 ? styles.twoColumns : ''}`}>
+                                    {round.rankings.map((ranking) => {
+                                      const playerName =
+                                        tournamentSummary.players[
+                                          ranking.playerIndex
+                                        ];
+                                      return (
+                                        <div
+                                          key={ranking.playerIndex}
+                                          className={styles.historyRank}
+                                        >
+                                          <div className={styles.historyRankLeft}>
+                                            <span className={styles.historyPosition}>
+                                              {ranking.rank}
+                                            </span>
+                                            <span>{playerName}</span>
+                                          </div>
+                                          <span className={styles.historyPoints}>
+                                            +{ranking.points}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className={styles.historyRankings}>
-                                {round.rankings.map((ranking) => {
-                                  const playerName =
-                                    tournamentSummary.players[
-                                      ranking.playerIndex
-                                    ];
-                                  return (
-                                    <div
-                                      key={ranking.playerIndex}
-                                      className={styles.historyRank}
+                                
+                                {totalPages > 1 && (
+                                  <div className={styles.historyPagination}>
+                                    <button 
+                                      type="button"
+                                      className={styles.pageBtn}
+                                      onClick={() => setCurrentHistoryPage(p => Math.min(totalPages - 1, p + 1))}
+                                      disabled={currentHistoryPage === totalPages - 1}
+                                      title="Babak Sebelumnya"
                                     >
-                                      <div className={styles.historyRankLeft}>
-                                        <div className={styles.historyPosition}>
-                                          {ranking.rank}
-                                        </div>
-                                        <div className={styles.historyPlayer}>
-                                          {playerName}
-                                        </div>
-                                      </div>
-                                      <div className={styles.historyPoints}>
-                                        +{ranking.points} poin
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ))
-                      ) : (
-                        <div className={styles.noHistoryMessage}>
-                          Belum ada riwayat babak
-                        </div>
-                      )}
+                                      &#8592;
+                                    </button>
+                                    <span className={styles.pageInfo}>
+                                      Babak {round.round}
+                                    </span>
+                                    <button 
+                                      type="button"
+                                      className={styles.pageBtn}
+                                      onClick={() => setCurrentHistoryPage(p => Math.max(0, p - 1))}
+                                      disabled={currentHistoryPage === 0}
+                                      title="Babak Selanjutnya"
+                                    >
+                                      &#8594;
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()
+                        ) : (
+                          <div className={styles.emptyHistory}>
+                            Belum ada riwayat babak
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {activeTab === "skor" && (
+                  <div className={`${styles.cardWrapper} double-bezel`}>
+                    <div className={`${styles.card} double-bezel-inner`}>
+                      <div className={styles.cardHeader}>
+                        <h3>Statistik Pemain</h3>
+                      </div>
+                      <div className={styles.statsGrid}>
+                        {(tournamentData.gameData?.playerScores || []).map(
+                          (playerScore) => {
+                            const playerName =
+                              tournamentSummary.players[playerScore.playerIndex];
+                            return (
+                              <div
+                                key={playerScore.playerIndex}
+                                className={styles.statsCard}
+                              >
+                                <h4>{playerName}</h4>
+                                <div className={styles.statsList}>
+                                  {createRankingArray(tournamentSummary.totalPlayers)
+                                    .map((rank) => (
+                                      <div key={rank} className={styles.statRow}>
+                                        <span className={styles.statLabel}>
+                                          {getRankingLabel(
+                                            rank,
+                                            tournamentSummary.totalPlayers
+                                          )}
+                                        </span>
+                                        <span className={styles.statValue}>
+                                          {playerScore.wins?.[`position${rank}`] || 0}x
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

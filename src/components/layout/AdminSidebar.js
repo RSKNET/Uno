@@ -26,30 +26,10 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
   }, []);
 
   const menuItems = [
-    {
-      id: "dashboard",
-      icon: "📊",
-      label: "Dashboard",
-      view: "dashboard",
-    },
-    {
-      id: "players",
-      icon: "👥",
-      label: "Players",
-      view: "players",
-    },
-    {
-      id: "report",
-      icon: "📄",
-      label: "Report",
-      view: "report",
-    },
-    {
-      id: "settings",
-      icon: "⚙️",
-      label: "Settings",
-      view: "settings",
-    },
+    { id: "dashboard", letter: "D", label: "Dashboard", view: "dashboard" },
+    { id: "players", letter: "P", label: "Players", view: "players" },
+    { id: "report", letter: "R", label: "Report", view: "report" },
+    { id: "settings", letter: "S", label: "Settings", view: "settings" },
   ];
 
   const handleMenuClick = useCallback(
@@ -72,7 +52,7 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.logo}>
-            <span className={styles.logoIcon}>🎮</span>
+            <span className={styles.logoIcon}>U</span>
             {!isMinimized && <span className={styles.logoText}>UNO Admin</span>}
           </div>
         </div>
@@ -87,7 +67,7 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
               onClick={() => handleMenuClick(item.view)}
               title={isMinimized ? item.label : ""}
             >
-              <span className={styles.menuIcon}>{item.icon}</span>
+              <span className={styles.menuIcon}>{item.letter}</span>
               {!isMinimized && (
                 <span className={styles.menuLabel}>{item.label}</span>
               )}
@@ -103,7 +83,7 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
               title={isMinimized ? "Expand sidebar" : "Minimize sidebar"}
             >
               <span className={styles.buttonIcon}>
-                {isMinimized ? "▶️" : "◀️"}
+                {isMinimized ? "\u25B6" : "\u25C0"}
               </span>
               {!isMinimized && (
                 <span className={styles.buttonText}>
@@ -114,7 +94,9 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
           )}
 
           <div className={styles.footerButton}>
-            <span className={styles.buttonIcon}>👤</span>
+            <span className={styles.buttonIcon}>
+              {user?.username?.charAt(0)?.toUpperCase() || "A"}
+            </span>
             {!isMinimized && (
               <div className={styles.buttonText}>
                 <div className={styles.username}>{user?.username}</div>
@@ -128,7 +110,13 @@ const AdminSidebar = ({ user, onLogout, currentView, onNavigate }) => {
             onClick={onLogout}
             title={isMinimized ? "Logout" : ""}
           >
-            <span className={styles.buttonIcon}>🚪</span>
+            <span className={styles.buttonIcon}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </span>
             {!isMinimized && <span className={styles.buttonText}>Logout</span>}
           </button>
         </div>

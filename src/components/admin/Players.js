@@ -297,65 +297,67 @@ const Players = ({ showNotification }) => {
           </button>
         </div>
 
-        <div className={styles.playersTable}>
-          <table>
-            <thead>
-              <tr>
-                <th onClick={() => handleSort("name")}>
-                  Nama
-                  {sortBy === "name" && (
-                    <span>{sortOrder === "asc" ? " ↑" : " ↓"}</span>
-                  )}
-                </th>
-                <th onClick={() => handleSort("joinDate")}>
-                  Tanggal Dibuat
-                  {sortBy === "joinDate" && (
-                    <span>{sortOrder === "asc" ? " ↑" : " ↓"}</span>
-                  )}
-                </th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPlayers.length > 0 ? (
-                currentPlayers.map((player) => (
-                  <tr key={player.id}>
-                    <td>{player.name}</td>
-                    <td>
-                      {new Date(player.joinDate).toLocaleDateString("id-ID")}
-                    </td>
-                    <td>
-                      <div className={styles.actionButtons}>
-                        <button
-                          onClick={() => openEditModal(player)}
-                          className={styles.editButton}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(player)}
-                          className={styles.deleteButton}
-                        >
-                          Hapus
-                        </button>
-                      </div>
+        <div className={`${styles.playersTableWrapper} double-bezel`}>
+          <div className={`${styles.playersTable} double-bezel-inner`}>
+            <table>
+              <thead>
+                <tr>
+                  <th onClick={() => handleSort("name")}>
+                    Nama
+                    {sortBy === "name" && (
+                      <span>{sortOrder === "asc" ? " ↑" : " ↓"}</span>
+                    )}
+                  </th>
+                  <th onClick={() => handleSort("joinDate")}>
+                    Tanggal Dibuat
+                    {sortBy === "joinDate" && (
+                      <span>{sortOrder === "asc" ? " ↑" : " ↓"}</span>
+                    )}
+                  </th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentPlayers.length > 0 ? (
+                  currentPlayers.map((player) => (
+                    <tr key={player.id}>
+                      <td>{player.name}</td>
+                      <td>
+                        {new Date(player.joinDate).toLocaleDateString("id-ID")}
+                      </td>
+                      <td>
+                        <div className={styles.actionButtons}>
+                          <button
+                            onClick={() => openEditModal(player)}
+                            className={styles.editButton}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(player)}
+                            className={styles.deleteButton}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className={styles.emptyState}>
+                      {isLoadingPlayers
+                        ? "Memuat data..."
+                        : filteredPlayers.length === 0 &&
+                          playersState.players.length === 0
+                        ? "Belum ada pemain terdaftar"
+                        : "Tidak ada pemain yang sesuai dengan pencarian"}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3" className={styles.emptyState}>
-                    {isLoadingPlayers
-                      ? "Memuat data..."
-                      : filteredPlayers.length === 0 &&
-                        playersState.players.length === 0
-                      ? "Belum ada pemain terdaftar"
-                      : "Tidak ada pemain yang sesuai dengan pencarian"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className={styles.cardContainer}>

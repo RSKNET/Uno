@@ -52,9 +52,10 @@ async function handler(req, res) {
       data: enrichedData,
     });
   } catch (error) {
+    console.error("API /admin/report error:", error);
     return res.status(500).json({
       success: false,
-      error: "Terjadi kesalahan server",
+      error: "Terjadi kesalahan server: " + error.message,
     });
   }
 }

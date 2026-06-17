@@ -8,9 +8,7 @@ const Loading = ({ isVisible = false, message = "Loading..." }) => {
     <div className={styles.loadingOverlay}>
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}>
-          <div className={styles.spinnerRing}></div>
-          <div className={styles.spinnerRing}></div>
-          <div className={styles.spinnerRing}></div>
+          <div className={styles.spinnerLine}></div>
         </div>
         <p className={styles.loadingText}>{message}</p>
       </div>

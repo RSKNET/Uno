@@ -19,13 +19,13 @@ const Dashboard = ({ onNavigate, showNotification }) => {
 
   const quickActions = [
     {
-      icon: "👥",
+      icon: "P",
       title: "Kelola Pemain",
       desc: "Tambah, edit, atau hapus pemain",
       action: () => onNavigate("players"),
     },
     {
-      icon: "⚙️",
+      icon: "S",
       title: "Pengaturan",
       desc: "Konfigurasi sistem",
       action: () => onNavigate("settings"),
@@ -77,79 +77,85 @@ const Dashboard = ({ onNavigate, showNotification }) => {
   }, [fetchPlayers, showNotification, updateLoadingState]);
 
   const renderRecentPlayers = () => (
-    <div className={styles.contentCard}>
-      <div className={styles.cardHeader}>
-        <h2 className={styles.cardTitle}>Pemain Terbaru</h2>
-        <button
-          className={styles.viewAllBtn}
-          onClick={() => onNavigate("players")}
-        >
-          Lihat Semua
-        </button>
-      </div>
-      <div className={styles.cardContent}>
-        {dashboardData.recentPlayers.length > 0 ? (
-          <div className={styles.playersList}>
-            {dashboardData.recentPlayers.map((player) => (
-              <div key={player.id} className={styles.playerItem}>
-                <div className={styles.playerInfo}>
-                  <span className={styles.playerName}>{player.name}</span>
-                  <span className={styles.playerDate}>
-                    {new Date(player.joinDate).toLocaleDateString("id-ID")}
-                  </span>
+    <div className={`${styles.contentCardWrapper} double-bezel`} style={{ gridColumn: 'span 2' }}>
+      <div className={`${styles.contentCard} double-bezel-inner`}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>Pemain Terbaru</h2>
+          <button
+            className={styles.viewAllBtn}
+            onClick={() => onNavigate("players")}
+          >
+            Lihat Semua
+          </button>
+        </div>
+        <div className={styles.cardContent}>
+          {dashboardData.recentPlayers.length > 0 ? (
+            <div className={styles.playersList}>
+              {dashboardData.recentPlayers.map((player) => (
+                <div key={player.id} className={styles.playerItem}>
+                  <div className={styles.playerInfo}>
+                    <span className={styles.playerName}>{player.name}</span>
+                    <span className={styles.playerDate}>
+                      {new Date(player.joinDate).toLocaleDateString("id-ID")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>
-            <p>Belum ada pemain terdaftar</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <p>Belum ada pemain terdaftar</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 
   const renderQuickActions = () => (
-    <div className={styles.contentCard}>
-      <div className={styles.cardHeader}>
-        <h2 className={styles.cardTitle}>Aksi Cepat</h2>
-      </div>
-      <div className={styles.cardContent}>
-        <div className={styles.actionsList}>
-          {quickActions.map((action, index) => (
-            <button
-              key={index}
-              className={styles.actionBtn}
-              onClick={action.action}
-            >
-              <span className={styles.actionIcon}>{action.icon}</span>
-              <div className={styles.actionText}>
-                <p className={styles.actionTitle}>{action.title}</p>
-                <p className={styles.actionDesc}>{action.desc}</p>
-              </div>
-            </button>
-          ))}
+    <div className={`${styles.contentCardWrapper} double-bezel`}>
+      <div className={`${styles.contentCard} double-bezel-inner`}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>Aksi Cepat</h2>
+        </div>
+        <div className={styles.cardContent}>
+          <div className={styles.actionsList}>
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                className={styles.actionBtn}
+                onClick={action.action}
+              >
+                <span className={styles.actionIcon}>{action.icon}</span>
+                <div className={styles.actionText}>
+                  <p className={styles.actionTitle}>{action.title}</p>
+                  <p className={styles.actionDesc}>{action.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 
   const renderSystemInfo = () => (
-    <div className={styles.contentCard}>
-      <div className={styles.cardHeader}>
-        <h2 className={styles.cardTitle}>Informasi Sistem</h2>
-      </div>
-      <div className={styles.cardContent}>
-        <div className={styles.systemInfo}>
-          {systemInfo.map((info, index) => (
-            <div key={index} className={styles.infoItem}>
-              <span className={styles.infoLabel}>{info.label}</span>
-              <span className={`${styles.infoValue} ${info.className || ""}`}>
-                {info.value}
-              </span>
-            </div>
-          ))}
+    <div className={`${styles.contentCardWrapper} double-bezel`} style={{ gridColumn: 'span 3' }}>
+      <div className={`${styles.contentCard} double-bezel-inner`}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>Informasi Sistem</h2>
+        </div>
+        <div className={styles.cardContent}>
+          <div className={styles.systemInfo}>
+            {systemInfo.map((info, index) => (
+              <div key={index} className={styles.infoItem}>
+                <span className={styles.infoLabel}>{info.label}</span>
+                <span className={`${styles.infoValue} ${info.className || ""}`}>
+                  {info.value}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

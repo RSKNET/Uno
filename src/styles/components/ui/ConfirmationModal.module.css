@@ -4,15 +4,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: var(--z-modal);
   padding: 20px;
   opacity: 0;
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.4s var(--ease-out) forwards;
 }
 
 @keyframes fadeIn {
@@ -22,63 +23,59 @@
 }
 
 .modal {
-  background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
-  border-radius: 24px;
-  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8), 0 25px 50px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.15);
-  max-width: 520px;
+  background: rgba(18, 18, 22, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 440px;
   width: 100%;
   max-height: 90vh;
   overflow: hidden;
   position: relative;
-  transform: scale(0.9);
-  animation: modalSlideIn 0.3s ease-out forwards;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: scale(0.95) translateY(10px);
+  animation: modalSlideIn 0.5s var(--ease-spring) forwards;
 }
 
 @keyframes modalSlideIn {
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
 .closeButton {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.7);
-  z-index: 1;
+  transition: all var(--duration-normal) var(--ease-out);
+  color: var(--text-muted);
+  z-index: 10;
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  transform: scale(1.1);
-}
-
-.closeButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: rotate(90deg);
 }
 
 .closeButton svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   stroke-width: 2;
 }
 
 .content {
-  padding: 50px 40px 30px;
+  padding: 48px 36px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -86,154 +83,158 @@
 }
 
 .iconContainer {
-  margin-bottom: 28px;
-  padding: 20px;
+  margin-bottom: 24px;
+  padding: 18px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+
+.iconContainer::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: inherit;
+  filter: blur(20px);
+  opacity: 0.5;
+  z-index: -1;
 }
 
 .icon {
-  width: 48px;
-  height: 48px;
-  stroke-width: 2;
-  color: #ffffff;
+  width: 42px;
+  height: 42px;
+  stroke-width: 1.5;
+  color: var(--text-primary);
 }
 
 .textContent {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0 0 12px 0;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 .message {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
-  max-width: 400px;
+  max-width: 380px;
 }
 
 .actions {
-  padding: 30px 40px 40px;
+  padding: 0 36px 36px;
   display: flex;
   gap: 16px;
   justify-content: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.1);
 }
 
 .button {
   flex: 1;
-  max-width: 160px;
-  padding: 16px 32px;
+  padding: 14px 24px;
   border: none;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  min-height: 54px;
+  transition: all var(--duration-normal) var(--ease-spring);
   display: flex;
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
 }
 
-.button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+.button:active {
+  transform: scale(0.96);
 }
 
 .cancelButton {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cancelButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .confirmButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.25);
 }
 
 .confirmButton:hover {
-  background: linear-gradient(135deg, #7c8cf0 0%, #8b5fbf 100%);
+  background: var(--accent-hover);
+  box-shadow: 0 12px 32px rgba(var(--accent-rgb), 0.35);
   transform: translateY(-2px);
 }
 
 /* Type variants */
 .danger .iconContainer {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .danger .icon {
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .dangerConfirm {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--danger);
 }
 
 .dangerConfirm:hover {
-  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-  transform: translateY(-2px);
+  background: #c4514b;
 }
 
 .success .iconContainer {
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 
 .success .icon {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .successConfirm {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--success);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.25);
 }
 
 .successConfirm:hover {
-  background: linear-gradient(135deg, #48cc6c 0%, #22c55e 100%);
-  transform: translateY(-2px);
+  background: #16a34a;
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.35);
 }
 
 .warning .iconContainer {
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
 .warning .icon {
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .warningConfirm {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--warning);
+  color: var(--bg-primary);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
 }
 
 .warningConfirm:hover {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  transform: translateY(-2px);
+  background: #d97706;
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.35);
 }
 
 /* Responsive */
@@ -243,7 +244,7 @@
   }
 
   .modal {
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     max-width: 100%;
   }
 
@@ -252,15 +253,15 @@
   }
 
   .title {
-    font-size: 20px;
+    font-size: 1.1rem;
   }
 
   .message {
-    font-size: 14px;
+    font-size: 0.85rem;
   }
 
   .actions {
-    padding: 20px 24px 24px;
+    padding: 18px 24px 24px;
     flex-direction: column;
   }
 
@@ -277,17 +278,17 @@
   }
 
   .closeButton svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
   }
 
   .icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .iconContainer {
     padding: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 }
