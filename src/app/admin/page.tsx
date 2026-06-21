@@ -105,11 +105,13 @@ export default function AdminLoginPage() {
           </div>
 
 
-          <div className="bg-zinc-900/50 border border-zinc-800/40 p-3 rounded-xl text-[10px] text-zinc-500 text-center leading-relaxed">
-            <span className="font-bold text-zinc-400">Kredensial Pengujian:</span><br />
-            Email: admin@unoskors.com<br />
-            Password: password123
-          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-zinc-900/50 border border-zinc-800/40 p-3 rounded-xl text-[10px] text-zinc-500 text-center leading-relaxed">
+              <span className="font-bold text-zinc-400">Kredensial Pengujian:</span><br />
+              Email: admin@unoskors.com<br />
+              Password: password123
+            </div>
+          )}
 
         </div>
       </div>
