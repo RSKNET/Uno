@@ -1,0 +1,3 @@
+# Supabase Local CLI Metadata & Temp Files
+.temp/
+.branches/
