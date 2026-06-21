@@ -93,40 +93,40 @@ DROP POLICY IF EXISTS "Allow admin write on settings" ON public.settings;
 
 -- Policies for players
 CREATE POLICY "Allow public select on players" ON public.players
-    FOR SELECT TO anon, authenticated USING (true);
+    FOR SELECT TO anon USING (true);
 
 CREATE POLICY "Allow public insert on players" ON public.players
-    FOR INSERT TO anon, authenticated WITH CHECK (name IS NOT NULL AND length(trim(name)) > 0);
+    FOR INSERT TO anon WITH CHECK (name IS NOT NULL AND length(trim(name)) > 0);
 
 CREATE POLICY "Allow admin update/delete on players" ON public.players
-    FOR ALL TO authenticated USING (auth.jwt() ->> 'email' = 'admin@unoskors.com') WITH CHECK (auth.jwt() ->> 'email' = 'admin@unoskors.com');
+    FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 -- Policies for games
 CREATE POLICY "Allow public select on games" ON public.games
-    FOR SELECT TO anon, authenticated USING (true);
+    FOR SELECT TO anon USING (true);
 
 CREATE POLICY "Allow public insert on games" ON public.games
-    FOR INSERT TO anon, authenticated WITH CHECK (total_players >= 2 AND total_rounds >= 1);
+    FOR INSERT TO anon WITH CHECK (total_players >= 2 AND total_rounds >= 1);
 
 CREATE POLICY "Allow admin modify on games" ON public.games
-    FOR ALL TO authenticated USING (auth.jwt() ->> 'email' = 'admin@unoskors.com') WITH CHECK (auth.jwt() ->> 'email' = 'admin@unoskors.com');
+    FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 -- Policies for game_scores
 CREATE POLICY "Allow public select on game_scores" ON public.game_scores
-    FOR SELECT TO anon, authenticated USING (true);
+    FOR SELECT TO anon USING (true);
 
 CREATE POLICY "Allow public insert on game_scores" ON public.game_scores
-    FOR INSERT TO anon, authenticated WITH CHECK (round_number >= 1 AND rank >= 1 AND calculated_score >= 0);
+    FOR INSERT TO anon WITH CHECK (round_number >= 1 AND rank >= 1 AND calculated_score >= 0);
 
 CREATE POLICY "Allow admin modify on game_scores" ON public.game_scores
-    FOR ALL TO authenticated USING (auth.jwt() ->> 'email' = 'admin@unoskors.com') WITH CHECK (auth.jwt() ->> 'email' = 'admin@unoskors.com');
+    FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 -- Policies for settings (anyone can view, admin updates)
 CREATE POLICY "Allow public select on settings" ON public.settings
-    FOR SELECT TO anon, authenticated USING (true);
+    FOR SELECT TO anon USING (true);
 
 CREATE POLICY "Allow admin write on settings" ON public.settings
-    FOR ALL TO authenticated USING (auth.jwt() ->> 'email' = 'admin@unoskors.com') WITH CHECK (auth.jwt() ->> 'email' = 'admin@unoskors.com');
+    FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 -- ==========================================
 -- 4. Enable Realtime Replication
@@ -214,7 +214,19 @@ DROP POLICY IF EXISTS "Allow public select" ON storage.objects;
 DROP POLICY IF EXISTS "Allow admin all on storage" ON storage.objects;
 
 CREATE POLICY "Allow public upload" ON storage.objects
-    FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'game-reports');
+    FOR INSERT TO anon WITH CHECK (bucket_id = 'game-reports');
 
 CREATE POLICY "Allow admin all on storage" ON storage.objects
-    FOR ALL TO authenticated USING (bucket_id = 'game-reports' AND (auth.jwt() ->> 'email' = 'admin@unoskors.com')) WITH CHECK (bucket_id = 'game-reports' AND (auth.jwt() ->> 'email' = 'admin@unoskors.com'));
+    FOR ALL TO authenticated USING (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com')) WITH CHECK (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com'));
+
+-- ==========================================
+-- 7. Utility Ping Function
+-- ==========================================
+CREATE OR REPLACE FUNCTION "public"."ping"() RETURNS "text"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+  RETURN 'success';
+END;
+$$;
