@@ -41,7 +41,6 @@ type SetupFormValues = z.infer<typeof setupSchema>;
 
 export default function SetupPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dbPlayers, setDbPlayers] = useState<{ id: string; name: string }[]>([]);
   const [maxPlayersLimit, setMaxPlayersLimit] = useState<number>(8);
@@ -83,8 +82,6 @@ export default function SetupPage() {
   };
 
   useEffect(() => {
-    setMounted(true);
-
     const loadSettingsAndPlayers = async () => {
       try {
         const { data: playersData, error: playersError } = await supabase.from('players').select('id, name');
@@ -245,8 +242,6 @@ export default function SetupPage() {
       setLoading(false);
     }
   };
-
-  if (!mounted) return null;
 
   const playerButtons = Array.from({ length: maxPlayersLimit - 1 }, (_, i) => i + 2);
 

@@ -129,7 +129,7 @@ export default function GameSummaryPage({ params }: PageProps) {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-6 justify-center transition-colors duration-500">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-6 justify-center transition-colors duration-500 overflow-x-hidden">
       
       
       <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70%] h-[40%] rounded-full bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-teal-500/10 blur-[140px] pointer-events-none" />

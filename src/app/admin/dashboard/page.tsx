@@ -537,7 +537,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex flex-row min-h-screen bg-[#050505] text-zinc-50 w-full max-w-[98%] mx-auto relative transition-colors duration-500">
+    <div className="flex flex-row min-h-screen bg-[#050505] text-zinc-50 w-full max-w-[98%] mx-auto relative transition-colors duration-500 overflow-x-hidden">
       
       
       <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />

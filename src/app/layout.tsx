@@ -18,7 +18,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Uno Skors",
   description: "Pencatat skor digital UNO modern, estetik, support offline mode, dan unduh PDF. Dirancang untuk anak muda.",
-  manifest: "/manifest.json",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",

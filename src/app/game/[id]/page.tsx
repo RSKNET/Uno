@@ -325,7 +325,7 @@ export default function GamePage({ params }: PageProps) {
   const isGameOver = !game.isUnlimitedRounds && game.rounds.length >= game.totalRounds;
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-12 transition-colors duration-500">
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-12 transition-colors duration-500 overflow-x-hidden">
       
       {/* Background Soft Blobs */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none dark:block hidden" />

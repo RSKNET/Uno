@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
   if (!mounted) return null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6 bg-zinc-950 text-zinc-100 relative">
+    <div className="flex min-h-screen items-center justify-center p-6 bg-zinc-950 text-zinc-100 relative overflow-x-hidden">
       
 
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />
