@@ -49,6 +49,14 @@ export default function AdminDashboard() {
   
   const [user, setUser] = useState<any>(null);
 
+  // Latency, Connection & System metrics state
+  const [latency, setLatency] = useState<number | null>(null);
+  const [apiConnected, setApiConnected] = useState<boolean | 'checking'>('checking');
+  const [dbEngine, setDbEngine] = useState<string>("PostgreSQL (Supabase Cloud)");
+  const [rlsActive, setRlsActive] = useState<boolean | 'checking'>('checking');
+  const [settingsActive, setSettingsActive] = useState<boolean | 'checking'>('checking');
+  const [serverLocation, setServerLocation] = useState<string>("Singapore (ap-southeast-1)");
+
   
   const [players, setPlayers] = useState<Player[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,6 +130,59 @@ export default function AdminDashboard() {
       
       setUser(session.user);
       
+      // Ping Supabase to test connectivity and measure latency dynamically
+      const startPing = performance.now();
+      try {
+        const { data: pingResult, error: pingError } = await supabase.rpc('ping');
+        const endPing = performance.now();
+        if (pingError) throw pingError;
+        if (pingResult === 'success') {
+          setLatency(Math.round(endPing - startPing));
+          setApiConnected(true);
+        } else {
+          setApiConnected(false);
+        }
+      } catch (err) {
+        console.error('Failed to ping Supabase API:', err);
+        setApiConnected(false);
+      }
+
+      // Fetch dynamic system metrics from Database
+      try {
+        const { data: metricsData, error: metricsError } = await supabase.rpc('get_system_metrics');
+        if (metricsError) throw metricsError;
+        
+        if (metricsData) {
+          // Check if database is local or cloud
+          const isLocal = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost') || 
+                          process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('127.0.0.1');
+          const envTag = isLocal ? "Local Docker" : "Supabase Cloud";
+
+          // PostgreSQL version parsing
+          const verString = metricsData.db_version || '';
+          const matchVer = verString.match(/PostgreSQL \d+(\.\d+)*/i);
+          if (matchVer) {
+            setDbEngine(matchVer[0] + ` (${envTag})`);
+          } else {
+            setDbEngine(`PostgreSQL (${envTag})`);
+          }
+
+          setRlsActive(metricsData.rls_enabled);
+          setSettingsActive(metricsData.settings_active);
+          
+          // Server timezone
+          const tz = metricsData.timezone || '';
+          if (isLocal) {
+            setServerLocation(`Lokal (${tz || 'UTC'})`);
+          } else {
+            setServerLocation(`Singapore (${tz || 'ap-southeast-1'})`);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch system metrics:', err);
+        setRlsActive(false);
+        setSettingsActive(false);
+      }
       
       await fetchPlayers();
       
@@ -775,30 +836,56 @@ export default function AdminDashboard() {
                   <div className="space-y-3.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Database Engine</span>
-                      <span className="font-semibold text-zinc-200">PostgreSQL (Supabase Cloud)</span>
+                      <span className="font-semibold text-zinc-200">{dbEngine}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Status Koneksi API</span>
-                      <span className="text-emerald-400 font-bold">TERHUBUNG (OK)</span>
+                      {apiConnected === 'checking' && (
+                        <span className="text-zinc-400 font-semibold">Memeriksa...</span>
+                      )}
+                      {apiConnected === true && (
+                        <span className="text-emerald-400 font-bold">TERHUBUNG (OK)</span>
+                      )}
+                      {apiConnected === false && (
+                        <span className="text-red-500 font-bold">TERPUTUS (ERROR)</span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Tabel Realtime Settings</span>
-                      <span className="text-emerald-400 font-semibold">Aktif & Sinkron</span>
+                      {settingsActive === 'checking' && (
+                        <span className="text-zinc-400 font-semibold">Memeriksa...</span>
+                      )}
+                      {settingsActive === true && (
+                        <span className="text-emerald-400 font-semibold">Aktif & Sinkron</span>
+                      )}
+                      {settingsActive === false && (
+                        <span className="text-red-500 font-semibold">Gangguan / Bermasalah</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-3.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Supabase RLS Policy</span>
-                      <span className="text-emerald-400 font-semibold">Aktif (Aman)</span>
+                      {rlsActive === 'checking' && (
+                        <span className="text-zinc-400 font-semibold">Memeriksa...</span>
+                      )}
+                      {rlsActive === true && (
+                        <span className="text-emerald-400 font-semibold">Aktif (Aman)</span>
+                      )}
+                      {rlsActive === false && (
+                        <span className="text-red-500 font-semibold">TIDAK AMAN (Non-RLS)</span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Latency Check</span>
-                      <span className="font-mono text-zinc-200">&lt; 15ms</span>
+                      <span className="font-mono text-zinc-200">
+                        {latency !== null ? `${latency}ms` : 'Mengukur...'}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-zinc-400">Lokasi Server</span>
-                      <span className="font-semibold text-zinc-200">Singapore (ap-southeast-1)</span>
+                      <span className="font-semibold text-zinc-200">{serverLocation}</span>
                     </div>
                   </div>
                 </div>
