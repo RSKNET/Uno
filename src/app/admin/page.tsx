@@ -69,6 +69,8 @@ export default function AdminLoginPage() {
           <div className="supabase-auth-container">
             <Auth
               supabaseClient={supabase}
+              view="sign_in"
+              showLinks={false}
               appearance={{
                 theme: ThemeSupa,
                 variables: {
