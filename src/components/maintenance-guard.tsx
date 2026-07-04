@@ -10,6 +10,13 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      if (isStandalone && !pathname?.startsWith('/admin')) {
+        router.replace('/admin');
+        return;
+      }
+    }
 
     const isAdminRoute = pathname?.startsWith('/admin');
 

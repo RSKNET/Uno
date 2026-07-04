@@ -10,9 +10,15 @@ import { Shield, ArrowLeft } from 'lucide-react';
 export default function AdminLoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [isPwa, setIsPwa] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    if (typeof window !== 'undefined') {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      setIsPwa(!!standalone);
+    }
 
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -44,13 +50,15 @@ export default function AdminLoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />
 
 
-      <button
-        onClick={() => router.push('/')}
-        className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-200 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to App
-      </button>
+      {!isPwa && (
+        <button
+          onClick={() => router.push('/')}
+          className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-200 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to App
+        </button>
+      )}
 
       <div className="bezel-outer max-w-sm w-full relative z-10">
         <div className="bezel-inner p-6 sm:p-8 space-y-6">
