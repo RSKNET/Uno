@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
 import { Settings, Wrench, ShieldAlert } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: "Pemeliharaan Sistem | UNO Skors",
+  description: "Sistem sedang dalam pemeliharaan rutin. Silakan kembali lagi nanti.",
+};
 
 export default function MaintenancePage() {
   return (
