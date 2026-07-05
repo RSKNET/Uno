@@ -11,13 +11,7 @@ CREATE TABLE IF NOT EXISTS public.players (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_players_name_lower ON public.players (LOWER(name));
 
-CREATE TABLE IF NOT EXISTS public.games (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    total_players INTEGER NOT NULL,
-    total_rounds INTEGER NOT NULL,
-    is_unlimited_rounds BOOLEAN DEFAULT false NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+
 
 
 
@@ -39,13 +33,13 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 -- 3. Row Level Security (RLS) Configuration
 -- ==========================================
 ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
+
 
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT, INSERT ON public.players TO anon, authenticated;
 GRANT ALL ON public.players TO authenticated;
-GRANT ALL ON public.games TO anon, authenticated;
+
 
 GRANT SELECT ON public.settings TO anon, authenticated;
 GRANT ALL ON public.settings TO authenticated;
@@ -60,15 +54,7 @@ CREATE POLICY "Allow public select on players" ON public.players FOR SELECT TO a
 CREATE POLICY "Allow public insert on players" ON public.players FOR INSERT TO anon WITH CHECK (name IS NOT NULL AND length(trim(name)) > 0);
 CREATE POLICY "Allow admin update/delete on players" ON public.players FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
--- Bersihkan policy lama games
-DROP POLICY IF EXISTS "Allow public select on games" ON public.games;
-DROP POLICY IF EXISTS "Allow public insert on games" ON public.games;
-DROP POLICY IF EXISTS "Allow admin modify on games" ON public.games;
 
--- Policies for games
-CREATE POLICY "Allow public select on games" ON public.games FOR SELECT TO anon USING (true);
-CREATE POLICY "Allow public insert on games" ON public.games FOR INSERT TO anon WITH CHECK (total_players >= 2 AND total_rounds >= 1);
-CREATE POLICY "Allow admin modify on games" ON public.games FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 
 
@@ -102,7 +88,7 @@ DECLARE
   v_version text; v_rls_enabled boolean; v_settings_active boolean; v_timezone text;
 BEGIN
   SELECT version() INTO v_version;
-  SELECT COALESCE(bool_and(rowsecurity), false) INTO v_rls_enabled FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('players', 'games', 'scores', 'settings');
+  SELECT COALESCE(bool_and(rowsecurity), false) INTO v_rls_enabled FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('players', 'settings');
   BEGIN PERFORM count(*) FROM public.settings; v_settings_active := true; EXCEPTION WHEN OTHERS THEN v_settings_active := false; END;
   SELECT current_setting('timezone') INTO v_timezone;
   RETURN json_build_object('db_version', v_version, 'rls_enabled', v_rls_enabled, 'settings_active', v_settings_active, 'timezone', v_timezone);

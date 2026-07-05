@@ -51,22 +51,6 @@ export async function syncOfflineData(): Promise<{ success: boolean; count: numb
         }
 
 
-        const { error: insertGameError } = await supabase
-          .from('games')
-          .upsert({
-            id: gameData.id,
-            total_players: gameData.totalPlayers,
-            total_rounds: gameData.totalRounds,
-            is_unlimited_rounds: gameData.isUnlimitedRounds,
-            created_at: new Date(gameData.createdAt).toISOString()
-          });
-
-        if (insertGameError) {
-          console.error('Error upserting game:', insertGameError);
-          throw insertGameError;
-        }
-
-
         if (gameData.status === 'completed') {
           try {
             const updatedPlayers = gameData.players.map(p => ({
