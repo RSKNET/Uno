@@ -19,10 +19,7 @@ export const metadata: Metadata = {
   title: "Uno Skors",
   description: "Pencatat skor digital UNO modern, estetik, support offline mode, dan unduh PDF. Dirancang untuk anak muda.",
   icons: {
-    icon: [
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-    ],
+    icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
 };
@@ -39,6 +36,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="preconnect" href="https://ailhpydenmwgoboveemj.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://ailhpydenmwgoboveemj.supabase.co" />
         <script dangerouslySetInnerHTML={{ __html: "var __name = (t, v) => t; window.__name = __name;" }} />
       </head>
       <body className="min-h-full flex flex-col">
