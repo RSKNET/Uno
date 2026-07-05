@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { localDb, type GameCache } from './db';
+import { encodeGame } from './codec';
 
 
 export async function syncOfflineData(): Promise<{ success: boolean; count: number; message: string }> {
@@ -66,34 +67,6 @@ export async function syncOfflineData(): Promise<{ success: boolean; count: numb
         }
 
 
-        const scoresToInsert = [];
-        for (const round of gameData.rounds) {
-          for (const [localPlayerId, roundDetails] of Object.entries(round.scores)) {
-            const supabasePlayerId = playerMap[localPlayerId];
-            if (!supabasePlayerId) continue;
-
-            scoresToInsert.push({
-              game_id: gameData.id,
-              player_id: supabasePlayerId,
-              round_number: round.roundNumber,
-              rank: roundDetails.rank,
-              calculated_score: roundDetails.score
-            });
-          }
-        }
-
-        if (scoresToInsert.length > 0) {
-          const { error: insertScoresError } = await supabase
-            .from('game_scores')
-            .upsert(scoresToInsert, { onConflict: 'game_id,player_id,round_number' });
-
-          if (insertScoresError) {
-            console.error('Error upserting game scores:', insertScoresError);
-            throw insertScoresError;
-          }
-        }
-
-
         if (gameData.status === 'completed') {
           try {
             const updatedPlayers = gameData.players.map(p => ({
@@ -122,13 +95,13 @@ export async function syncOfflineData(): Promise<{ success: boolean; count: numb
               rounds: updatedRounds
             };
 
-            const fileContent = JSON.stringify(reportData);
-            const blob = new Blob([fileContent], { type: 'application/json' });
+            const binaryData = encodeGame(reportData);
+            const blob = new Blob([binaryData as any], { type: 'application/x-msgpack' });
             
             const { error: uploadError } = await supabase.storage
               .from('game-reports')
-              .upload(`${gameData.id}.json`, blob, {
-                contentType: 'application/json',
+              .upload(`${gameData.id}.msgpack`, blob, {
+                contentType: 'application/x-msgpack',
                 upsert: true
               });
             

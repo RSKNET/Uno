@@ -19,18 +19,7 @@ CREATE TABLE IF NOT EXISTS public.games (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS public.game_scores (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    game_id UUID REFERENCES public.games(id) ON DELETE CASCADE NOT NULL,
-    player_id UUID REFERENCES public.players(id) ON DELETE CASCADE NOT NULL,
-    round_number INTEGER NOT NULL,
-    rank INTEGER NOT NULL,
-    calculated_score INTEGER NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    CONSTRAINT unique_game_player_round UNIQUE (game_id, player_id, round_number)
-);
-CREATE INDEX IF NOT EXISTS idx_game_scores_game_id ON public.game_scores(game_id);
-CREATE INDEX IF NOT EXISTS idx_game_scores_player_id ON public.game_scores(player_id);
+
 
 CREATE TABLE IF NOT EXISTS public.settings (
     key VARCHAR(255) PRIMARY KEY,
@@ -51,13 +40,13 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 -- ==========================================
 ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.game_scores ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT, INSERT ON public.players TO anon, authenticated;
 GRANT ALL ON public.players TO authenticated;
 GRANT ALL ON public.games TO anon, authenticated;
-GRANT ALL ON public.game_scores TO anon, authenticated;
+
 GRANT SELECT ON public.settings TO anon, authenticated;
 GRANT ALL ON public.settings TO authenticated;
 
@@ -81,15 +70,7 @@ CREATE POLICY "Allow public select on games" ON public.games FOR SELECT TO anon 
 CREATE POLICY "Allow public insert on games" ON public.games FOR INSERT TO anon WITH CHECK (total_players >= 2 AND total_rounds >= 1);
 CREATE POLICY "Allow admin modify on games" ON public.games FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
--- Bersihkan policy lama game_scores
-DROP POLICY IF EXISTS "Allow public select on game_scores" ON public.game_scores;
-DROP POLICY IF EXISTS "Allow public insert on game_scores" ON public.game_scores;
-DROP POLICY IF EXISTS "Allow admin modify on game_scores" ON public.game_scores;
 
--- Policies for game_scores
-CREATE POLICY "Allow public select on game_scores" ON public.game_scores FOR SELECT TO anon USING (true);
-CREATE POLICY "Allow public insert on game_scores" ON public.game_scores FOR INSERT TO anon WITH CHECK (round_number >= 1 AND rank >= 1 AND calculated_score >= 0);
-CREATE POLICY "Allow admin modify on game_scores" ON public.game_scores FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
 
 -- Bersihkan policy lama settings
 DROP POLICY IF EXISTS "Allow public select on settings" ON public.settings;

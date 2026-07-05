@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { decodeGame } from '@/lib/codec';
 
 export interface Player {
   id: string;
@@ -46,7 +47,7 @@ export default function useAdminDashboard() {
 
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [selectedGameLeaderboard, setSelectedGameLeaderboard] = useState<any[]>([]);
-  const [, setSelectedGameRounds] = useState<any[]>([]);
+
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [selectedGameReportData, setSelectedGameReportData] = useState<any | null>(null);
 
@@ -206,10 +207,10 @@ export default function useAdminDashboard() {
       if (listError) throw listError;
 
       if (files) {
-        const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+        const msgpackFiles = files.filter(f => f.name.endsWith('.msgpack'));
         
         const fetchedGames = await Promise.all(
-          jsonFiles.map(async (file) => {
+          msgpackFiles.map(async (file) => {
             try {
               const { data, error } = await supabase.storage
                 .from('game-reports')
@@ -217,8 +218,8 @@ export default function useAdminDashboard() {
               
               if (error) return null;
               if (data) {
-                const text = await data.text();
-                const parsed = JSON.parse(text);
+                const buffer = await data.arrayBuffer();
+                const parsed = decodeGame(new Uint8Array(buffer));
                 return {
                   id: parsed.id,
                   total_players: parsed.totalPlayers,
@@ -228,7 +229,7 @@ export default function useAdminDashboard() {
                 };
               }
             } catch (err) {
-              console.error(`Error loading game json for ${file.name}:`, err);
+              console.error(`Error loading game msgpack for ${file.name}:`, err);
             }
             return null;
           })
@@ -254,34 +255,34 @@ export default function useAdminDashboard() {
     setLoadingSummary(true);
     setSelectedGame(g);
     try {
-      let parsedJson: any = null;
+      let parsedGame: any = null;
       try {
         const { data, error } = await supabase.storage
           .from('game-reports')
-          .download(`${g.id}.json`);
+          .download(`${g.id}.msgpack`);
 
         if (error) {
           if (error.message?.includes('Object not found') || (error as any).status === 404 || (error as any).status === 400) {
-            console.log(`Report JSON not found in storage for game ${g.id}, querying database tables instead.`);
+            console.log(`Report msgpack not found in storage for game ${g.id}`);
           } else {
             console.warn('Storage API error during game report download:', error);
           }
         } else if (data) {
-          const text = await data.text();
-          parsedJson = JSON.parse(text);
+          const buffer = await data.arrayBuffer();
+          parsedGame = decodeGame(new Uint8Array(buffer));
         }
       } catch (storageErr) {
         console.warn('Unexpected error loading game report from storage:', storageErr);
       }
 
-      if (parsedJson) {
+      if (parsedGame) {
         const playerMap: { [id: string]: { name: string, totalScore: number, rankCounts: { [rank: number]: number } } } = {};
         
-        parsedJson.players.forEach((p: any) => {
+        parsedGame.players.forEach((p: any) => {
           playerMap[p.id] = { name: p.name, totalScore: 0, rankCounts: {} };
         });
 
-        parsedJson.rounds.forEach((round: any) => {
+        parsedGame.rounds.forEach((round: any) => {
           Object.entries(round.scores).forEach(([pid, scoreObj]: [string, any]) => {
             if (playerMap[pid]) {
               playerMap[pid].totalScore += scoreObj.score;
@@ -290,7 +291,7 @@ export default function useAdminDashboard() {
           });
         });
 
-        const N = parsedJson.totalPlayers;
+        const N = parsedGame.totalPlayers;
         const leaderboard = Object.entries(playerMap).map(([id, val]) => ({
           id,
           ...val
@@ -309,97 +310,13 @@ export default function useAdminDashboard() {
         });
 
         setSelectedGameLeaderboard(leaderboard);
-        setSelectedGameRounds(parsedJson.rounds);
-        setSelectedGameReportData(parsedJson);
+        setSelectedGameReportData(parsedGame);
       } else {
-        const { data: scoresData, error: scoresError } = await supabase
-          .from('game_scores')
-          .select(`
-            player_id,
-            calculated_score,
-            rank,
-            round_number,
-            players (
-              name
-            )
-          `)
-          .eq('game_id', g.id);
-
-        if (scoresError) throw scoresError;
-
-        if (scoresData) {
-          const playerMap: { [id: string]: { name: string, totalScore: number, rankCounts: { [rank: number]: number } } } = {};
-          
-          scoresData.forEach((item: any) => {
-            const pid = item.player_id;
-            const name = item.players?.name || 'Pemain Terhapus';
-            if (!playerMap[pid]) {
-              playerMap[pid] = { name, totalScore: 0, rankCounts: {} };
-            }
-            playerMap[pid].totalScore += item.calculated_score;
-            playerMap[pid].rankCounts[item.rank] = (playerMap[pid].rankCounts[item.rank] || 0) + 1;
-          });
-
-          const N = g.total_players;
-          const leaderboard = Object.entries(playerMap).map(([id, val]) => ({
-            id,
-            ...val
-          })).sort((a, b) => {
-            const scoreDiff = b.totalScore - a.totalScore;
-            if (scoreDiff !== 0) return scoreDiff;
-
-            for (let r = 1; r <= N; r++) {
-              const countA = a.rankCounts[r] || 0;
-              const countB = b.rankCounts[r] || 0;
-              if (countB !== countA) {
-                return countB - countA;
-              }
-            }
-            return 0;
-          });
-
-          setSelectedGameLeaderboard(leaderboard);
-
-          const roundsMap: { [roundNumber: number]: { roundNumber: number, scores: { [pid: string]: { score: number, rank: number } } } } = {};
-          scoresData.forEach((item: any) => {
-            const rNum = item.round_number;
-            if (!roundsMap[rNum]) {
-              roundsMap[rNum] = { roundNumber: rNum, scores: {} };
-            }
-            roundsMap[rNum].scores[item.player_id] = {
-              score: item.calculated_score,
-              rank: item.rank
-            };
-          });
-
-          const roundsList = Object.values(roundsMap).sort((a, b) => a.roundNumber - b.roundNumber);
-          setSelectedGameRounds(roundsList);
-
-          const playersList = Object.entries(playerMap).map(([id, val]) => ({
-            id,
-            name: val.name
-          }));
-          const reportData = {
-            id: g.id,
-            totalPlayers: g.total_players,
-            totalRounds: g.total_rounds,
-            isUnlimitedRounds: g.is_unlimited_rounds,
-            createdAt: g.created_at,
-            players: playersList,
-            rounds: roundsList.map((r: any) => ({
-              roundNumber: r.roundNumber,
-              scores: Object.entries(r.scores).reduce((acc: any, [pid, sObj]: [string, any]) => {
-                acc[pid] = { score: sObj.score, rank: sObj.rank };
-                return acc;
-              }, {})
-            }))
-          };
-          setSelectedGameReportData(reportData);
-        }
+        throw new Error('File laporan (.msgpack) tidak ditemukan di cloud storage.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching game summary detail:', err);
-      showModal("Gagal Memuat", "Gagal memuat ringkasan game.", () => {}, 'alert', 'error');
+      showModal("Gagal Memuat", err?.message || "Gagal memuat ringkasan game.", () => {}, 'alert', 'error');
     } finally {
       setLoadingSummary(false);
     }
