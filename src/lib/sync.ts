@@ -85,13 +85,15 @@ export async function syncOfflineData(): Promise<{ success: boolean; count: numb
             const { error: uploadError } = await supabase.storage
               .from('game-reports')
               .upload(`${gameData.id}.msgpack`, blob, {
-                contentType: 'application/x-msgpack',
-                upsert: true
+                contentType: 'application/x-msgpack'
               });
             
             if (uploadError) {
-              console.error('Error uploading game report to storage:', uploadError);
-              throw uploadError;
+              const isDuplicate = uploadError.status === 409 || uploadError.message?.includes('already exists');
+              if (!isDuplicate) {
+                console.error('Error uploading game report to storage:', uploadError);
+                throw uploadError;
+              }
             }
           } catch (uploadErr) {
             console.error('Failed to upload completed game report during sync:', uploadErr);

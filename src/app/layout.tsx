@@ -38,6 +38,9 @@ export default function RootLayout({
       className={`${outfit.variable} ${plusJakartaSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "var __name = (t, v) => t; window.__name = __name;" }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"

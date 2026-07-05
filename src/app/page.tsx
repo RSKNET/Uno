@@ -267,7 +267,7 @@ export default function SetupPage() {
           
           <div className="lg:col-span-5 space-y-8 text-center lg:text-left">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/15 text-[10px] font-bold tracking-widest uppercase font-display mx-auto lg:mx-0">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20 dark:border-rose-500/30 text-[10px] font-bold tracking-widest uppercase font-display mx-auto lg:mx-0">
                 <Sparkles className="w-3 h-3" />
                 Catat Skor Instan
               </div>
@@ -285,7 +285,7 @@ export default function SetupPage() {
                   <Swords className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Aturan Anti-Seri</h4>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Aturan Anti-Seri</span>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Sistem otomatis memecahkan skor seri berdasarkan rekapitulasi kemenangan tertinggi.</p>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function SetupPage() {
                   <Trophy className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Main Offline / Online</h4>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Main Offline / Online</span>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Data aman di lokal saat koneksi terputus dan otomatis disinkronkan saat terhubung kembali.</p>
                 </div>
               </div>
@@ -306,9 +306,9 @@ export default function SetupPage() {
             <div className="bezel-outer w-full">
               <div className="bezel-inner p-6 sm:p-8 space-y-6">
                 
-                <h3 className="text-lg font-bold font-display flex items-center gap-2">
+                <h2 className="text-lg font-bold font-display flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                   <Users className="w-5 h-5 text-rose-500" /> Pengaturan Match
-                </h3>
+                </h2>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                   
@@ -337,10 +337,11 @@ export default function SetupPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 mb-2">
+                      <label htmlFor="totalRounds" className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 flex items-center gap-2 mb-2">
                         Jumlah Babak
                       </label>
                       <input
+                        id="totalRounds"
                         type="number"
                         disabled={isUnlimitedRoundsWatch}
                         {...register('totalRounds', { valueAsNumber: true })}
@@ -366,9 +367,9 @@ export default function SetupPage() {
                   <div className="w-full h-px bg-zinc-200 dark:bg-zinc-800/80" />
 
                   <div className="space-y-4">
-                    <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                    <span className="block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                       Nama Pemain
-                    </label>
+                    </span>
                     
                     {errors.players && (
                       <p className="text-xs text-red-500 font-medium bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl">
@@ -382,6 +383,7 @@ export default function SetupPage() {
                           <input
                             type="text"
                             placeholder={`Pemain ${index + 1}`}
+                            aria-label={`Nama Pemain ${index + 1}`}
                             {...register(`players.${index}.name` as const, {
                               onChange: (e) => {
                                 checkPlayerName(index, e.target.value);
@@ -438,7 +440,7 @@ export default function SetupPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-500 dark:bg-rose-600 text-white py-3.5 text-sm font-bold transition-all hover:bg-rose-600 dark:hover:bg-rose-700 shadow-lg shadow-rose-500/20 active:scale-[0.98] disabled:opacity-50 mt-2"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-700 text-white py-3.5 text-sm font-bold transition-all shadow-lg shadow-rose-500/20 active:scale-[0.98] disabled:opacity-50 mt-2"
                   >
                     {loading ? (
                       <>
