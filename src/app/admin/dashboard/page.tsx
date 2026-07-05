@@ -1,7 +1,6 @@
 "use client";
 
 import { CustomModal } from '@/components/modal';
-import { exportGamePdf } from '@/lib/pdf-template';
 import Sidebar from './components/Sidebar';
 import DashboardTab from './components/DashboardTab';
 import PlayerTab from './components/PlayerTab';
@@ -53,6 +52,11 @@ export default function AdminDashboard() {
     handleSavePlayer,
     handleDeletePlayer
   } = useAdminDashboard();
+
+  const handleExportPdf = async (game: any) => {
+    const { exportGamePdf } = await import('@/lib/pdf-template');
+    exportGamePdf(game);
+  };
 
   if (!mounted) return null;
 
@@ -144,7 +148,7 @@ export default function AdminDashboard() {
           setSelectedGameLeaderboard([]);
           setSelectedGameReportData(null);
         }}
-        onExportPdf={exportGamePdf}
+        onExportPdf={handleExportPdf}
       />
 
       <PlayerModal

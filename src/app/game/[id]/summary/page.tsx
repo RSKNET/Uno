@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { localDb, type GameCache } from '@/lib/db';
 import { Home, Download, Award, Calendar, BarChart2, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { exportGamePdf } from '@/lib/pdf-template';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -116,8 +115,9 @@ export default function GameSummaryPage({ params }: PageProps) {
   const otherPlaces = leaderboard.slice(3);
 
   
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!game) return;
+    const { exportGamePdf } = await import('@/lib/pdf-template');
     exportGamePdf(game);
   };
 

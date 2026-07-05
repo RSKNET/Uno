@@ -41,9 +41,6 @@ export default function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://ailhpydenmwgoboveemj.supabase.co" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://ailhpydenmwgoboveemj.supabase.co" crossOrigin="use-credentials" />
-        <link rel="preconnect" href="https://ailhpydenmwgoboveemj.supabase.co" />
-        <link rel="dns-prefetch" href="https://ailhpydenmwgoboveemj.supabase.co" />
         <script dangerouslySetInnerHTML={{ __html: "var __name = (t, v) => t; window.__name = __name;" }} />
       </head>
       <body className="min-h-full flex flex-col">
