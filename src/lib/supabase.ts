@@ -4,7 +4,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 if (!supabaseAnonKey) {
-  console.warn('Supabase publishable key is missing. Please set NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+  
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

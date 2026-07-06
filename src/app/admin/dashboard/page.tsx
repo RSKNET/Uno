@@ -9,7 +9,7 @@ import SettingTab from './components/SettingTab';
 import GameSummaryModal from './components/GameSummaryModal';
 import PlayerModal from './components/PlayerModal';
 
-// Hook
+
 import useAdminDashboard from './hooks/useAdminDashboard';
 
 export default function AdminDashboard() {
@@ -82,11 +82,7 @@ export default function AdminDashboard() {
         email={user?.email}
         onLogout={handleLogout}
       />
-
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-6 md:p-8 relative z-10">
-        
-        {/* Tab 1: Dashboard */}
         {activeTab === 'dashboard' && (
           <DashboardTab
             playersCount={players.length}
@@ -101,8 +97,6 @@ export default function AdminDashboard() {
             onNavigateToTab={setActiveTab}
           />
         )}
-
-        {/* Tab 2: Player CRUD */}
         {activeTab === 'player' && (
           <PlayerTab
             players={players}
@@ -113,16 +107,12 @@ export default function AdminDashboard() {
             onDeletePlayer={handleDeletePlayer}
           />
         )}
-
-        {/* Tab 3: Reports */}
         {activeTab === 'report' && (
           <ReportTab
             games={games}
             onOpenSummaryModal={openGameSummaryModal}
           />
         )}
-
-        {/* Tab 4: Settings */}
         {activeTab === 'setting' && (
           <SettingTab
             maintenanceMode={maintenanceMode}

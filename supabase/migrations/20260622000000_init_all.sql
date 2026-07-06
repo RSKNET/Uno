@@ -38,11 +38,11 @@ ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT, INSERT ON public.players TO anon, authenticated;
-GRANT ALL ON public.players TO authenticated;
+GRANT ALL ON public.players TO authenticated, service_role;
 
 
 GRANT SELECT ON public.settings TO anon, authenticated;
-GRANT ALL ON public.settings TO authenticated;
+GRANT ALL ON public.settings TO authenticated, service_role;
 
 -- Bersihkan policy lama players (Biar gak error di cloud)
 DROP POLICY IF EXISTS "Allow public select on players" ON public.players;

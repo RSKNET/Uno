@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Play, Users, Trophy, Loader2, Sparkles, UserCheck, Swords } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { getInitialSetupData } from '@/app/actions/public';
 import { localDb } from '@/lib/db';
 import { CustomModal } from '@/components/modal';
 
@@ -41,6 +41,25 @@ type SetupFormValues = z.infer<typeof setupSchema>;
 
 export default function SetupPage() {
   const router = useRouter();
+
+  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<SetupFormValues>({
+    resolver: zodResolver(setupSchema),
+    defaultValues: {
+      totalPlayers: 2,
+      totalRounds: 5,
+      isUnlimitedRounds: false,
+      players: [
+        { name: '', id: '', isMatched: false },
+        { name: '', id: '', isMatched: false }
+      ]
+    }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'players'
+  });
+
   const [loading, setLoading] = useState(false);
   const [dbPlayers, setDbPlayers] = useState<{ id: string; name: string }[]>([]);
   const [maxPlayersLimit, setMaxPlayersLimit] = useState<number>(8);
@@ -84,17 +103,13 @@ export default function SetupPage() {
   useEffect(() => {
     const loadSettingsAndPlayers = async () => {
       try {
-        const { data: playersData, error: playersError } = await supabase.from('players').select('id, name');
-        if (playersError) throw playersError;
+        const { players: playersData, settings: settingsData } = await getInitialSetupData();
         
         if (playersData) {
           await localDb.playersCache.clear();
           await localDb.playersCache.bulkPut(playersData);
           setDbPlayers(playersData);
         }
-
-        const { data: settingsData, error: settingsError } = await supabase.from('settings').select('key, value');
-        if (settingsError) throw settingsError;
 
         if (settingsData) {
           const limit = settingsData.find(s => s.key === 'max_players')?.value;
@@ -112,32 +127,16 @@ export default function SetupPage() {
           setValue('isUnlimitedRounds', unlimitDefault);
         }
       } catch (err) {
-        console.warn('Fallback settings & players (offline mode):', err);
+        
         const cachedPlayers = await localDb.playersCache.toArray();
         setDbPlayers(cachedPlayers);
       }
     };
 
     loadSettingsAndPlayers();
-  }, []);
+  }, [setValue, watch]);
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm<SetupFormValues>({
-    resolver: zodResolver(setupSchema),
-    defaultValues: {
-      totalPlayers: 2,
-      totalRounds: 5,
-      isUnlimitedRounds: false,
-      players: [
-        { name: '', id: '', isMatched: false },
-        { name: '', id: '', isMatched: false }
-      ]
-    }
-  });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'players'
-  });
 
   const totalPlayersWatch = watch('totalPlayers');
   const isUnlimitedRoundsWatch = watch('isUnlimitedRounds');
@@ -191,6 +190,7 @@ export default function SetupPage() {
   const onSubmit = async (data: SetupFormValues) => {
     setLoading(true);
     try {
+      const now = Date.now();
       const gameId = uuidv4Custom();
       const playersList = data.players.map(p => {
         const id = p.id || `local-${uuidv4Custom()}`;
@@ -207,7 +207,7 @@ export default function SetupPage() {
         rounds: [],
         status: 'active' as const,
         isSynced: 0,
-        createdAt: Date.now()
+        createdAt: now
       };
 
       await localDb.gamesCache.put(gameCacheItem);
@@ -221,7 +221,7 @@ export default function SetupPage() {
       await localDb.syncQueue.put({
         type: 'game',
         payload: gameCacheItem,
-        createdAt: Date.now()
+        createdAt: now
       });
 
       if (navigator.onLine) {
@@ -230,7 +230,7 @@ export default function SetupPage() {
 
       router.push(`/game/${gameId}`);
     } catch (err) {
-      console.error(err);
+      
       showModal(
         "Gagal Memulai",
         "Gagal memulai permainan.",

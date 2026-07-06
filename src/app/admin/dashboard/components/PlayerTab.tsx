@@ -50,8 +50,6 @@ export default function PlayerTab({
               Tambah Pemain
             </button>
           </div>
-
-          {/* Search bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -62,8 +60,6 @@ export default function PlayerTab({
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium focus:outline-none focus:border-rose-500 text-zinc-100"
             />
           </div>
-
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>

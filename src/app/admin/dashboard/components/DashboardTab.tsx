@@ -35,7 +35,6 @@ export default function DashboardTab({
 }: DashboardTabProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/30 border border-zinc-800/50 p-6 rounded-3xl backdrop-blur-sm">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight font-display text-gradient">Selamat Datang, Admin!</h2>
@@ -46,8 +45,6 @@ export default function DashboardTab({
           Sistem Sehat
         </div>
       </div>
-
-      {/* Grid Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bezel-outer">
           <div 
@@ -110,8 +107,6 @@ export default function DashboardTab({
           </div>
         </div>
       </div>
-
-      {/* System Metrics Info */}
       <div className="bezel-outer">
         <div className="bezel-inner p-6 space-y-5">
           <h3 className="text-base font-bold font-display flex items-center gap-2">

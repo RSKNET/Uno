@@ -58,11 +58,9 @@ export default function GameSummaryModal({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Visual Podium Stack */}
               {selectedGameLeaderboard.length >= 2 && (
                 <div className="w-full bg-zinc-900/35 border border-zinc-800/40 rounded-2xl p-4 flex flex-col items-center">
                   <div className="flex items-end justify-center w-full max-w-xs gap-2 mt-2 h-[120px]">
-                    {/* 2nd Place */}
                     {selectedGameLeaderboard[1] && (
                       <div className="flex flex-col items-center w-20">
                         <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-zinc-400">{selectedGameLeaderboard[1].name}</span>
@@ -72,7 +70,6 @@ export default function GameSummaryModal({
                         </div>
                       </div>
                     )}
-                    {/* 1st Place */}
                     {selectedGameLeaderboard[0] && (
                       <div className="flex flex-col items-center w-24 relative">
                         <Sparkles className="w-4 h-4 text-amber-400 absolute -top-5 animate-pulse" />
@@ -83,7 +80,6 @@ export default function GameSummaryModal({
                         </div>
                       </div>
                     )}
-                    {/* 3rd Place */}
                     {selectedGameLeaderboard[2] && (
                       <div className="flex flex-col items-center w-20">
                         <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-amber-700">{selectedGameLeaderboard[2].name}</span>
@@ -96,8 +92,6 @@ export default function GameSummaryModal({
                   </div>
                 </div>
               )}
-
-              {/* Leaderboard Standings */}
               <div className="space-y-3">
                 <h5 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Klasemen Akhir</h5>
                 <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
@@ -119,19 +113,26 @@ export default function GameSummaryModal({
                           <span className="text-xs font-semibold truncate">{item.name}</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-zinc-500 font-medium">
-                            🥇 {item.rankCounts[1] || 0}x
-                          </span>
+                        <div className="flex flex-col items-end gap-1 text-right shrink-0">
                           <span className="text-xs font-mono font-extrabold">{item.totalScore} pts</span>
+                          <div className="flex flex-wrap gap-1 justify-end max-w-[280px]">
+                            {Array.from({ length: selectedGameLeaderboard.length }, (_, i) => i + 1).map((rank) => {
+                              const count = item.rankCounts[rank] || 0;
+                              const rankIcons: { [r: number]: string } = { 1: '🥇', 2: '🥈', 3: '🥉' };
+                              const badgeLabel = rankIcons[rank] || `#${rank}`;
+                              return (
+                                <span key={rank} className="text-[9px] px-1 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-800/20 font-medium">
+                                  {badgeLabel}: <span className="font-bold text-zinc-200">{count}x</span>
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-
-              {/* Actions inside modal */}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   onClick={() => selectedGameReportData && onExportPdf(selectedGameReportData)}

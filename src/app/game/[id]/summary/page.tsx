@@ -19,7 +19,7 @@ export default function GameSummaryPage({ params }: PageProps) {
   const [game, setGame] = useState<GameCache | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    Promise.resolve().then(() => setMounted(true));
 
     const loadGame = async () => {
       const data = await localDb.gamesCache.get(gameId);
@@ -151,17 +151,11 @@ export default function GameSummaryPage({ params }: PageProps) {
             <span>{formattedDate}</span>
           </div>
         </div>
-
-        {/* Responsive Grid for Widescreen */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-start mt-4">
-          
-          {/* Left Panel: Visual Podium Stack & Action Buttons (cols-5) */}
           <div className="md:col-span-5 space-y-4">
             {leaderboard.length >= 2 && (
               <div className="w-full bg-zinc-100/50 dark:bg-zinc-900/20 border border-zinc-200/50 dark:border-zinc-800/40 rounded-2xl p-4 flex flex-col items-center">
-                {/* Podium heights: 1st in center, 2nd on left, 3rd on right */}
                 <div className="flex items-end justify-center w-full max-w-xs gap-2 mt-2 h-[120px]">
-                  {/* 2nd Place (Left) */}
                   {secondPlace && (
                     <div className="flex flex-col items-center w-20">
                       <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-zinc-400">{secondPlace.name}</span>
@@ -171,8 +165,6 @@ export default function GameSummaryPage({ params }: PageProps) {
                       </div>
                     </div>
                   )}
-
-                  {/* 1st Place (Center) */}
                   {firstPlace && (
                     <div className="flex flex-col items-center w-24 relative">
                       <Sparkles className="w-4 h-4 text-amber-400 absolute -top-5 animate-pulse" />
@@ -183,8 +175,6 @@ export default function GameSummaryPage({ params }: PageProps) {
                       </div>
                     </div>
                   )}
-
-                  {/* 3rd Place (Right) */}
                   {thirdPlace && (
                     <div className="flex flex-col items-center w-20">
                       <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-amber-700">{thirdPlace.name}</span>
@@ -197,8 +187,6 @@ export default function GameSummaryPage({ params }: PageProps) {
                 </div>
               </div>
             )}
-
-            {/* Action Buttons */}
             <div className="w-full grid grid-cols-2 gap-3">
               <button
                 onClick={exportPDF}
@@ -217,8 +205,6 @@ export default function GameSummaryPage({ params }: PageProps) {
               </button>
             </div>
           </div>
-
-          {/* Right Panel: Standings & Score Details Card (cols-7) */}
           <div className="md:col-span-7">
             <div className="bezel-outer w-full">
               <div className="bezel-inner p-4 space-y-3">

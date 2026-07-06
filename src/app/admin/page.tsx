@@ -10,15 +10,15 @@ import { Shield, ArrowLeft } from 'lucide-react';
 export default function AdminLoginPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [isPwa, setIsPwa] = useState(false);
+  const [isPwa] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as unknown as { standalone?: boolean }).standalone);
+    }
+    return false;
+  });
 
   useEffect(() => {
-    setMounted(true);
-
-    if (typeof window !== 'undefined') {
-      const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-      setIsPwa(!!standalone);
-    }
+    Promise.resolve().then(() => setMounted(true));
 
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();

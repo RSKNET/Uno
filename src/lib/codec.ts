@@ -1,13 +1,7 @@
 import { encode, decode } from '@msgpack/msgpack';
 import { type GameCache } from './db';
 
-/**
- * Point 1: Custom delimited text serialization
- * Format:
- * [Header] id|totalPlayers|totalRounds|isUnlimitedRounds|status|createdAt
- * [Players] id:name,id:name,...
- * [Rounds] roundNumber:playerId=score,rank;playerId=score,rank|roundNumber:...
- */
+
 export function serializeGameToText(game: Partial<GameCache> & { id: string, totalPlayers: number, totalRounds: number, isUnlimitedRounds: boolean, createdAt: number, players: { id: string, name: string }[], rounds: any[] }): string {
   const header = [
     game.id,
@@ -33,16 +27,16 @@ export function serializeGameToText(game: Partial<GameCache> & { id: string, tot
 export function deserializeGameFromText(text: string): GameCache {
   const [headerStr, playersStr, roundsStr] = text.split('\n');
 
-  // Header
+  
   const [id, totalPlayersStr, totalRoundsStr, isUnlimitedStr, status, createdAtStr] = headerStr.split('|');
   
-  // Players
+  
   const players = playersStr ? playersStr.split(',').map(pStr => {
     const [pid, name] = pStr.split(':');
     return { id: pid, name };
   }) : [];
 
-  // Rounds
+  
   const rounds = (roundsStr && roundsStr.trim()) ? roundsStr.split('|').map(rStr => {
     const [rNumStr, scoresStr] = rStr.split(':');
     const scores: { [playerId: string]: { score: number; rank: number } } = {};
@@ -77,9 +71,7 @@ export function deserializeGameFromText(text: string): GameCache {
   };
 }
 
-/**
- * Point 2: MessagePack binary encoding on top of the custom text format
- */
+
 export function encodeGame(game: any): Uint8Array {
   const text = serializeGameToText(game);
   return encode(text);

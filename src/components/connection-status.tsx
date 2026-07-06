@@ -12,16 +12,19 @@ interface ToastState {
 }
 
 export function ConnectionStatus() {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [isOnline, setIsOnline] = useState<boolean>(() => typeof window !== 'undefined' ? navigator.onLine : true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [unsyncedCount, setUnsyncedCount] = useState<number>(0);
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
 
+  function showToast(message: string, type: 'success' | 'info' | 'error') {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 5000);
+  }
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
-
-
     const updateQueueCount = async () => {
       const count = await localDb.syncQueue.count();
       setUnsyncedCount(count);
@@ -33,12 +36,9 @@ export function ConnectionStatus() {
     const handleOnline = async () => {
       setIsOnline(true);
       showToast('Koneksi internet terhubung kembali.', 'info');
-      
-
       setIsSyncing(true);
       const res = await syncOfflineData();
       setIsSyncing(false);
-      
       if (res.success && res.count > 0) {
         showToast('Koneksi kembali terhubung. Data permainan berhasil disinkronkan ke cloud!', 'success');
       } else if (!res.success) {
@@ -62,16 +62,8 @@ export function ConnectionStatus() {
     };
   }, []);
 
-  const showToast = (message: string, type: 'success' | 'info' | 'error') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast(prev => ({ ...prev, show: false }));
-    }, 5000);
-  };
-
   return (
     <>
-
       <div className="fixed bottom-4 left-4 z-50 pointer-events-auto">
         <div className={`
           flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
@@ -120,7 +112,6 @@ export function ConnectionStatus() {
           )}
         </div>
       </div>
-
 
       {toast.show && (
         <div className="fixed bottom-6 right-6 z-50 pointer-events-auto max-w-sm w-full animate-bounce-short">

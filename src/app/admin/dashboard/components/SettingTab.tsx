@@ -23,7 +23,6 @@ export default function SettingTab({
 }: SettingTabProps) {
   return (
     <div className="space-y-6 animate-fade-in w-full">
-      {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/30 border border-zinc-800/50 p-6 rounded-3xl backdrop-blur-sm mb-2">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight font-display text-gradient">Pengaturan Sistem</h2>
@@ -32,8 +31,6 @@ export default function SettingTab({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
-        
-        {/* Left Column: Security and Access */}
         <div className="bezel-outer w-full">
           <div className="bezel-inner p-6 space-y-5">
             <h3 className="text-sm font-bold font-display flex items-center gap-2 text-zinc-200">
@@ -42,8 +39,6 @@ export default function SettingTab({
             </h3>
             
             <div className="w-full h-px bg-zinc-800/60" />
-
-            {/* Maintenance Mode Toggle Switch */}
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">
@@ -75,8 +70,6 @@ export default function SettingTab({
             </div>
           </div>
         </div>
-
-        {/* Right Column: Match Configuration */}
         <div className="bezel-outer w-full">
           <div className="bezel-inner p-6 space-y-5">
             <h3 className="text-sm font-bold font-display flex items-center gap-2 text-zinc-200">
@@ -87,7 +80,6 @@ export default function SettingTab({
             <div className="w-full h-px bg-zinc-800/60" />
 
             <div className="space-y-6">
-              {/* Unlimited Rounds */}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">
@@ -117,8 +109,6 @@ export default function SettingTab({
                   )}
                 </button>
               </div>
-
-              {/* Max Players Config */}
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
                   <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">

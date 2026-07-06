@@ -29,7 +29,7 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching maintenance setting:', error);
+          
           setLoading(false);
           return;
         }
@@ -48,7 +48,7 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
           router.push(lastPath);
         }
       } catch (err) {
-        console.error('Failed to run maintenance check:', err);
+        
       } finally {
         setLoading(false);
       }

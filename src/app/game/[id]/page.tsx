@@ -11,6 +11,8 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+const getTimestamp = () => Date.now();
+
 export default function GamePage({ params }: PageProps) {
   const router = useRouter();
   const resolvedParams = React.use(params);
@@ -71,7 +73,7 @@ export default function GamePage({ params }: PageProps) {
   }, [mounted]);
 
   useEffect(() => {
-    setMounted(true);
+    Promise.resolve().then(() => setMounted(true));
 
     const loadGame = async () => {
       const data = await localDb.gamesCache.get(gameId);
@@ -106,21 +108,21 @@ export default function GamePage({ params }: PageProps) {
 
   const N = game.totalPlayers;
 
-  // Rank to Point conversion formula: Points = N - Rank + 1
+  
   const calculatePoints = (rank: number) => {
     return N - rank + 1;
   };
 
-  // Handle player change for a rank
+  
   const handlePlayerChangeForRank = (rank: number, playerId: string) => {
     setRoundRanks(prev => ({
       ...prev,
       [rank]: playerId
     }));
-    setValidationError(null); // Clear errors on change
+    setValidationError(null); 
   };
 
-  // Validate that all ranks are assigned to unique players
+  
   const validateRanks = (): boolean => {
     const selectedPlayerIds = Object.values(roundRanks).filter(id => id !== '');
     const uniqueIds = new Set(selectedPlayerIds);
@@ -134,9 +136,10 @@ export default function GamePage({ params }: PageProps) {
   const handleSaveRound = async () => {
     if (!validateRanks()) return;
 
+    const now = getTimestamp();
     setSavingRound(true);
     try {
-      // Calculate scores for this round based on rank
+      
       const scores: { [playerId: string]: { score: number; rank: number } } = {};
       for (let r = 1; r <= N; r++) {
         const playerId = roundRanks[r];
@@ -159,26 +162,26 @@ export default function GamePage({ params }: PageProps) {
         rounds: updatedRounds
       };
 
-      // Save to Dexie cache
+      
       await localDb.gamesCache.put(updatedGame);
       setGame(updatedGame);
 
-      // Add updated game to sync queue
+      
       await localDb.syncQueue.put({
         type: 'game',
         payload: updatedGame,
-        createdAt: Date.now()
+        createdAt: now
       });
 
-      // Try background sync
+      
       if (navigator.onLine) {
         import('@/lib/sync').then(m => m.syncOfflineData());
       }
 
-      // Progress to next round
+      
       setCurrentRoundNumber(currentRoundNumber + 1);
 
-      // Re-initialize default ranks for the next round input
+      
       const nextRanks: { [rank: number]: string } = {};
       game.players.forEach((p, idx) => {
         nextRanks[idx + 1] = p.id;
@@ -186,7 +189,7 @@ export default function GamePage({ params }: PageProps) {
       setRoundRanks(nextRanks);
 
     } catch (err) {
-      console.error(err);
+      
       setValidationError("Gagal menyimpan babak.");
     } finally {
       setSavingRound(false);
@@ -195,6 +198,7 @@ export default function GamePage({ params }: PageProps) {
 
   const handleFinishGame = async () => {
     try {
+      const now = getTimestamp();
       const finalGame: GameCache = {
         ...game,
         status: 'completed'
@@ -202,11 +206,10 @@ export default function GamePage({ params }: PageProps) {
 
       await localDb.gamesCache.put(finalGame);
       
-      // Sync queue
       await localDb.syncQueue.put({
         type: 'game',
         payload: finalGame,
-        createdAt: Date.now()
+        createdAt: now
       });
 
       if (navigator.onLine) {
@@ -215,7 +218,7 @@ export default function GamePage({ params }: PageProps) {
 
       router.push(`/game/${gameId}/summary`);
     } catch (err) {
-      console.error(err);
+      
       showModal(
         "Gagal Menyimpan",
         "Gagal menyelesaikan permainan.",
@@ -231,12 +234,12 @@ export default function GamePage({ params }: PageProps) {
       const { syncOfflineData } = await import('@/lib/sync');
       await syncOfflineData();
     } catch (e) {
-      console.warn('Sync failed', e);
+      
     }
   };
 
-  // Compile stats for leaderboard and tie-breakers
-  // We need: total score, rank frequencies, player details
+  
+  
   const getLeaderboard = () => {
     return game.players.map((p) => {
       let totalScore = 0;
@@ -257,16 +260,16 @@ export default function GamePage({ params }: PageProps) {
         rankCounts
       };
     }).sort((a, b) => {
-      // 1. Compare total score (higher score wins)
+      
       const scoreDiff = b.totalScore - a.totalScore;
       if (scoreDiff !== 0) return scoreDiff;
 
-      // 2. Tie-breaker logic: compare frequency of ranks starting from Rank 1 (Juara 1)
+      
       for (let r = 1; r <= N; r++) {
         const countA = a.rankCounts[r] || 0;
         const countB = b.rankCounts[r] || 0;
         if (countB !== countA) {
-          return countB - countA; // Player with more top ranks goes first
+          return countB - countA; 
         }
       }
       return 0;
@@ -275,19 +278,19 @@ export default function GamePage({ params }: PageProps) {
 
   const leaderboard = getLeaderboard();
 
-  // Prepare chart data for Recharts
-  // Format: [ { name: 'Babak 1', 'Player A': 4, 'Player B': 3 }, ... ]
+  
+  
   const getChartData = () => {
     const data: any[] = [];
     
-    // Initial round 0 score = 0 for everyone
+    
     const baseRound: any = { name: 'Start' };
     game.players.forEach(p => {
       baseRound[p.name] = 0;
     });
     data.push(baseRound);
 
-    let cumulativeScores: { [playerName: string]: number } = {};
+    const cumulativeScores: { [playerName: string]: number } = {};
     game.players.forEach(p => {
       cumulativeScores[p.name] = 0;
     });
@@ -308,29 +311,25 @@ export default function GamePage({ params }: PageProps) {
 
   const chartData = getChartData();
 
-  // Distinct vibrant line colors for up to 10 players
+  
   const colors = [
-    '#f43f5e', // Rose
-    '#0ea5e9', // Sky
-    '#10b981', // Emerald
-    '#f59e0b', // Amber
-    '#8b5cf6', // Violet
-    '#ec4899', // Pink
-    '#14b8a6', // Teal
-    '#f97316', // Orange
-    '#a855f7', // Purple
-    '#6366f1', // Indigo
+    '#f43f5e', 
+    '#0ea5e9', 
+    '#10b981', 
+    '#f59e0b', 
+    '#8b5cf6', 
+    '#ec4899', 
+    '#14b8a6', 
+    '#f97316', 
+    '#a855f7', 
+    '#6366f1', 
   ];
 
   const isGameOver = !game.isUnlimitedRounds && game.rounds.length >= game.totalRounds;
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-12 transition-colors duration-500 overflow-x-hidden">
-      
-      {/* Background Soft Blobs */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none dark:block hidden" />
-
-      {/* Header Bar */}
       <header className="sticky top-0 w-full flex items-center justify-between px-6 py-4 z-40 backdrop-blur-md bg-transparent">
         <button
           onClick={() => {
@@ -339,10 +338,10 @@ export default function GamePage({ params }: PageProps) {
               "Keluar dari game? Skor Anda akan dihapus dari lokal dan data permainan ini akan hilang.",
               async () => {
                 try {
-                  // Delete game cache
+                  
                   await localDb.gamesCache.delete(gameId);
                   
-                  // Delete from sync queue
+                  
                   const queueItems = await localDb.syncQueue.toArray();
                   for (const item of queueItems) {
                     if (item.payload?.id === gameId) {
@@ -354,7 +353,7 @@ export default function GamePage({ params }: PageProps) {
                   
                   router.push('/');
                 } catch (err) {
-                  console.error('Failed to clear game on exit:', err);
+                  
                   router.push('/');
                 }
               },
@@ -372,16 +371,10 @@ export default function GamePage({ params }: PageProps) {
           Match Board
         </span>
 
-        <div className="w-12 h-6" /> {/* Placeholder spacer */}
+        <div className="w-12 h-6" /> {}
       </header>
-
-      {/* Main Body */}
       <div className="w-full max-w-[98%] mx-auto px-4 md:px-10 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
-        
-        {/* Left Side: Score Input & Leaderboard (cols-7) */}
         <main className="lg:col-span-7 space-y-8">
-          
-          {/* Round Header / Status */}
           <div className="flex items-center justify-between bg-zinc-100 dark:bg-zinc-900/40 border border-zinc-200/50 dark:border-zinc-800/30 px-5 py-4 rounded-2xl">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Status Game</p>
@@ -401,8 +394,6 @@ export default function GamePage({ params }: PageProps) {
               </span>
             </div>
           </div>
-
-          {/* Rank Scoring Form (Only show if not game over) */}
           {!isGameOver ? (
             <div className="bezel-outer">
               <div className="bezel-inner p-6 space-y-5">
@@ -421,8 +412,6 @@ export default function GamePage({ params }: PageProps) {
                     {validationError}
                   </p>
                 )}
-
-                {/* List ranks for players selection */}
                 <div className="space-y-3.5">
                   {Array.from({ length: N }, (_, idx) => idx + 1).map((rank) => {
                     const currentSelectedPlayerId = roundRanks[rank] || '';
@@ -433,12 +422,9 @@ export default function GamePage({ params }: PageProps) {
                         <span className="text-sm font-bold text-gradient">Juara {rank}</span>
                         
                         <div className="flex items-center gap-4">
-                          {/* Points previews */}
                           <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-black/5 dark:bg-black/30 px-2 py-1 rounded-md">
                             +{points} poin
                           </span>
-
-                          {/* Select player dropdown */}
                           <select
                             value={currentSelectedPlayerId}
                             onChange={(e) => handlePlayerChangeForRank(rank, e.target.value)}
@@ -485,8 +471,6 @@ export default function GamePage({ params }: PageProps) {
               </button>
             </div>
           )}
-
-          {/* Active Leaderboard list table */}
           <div className="bezel-outer">
             <div className="bezel-inner p-6 space-y-4">
               <h3 className="text-lg font-bold font-display flex items-center gap-2">
@@ -505,7 +489,7 @@ export default function GamePage({ params }: PageProps) {
                   </thead>
                   <tbody>
                     {leaderboard.map((item, index) => {
-                      // Format rank list
+                      
                       const rank1Count = item.rankCounts[1] || 0;
                       const rank2Count = item.rankCounts[2] || 0;
                       
@@ -538,11 +522,7 @@ export default function GamePage({ params }: PageProps) {
           </div>
 
         </main>
-
-        {/* Right Side: Charts & Stats (cols-5) */}
         <aside className="lg:col-span-5 space-y-8">
-          
-          {/* Recharts Chart */}
           <div className="bezel-outer">
             <div className="bezel-inner p-6 space-y-4">
               <div className="space-y-1">
@@ -594,8 +574,6 @@ export default function GamePage({ params }: PageProps) {
               )}
             </div>
           </div>
-
-          {/* Quick Stats Summary */}
           <div className="bg-zinc-900/20 border border-zinc-200/50 dark:border-zinc-800/40 p-5 rounded-2xl space-y-4 text-xs">
             <h4 className="font-bold text-zinc-400 uppercase tracking-wider">Statistik Game</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -617,8 +595,6 @@ export default function GamePage({ params }: PageProps) {
               </div>
             </div>
           </div>
-
-          {/* Action triggers */}
           {game.rounds.length > 0 && (
             <div className="flex gap-2">
               <button
@@ -634,7 +610,7 @@ export default function GamePage({ params }: PageProps) {
                       await localDb.gamesCache.put(resetGame);
                       setGame(resetGame);
                       setCurrentRoundNumber(1);
-                      // Re-initialize default ranks
+                      
                       const nextRanks: { [rank: number]: string } = {};
                       game.players.forEach((p, idx) => {
                         nextRanks[idx + 1] = p.id;
