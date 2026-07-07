@@ -115,14 +115,14 @@ export default function DashboardTab({
 
           <div className="w-full h-px bg-zinc-800/60" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-0">
             <div className="space-y-3.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Database Engine</span>
-                <span className="font-semibold text-zinc-200">{dbEngine}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Database Engine</span>
+                <span className="font-semibold text-zinc-200 truncate" title={dbEngine}>{dbEngine}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Status Koneksi API</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Status Koneksi API</span>
                 {apiConnected === 'checking' && (
                   <span className="text-zinc-400 font-semibold">Memeriksa...</span>
                 )}
@@ -133,8 +133,8 @@ export default function DashboardTab({
                   <span className="text-red-500 font-bold">TERPUTUS (ERROR)</span>
                 )}
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Tabel Realtime Settings</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Tabel Realtime Settings</span>
                 {settingsActive === 'checking' && (
                   <span className="text-zinc-400 font-semibold">Memeriksa...</span>
                 )}
@@ -148,8 +148,8 @@ export default function DashboardTab({
             </div>
 
             <div className="space-y-3.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Supabase RLS Policy</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Supabase RLS Policy</span>
                 {rlsActive === 'checking' && (
                   <span className="text-zinc-400 font-semibold">Memeriksa...</span>
                 )}
@@ -160,15 +160,15 @@ export default function DashboardTab({
                   <span className="text-red-500 font-semibold">TIDAK AMAN (Non-RLS)</span>
                 )}
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Latency Check</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Latency Check</span>
                 <span className="font-mono text-zinc-200">
                   {latency !== null ? `${latency}ms` : 'Mengukur...'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Lokasi Server</span>
-                <span className="font-semibold text-zinc-200">{serverLocation}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
+                <span className="text-zinc-400 shrink-0">Lokasi Server</span>
+                <span className="font-semibold text-zinc-200 truncate" title={serverLocation}>{serverLocation}</span>
               </div>
             </div>
           </div>

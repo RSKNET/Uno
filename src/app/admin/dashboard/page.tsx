@@ -53,6 +53,7 @@ export default function AdminDashboard() {
     handleDeletePlayer
   } = useAdminDashboard();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleExportPdf = async (game: any) => {
     const { exportGamePdf } = await import('@/lib/pdf-template');
     exportGamePdf(game);
@@ -72,14 +73,14 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex flex-row min-h-screen bg-[#050505] text-zinc-50 w-full max-w-[98%] mx-auto relative transition-colors duration-500 overflow-x-hidden">
+    <div className="flex flex-row h-[100dvh] bg-[#050505] text-zinc-50 w-full max-w-[98%] mx-auto relative transition-colors duration-500 overflow-hidden">
       
       <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />
 
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        email={user?.email}
+        user={user}
         onLogout={handleLogout}
       />
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-6 md:p-8 relative z-10">
