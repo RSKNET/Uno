@@ -11,10 +11,6 @@ CREATE TABLE IF NOT EXISTS public.players (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_players_name_lower ON public.players (LOWER(name));
 
-
-
-
-
 CREATE TABLE IF NOT EXISTS public.settings (
     key VARCHAR(255) PRIMARY KEY,
     value VARCHAR(255) NOT NULL
@@ -33,13 +29,10 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 -- 3. Row Level Security (RLS) Configuration
 -- ==========================================
 ALTER TABLE public.players ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
 GRANT SELECT, INSERT ON public.players TO anon, authenticated;
 GRANT ALL ON public.players TO authenticated, service_role;
-
 
 GRANT SELECT ON public.settings TO anon, authenticated;
 GRANT ALL ON public.settings TO authenticated, service_role;
@@ -52,11 +45,7 @@ DROP POLICY IF EXISTS "Allow admin update/delete on players" ON public.players;
 -- Policies for players
 CREATE POLICY "Allow public select on players" ON public.players FOR SELECT TO anon USING (true);
 CREATE POLICY "Allow public insert on players" ON public.players FOR INSERT TO anon WITH CHECK (name IS NOT NULL AND length(trim(name)) > 0);
-CREATE POLICY "Allow admin update/delete on players" ON public.players FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
-
-
-
-
+CREATE POLICY "Allow admin update/delete on players" ON public.players FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com');
 
 -- Bersihkan policy lama settings
 DROP POLICY IF EXISTS "Allow public select on settings" ON public.settings;
@@ -64,7 +53,7 @@ DROP POLICY IF EXISTS "Allow admin write on settings" ON public.settings;
 
 -- Policies for settings
 CREATE POLICY "Allow public select on settings" ON public.settings FOR SELECT TO anon USING (true);
-CREATE POLICY "Allow admin write on settings" ON public.settings FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com');
+CREATE POLICY "Allow admin write on settings" ON public.settings FOR ALL TO authenticated USING ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com') WITH CHECK ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com');
 
 -- ==========================================
 -- 4. Enable Realtime Replication
@@ -98,18 +87,19 @@ END; $$;
 CREATE OR REPLACE FUNCTION public.restrict_auth_users_access()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = 'public', 'auth', 'pg_catalog' AS $$
 BEGIN
-  IF TG_OP = 'INSERT' THEN
-    IF NEW.id = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d' THEN RETURN NEW;
-    ELSE RAISE EXCEPTION 'Registrasi akun baru dinonaktifkan di sistem ini!'; END IF;
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.email = 'riskicahyadi.2nd@gmail.com' THEN
+      RETURN OLD;
+    END IF;
+    RAISE EXCEPTION 'Penghapusan akun admin dinonaktifkan!';
   END IF;
-  IF TG_OP = 'UPDATE' THEN
-    IF NEW.encrypted_password <> OLD.encrypted_password THEN RAISE EXCEPTION 'Perubahan kata sandi (reset password) dinonaktifkan!'; END IF;
-    IF NEW.email <> OLD.email THEN RAISE EXCEPTION 'Perubahan alamat email dinonaktifkan!'; END IF;
-    IF NEW.id <> OLD.id OR NEW.role <> OLD.role THEN RAISE EXCEPTION 'Modifikasi identitas akun dilarang!'; END IF;
+
+  -- For INSERT and UPDATE, NEW is defined
+  IF NEW.email = 'riskicahyadi.2nd@gmail.com' THEN
     RETURN NEW;
   END IF;
-  IF TG_OP = 'DELETE' THEN RAISE EXCEPTION 'Penghapusan akun admin dinonaktifkan!'; END IF;
-  RETURN NEW;
+
+  RAISE EXCEPTION 'Registrasi dan modifikasi akun baru dinonaktifkan!';
 END; $$;
 
 -- JURUS PAMUNGKAS: Cabut hak akses eksekusi publik agar linter tidak mendeteksi celah keamanan
@@ -117,22 +107,40 @@ REVOKE EXECUTE ON FUNCTION public.restrict_auth_users_access() FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.restrict_auth_users_access() FROM anon;
 REVOKE EXECUTE ON FUNCTION public.restrict_auth_users_access() FROM authenticated;
 
--- ==========================================
--- 6. Seed Default Admin Auth User
--- ==========================================
-INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token) 
-VALUES ('00000000-0000-0000-0000-000000000000', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'authenticated', 'authenticated', 'admin@unoskors.com', extensions.crypt('password123', extensions.gen_salt('bf')), now(), '{"provider": "email", "providers": ["email"]}', '{"name": "Admin Uno"}', now(), now(), '', '', '', '') 
-ON CONFLICT (id) DO NOTHING;
+-- Create function for auth hook to filter signups
+CREATE OR REPLACE FUNCTION public.cek_email_hook(event jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog, pg_temp
+AS $$
+BEGIN
+  IF event->'user'->>'email' <> 'riskicahyadi.2nd@gmail.com' THEN
+    RETURN jsonb_build_object(
+      'error', jsonb_build_object(
+        'http_code', 403,
+        'message', 'Akses ditolak. Registrasi tidak diizinkan.'
+      )
+    );
+  END IF;
+  RETURN '{}'::jsonb;
+END;
+$$;
 
+-- Revoke execution from public roles for security
+REVOKE EXECUTE ON FUNCTION public.cek_email_hook(jsonb) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.cek_email_hook(jsonb) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.cek_email_hook(jsonb) FROM authenticated;
+
+-- Grant permissions only to auth admin
+GRANT EXECUTE ON FUNCTION public.cek_email_hook(jsonb) TO supabase_auth_admin;
+
+-- Set up Auth Trigger for restrict_auth_users_access
 DROP TRIGGER IF EXISTS auth_users_security_trigger ON auth.users;
 CREATE TRIGGER auth_users_security_trigger BEFORE INSERT OR UPDATE OR DELETE ON auth.users FOR EACH ROW EXECUTE FUNCTION public.restrict_auth_users_access();
 
-INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, created_at, updated_at) 
-VALUES ('a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', jsonb_build_object('sub', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'email', 'admin@unoskors.com', 'email_verified', true), 'email', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', now(), now()) 
-ON CONFLICT (provider_id, provider) DO NOTHING;
-
 -- ==========================================
--- 7. Storage Configuration
+-- 6. Storage Configuration
 -- ==========================================
 INSERT INTO storage.buckets (id, name, public) VALUES ('game-reports', 'game-reports', true) ON CONFLICT (id) DO NOTHING;
 
@@ -140,4 +148,4 @@ DROP POLICY IF EXISTS "Allow public upload" ON storage.objects;
 DROP POLICY IF EXISTS "Allow admin all on storage" ON storage.objects;
 
 CREATE POLICY "Allow public upload" ON storage.objects FOR INSERT TO anon WITH CHECK (bucket_id = 'game-reports');
-CREATE POLICY "Allow admin all on storage" ON storage.objects FOR ALL TO authenticated USING (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com')) WITH CHECK (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'admin@unoskors.com'));
+CREATE POLICY "Allow admin all on storage" ON storage.objects FOR ALL TO authenticated USING (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com')) WITH CHECK (bucket_id = 'game-reports' AND ((select auth.jwt()) ->> 'email' = 'riskicahyadi.2nd@gmail.com'));
