@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import {
@@ -211,10 +211,39 @@ export default function useAdminDashboard() {
     }
   }
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
     router.push('/admin');
-  };
+  }, [router]);
+
+  // Auto logout on 30 minutes of inactivity
+  useEffect(() => {
+    if (!user) return;
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(async () => {
+        await handleLogout();
+      }, 30 * 60 * 1000);
+    };
+
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+
+    resetTimer();
+
+    events.forEach(event => {
+      window.addEventListener(event, resetTimer);
+    });
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      events.forEach(event => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [user, handleLogout]);
 
   const openGameSummaryModal = async (g: Game) => {
     setLoadingSummary(true);
