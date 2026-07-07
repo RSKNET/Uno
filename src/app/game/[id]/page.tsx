@@ -89,8 +89,8 @@ export default function GamePage({ params }: PageProps) {
 
       
       const initialRanks: { [rank: number]: string } = {};
-      data.players.forEach((p, idx) => {
-        initialRanks[idx + 1] = p.id;
+      data.players.forEach((_, idx) => {
+        initialRanks[idx + 1] = '';
       });
       setRoundRanks(initialRanks);
     };
@@ -183,8 +183,8 @@ export default function GamePage({ params }: PageProps) {
 
       
       const nextRanks: { [rank: number]: string } = {};
-      game.players.forEach((p, idx) => {
-        nextRanks[idx + 1] = p.id;
+      game.players.forEach((_, idx) => {
+        nextRanks[idx + 1] = '';
       });
       setRoundRanks(nextRanks);
 
@@ -432,7 +432,11 @@ export default function GamePage({ params }: PageProps) {
                           >
                             <option value="">Pilih Pemain...</option>
                             {game.players.map((p) => (
-                              <option key={p.id} value={p.id}>
+                              <option 
+                                key={p.id} 
+                                value={p.id}
+                                disabled={Object.values(roundRanks).includes(p.id) && roundRanks[rank] !== p.id}
+                              >
                                 {p.name}
                               </option>
                             ))}
@@ -443,14 +447,31 @@ export default function GamePage({ params }: PageProps) {
                   })}
                 </div>
 
-                <button
-                  onClick={handleSaveRound}
-                  disabled={savingRound}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-500 dark:bg-rose-600 text-white py-3 text-sm font-bold transition-all hover:bg-rose-600 dark:hover:bg-rose-700 shadow-md shadow-rose-500/10 active:scale-[0.98]"
-                >
-                  <Save className="w-4 h-4" />
-                  Simpan Babak {currentRoundNumber}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full">
+                  <button
+                    onClick={() => {
+                      const clearedRanks: { [rank: number]: string } = {};
+                      game.players.forEach((_, idx) => {
+                        clearedRanks[idx + 1] = '';
+                      });
+                      setRoundRanks(clearedRanks);
+                      setValidationError(null);
+                    }}
+                    className="flex-1 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Reset Pilihan
+                  </button>
+
+                  <button
+                    onClick={handleSaveRound}
+                    disabled={savingRound}
+                    className="flex-2 flex items-center justify-center gap-2 rounded-xl bg-rose-500 dark:bg-rose-600 text-white py-3 px-4 text-xs font-bold transition-all hover:bg-rose-600 dark:hover:bg-rose-700 shadow-md shadow-rose-500/10 active:scale-[0.98]"
+                  >
+                    <Save className="w-4 h-4" />
+                    Simpan Babak {currentRoundNumber}
+                  </button>
+                </div>
               </div>
             </div>
           ) : (

@@ -316,23 +316,17 @@ export default function SetupPage() {
                     <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2 mb-2">
                       Jumlah Pemain
                     </label>
-                    <div className="flex flex-wrap gap-1.5">
+                    <select
+                      value={totalPlayersWatch}
+                      onChange={(e) => setValue('totalPlayers', parseInt(e.target.value) || 2)}
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-rose-500 dark:focus:border-rose-500 text-zinc-900 dark:text-zinc-100"
+                    >
                       {playerButtons.map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          onClick={() => setValue('totalPlayers', num)}
-                          className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-300 flex-1 min-w-[40px]
-                            ${totalPlayersWatch === num
-                              ? 'bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-500/20'
-                              : 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800'
-                            }
-                          `}
-                        >
-                          {num}
-                        </button>
+                        <option key={num} value={num}>
+                          {num} Pemain
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

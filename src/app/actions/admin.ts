@@ -86,7 +86,7 @@ export async function fetchAdminGames(token: string) {
   );
 
   return fetchedGames
-    .filter((g): g is any => g !== null)
+    .filter((g): g is { id: string; total_players: number; total_rounds: number; is_unlimited_rounds: boolean; created_at: string } => g !== null)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
@@ -143,4 +143,14 @@ export async function deleteAdminPlayer(token: string, id: string) {
     .eq('id', id);
   if (error) throw error;
   return { success: true };
+}
+
+export async function deleteAdminGames(token: string, gameIds: string[]) {
+  const { supabase } = await verifyAdmin(token);
+  const filePaths = gameIds.map(id => `${id}.msgpack`);
+  const { data, error } = await supabase.storage
+    .from('game-reports')
+    .remove(filePaths);
+  if (error) throw error;
+  return { success: true, data };
 }

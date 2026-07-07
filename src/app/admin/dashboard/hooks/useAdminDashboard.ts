@@ -12,7 +12,8 @@ import {
   fetchAdminGameSummary,
   updateAdminSetting,
   saveAdminPlayer,
-  deleteAdminPlayer
+  deleteAdminPlayer,
+  deleteAdminGames
 } from '@/app/actions/admin';
 
 export interface Player {
@@ -34,7 +35,7 @@ export default function useAdminDashboard() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'player' | 'report' | 'setting'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'player' | 'report' | 'setting' | 'play'>('dashboard');
   const [user, setUser] = useState<any>(null);
 
   
@@ -380,6 +381,22 @@ export default function useAdminDashboard() {
     );
   };
 
+  const handleDeleteGames = async (gameIds: string[]) => {
+    try {
+      const token = await getSessionToken();
+      await deleteAdminGames(token, gameIds);
+      setGames(prev => prev.filter(g => !gameIds.includes(g.id)));
+      
+      const { localDb } = await import('@/lib/db');
+      for (const id of gameIds) {
+        await localDb.gamesCache.delete(id);
+      }
+    } catch {
+      showModal("Gagal Menghapus", "Gagal menghapus laporan game.", () => {}, 'alert', 'error');
+      throw new Error("Failed to delete games");
+    }
+  };
+
   return {
     mounted,
     loading,
@@ -417,6 +434,8 @@ export default function useAdminDashboard() {
     handleToggleUnlimitedRounds,
     handleMaxPlayersChange,
     handleSavePlayer,
-    handleDeletePlayer
+    handleDeletePlayer,
+    handleDeleteGames,
+    showModal
   };
 }

@@ -6,6 +6,7 @@ import DashboardTab from './components/DashboardTab';
 import PlayerTab from './components/PlayerTab';
 import ReportTab from './components/ReportTab';
 import SettingTab from './components/SettingTab';
+import PlayTab from './components/PlayTab';
 import GameSummaryModal from './components/GameSummaryModal';
 import PlayerModal from './components/PlayerModal';
 
@@ -50,7 +51,9 @@ export default function AdminDashboard() {
     handleToggleUnlimitedRounds,
     handleMaxPlayersChange,
     handleSavePlayer,
-    handleDeletePlayer
+    handleDeletePlayer,
+    handleDeleteGames,
+    showModal
   } = useAdminDashboard();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,6 +115,8 @@ export default function AdminDashboard() {
           <ReportTab
             games={games}
             onOpenSummaryModal={openGameSummaryModal}
+            onDeleteGames={handleDeleteGames}
+            showModal={showModal}
           />
         )}
         {activeTab === 'setting' && (
@@ -123,6 +128,14 @@ export default function AdminDashboard() {
             onToggleMaintenance={handleToggleMaintenance}
             onToggleUnlimitedRounds={handleToggleUnlimitedRounds}
             onMaxPlayersChange={handleMaxPlayersChange}
+          />
+        )}
+        {activeTab === 'play' && (
+          <PlayTab
+            players={players}
+            maxPlayers={maxPlayers}
+            unlimitedRounds={unlimitedRounds}
+            showModal={showModal}
           />
         )}
 

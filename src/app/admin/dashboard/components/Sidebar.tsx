@@ -6,13 +6,14 @@ import {
   Users, 
   Settings, 
   LayoutDashboard, 
-  FileText 
+  FileText,
+  Swords
 } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'player' | 'report' | 'setting';
-  setActiveTab: (tab: 'dashboard' | 'player' | 'report' | 'setting') => void;
+  activeTab: 'dashboard' | 'player' | 'report' | 'setting' | 'play';
+  setActiveTab: (tab: 'dashboard' | 'player' | 'report' | 'setting' | 'play') => void;
   user?: User | null;
   onLogout: () => Promise<void>;
 }
@@ -42,6 +43,18 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           >
             <LayoutDashboard className="w-4 h-4" />
             Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('play')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all
+              ${activeTab === 'play' 
+                ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
+                : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
+              }
+            `}
+          >
+            <Swords className="w-4 h-4" />
+            Mulai Game
           </button>
           <button
             onClick={() => setActiveTab('player')}
@@ -112,7 +125,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
         </div>
       </aside>
 
-      <aside className="flex lg:hidden flex-col w-16 h-[100dvh] sticky top-0 border-l border-zinc-800 bg-[#070709]/80 py-6 items-center shrink-0 space-y-6 order-last">
+      <aside className="flex lg:hidden flex-col w-12 h-[100dvh] sticky top-0 border-l border-zinc-800 bg-[#070709]/80 py-6 items-center shrink-0 space-y-6 order-last z-20">
         <div className="p-2">
           <Shield className="w-5 h-5 text-rose-500" />
         </div>
@@ -123,7 +136,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           <div className="relative group flex justify-center w-full">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`p-3 rounded-xl transition-all flex justify-center
+              className={`p-2 rounded-xl transition-all flex justify-center
                 ${activeTab === 'dashboard' 
                   ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
                   : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
@@ -139,8 +152,25 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
 
           <div className="relative group flex justify-center w-full">
             <button
+              onClick={() => setActiveTab('play')}
+              className={`p-2 rounded-xl transition-all flex justify-center
+                ${activeTab === 'play' 
+                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
+                  : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
+                }
+              `}
+            >
+              <Swords className="w-4 h-4" />
+            </button>
+            <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-200 text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-md">
+              Mulai Game
+            </div>
+          </div>
+
+          <div className="relative group flex justify-center w-full">
+            <button
               onClick={() => setActiveTab('player')}
-              className={`p-3 rounded-xl transition-all flex justify-center
+              className={`p-2 rounded-xl transition-all flex justify-center
                 ${activeTab === 'player' 
                   ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
                   : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
@@ -157,7 +187,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           <div className="relative group flex justify-center w-full">
             <button
               onClick={() => setActiveTab('report')}
-              className={`p-3 rounded-xl transition-all flex justify-center
+              className={`p-2 rounded-xl transition-all flex justify-center
                 ${activeTab === 'report' 
                   ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
                   : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
@@ -174,7 +204,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           <div className="relative group flex justify-center w-full">
             <button
               onClick={() => setActiveTab('setting')}
-              className={`p-3 rounded-xl transition-all flex justify-center
+              className={`p-2 rounded-xl transition-all flex justify-center
                 ${activeTab === 'setting' 
                   ? 'bg-rose-500 text-white shadow-md shadow-rose-500/10' 
                   : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
@@ -213,7 +243,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout }: Sid
           <div className="relative group flex justify-center w-full">
             <button
               onClick={onLogout}
-              className="p-3 rounded-xl border border-zinc-800 text-red-500 hover:bg-zinc-900 transition-colors flex justify-center"
+              className="p-2 rounded-xl border border-zinc-800 text-red-500 hover:bg-zinc-900 transition-colors flex justify-center"
             >
               <LogOut className="w-4 h-4" />
             </button>
