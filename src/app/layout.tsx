@@ -42,6 +42,9 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://ailhpydenmwgoboveemj.supabase.co" crossOrigin="anonymous" />
         <script dangerouslySetInnerHTML={{ __html: "var __name = (t, v) => t; window.__name = __name;" }} />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="apple-touch-startup-image" href="/android-chrome-512x512.png" />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider
