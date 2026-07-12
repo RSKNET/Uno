@@ -1,23 +1,3 @@
-# NOTE: Konfigurasi berikut diperlukan agar workflow ini berjalan:
-# A. GitHub Secrets (di Repository GitHub):
-#    1. Buka repositori Anda di GitHub.
-#    2. Pergi ke tab "Settings" di menu atas.
-#    3. Pada sidebar kiri, klik menu "Secrets and variables" lalu pilih "Actions".
-#    4. Klik tombol "New repository secret" (tombol hijau).
-#    5. Tambahkan dua secret berikut:
-#       - SUPABASE_URL: URL proyek Supabase Anda (misal: https://xyz.supabase.co)
-#       - SUPABASE_ANON_KEY: API key anon / public key proyek Supabase Anda
-#
-# B. SQL Function (Jalankan di SQL Editor Supabase Dashboard):
-#    CREATE OR REPLACE FUNCTION "public"."ping"() RETURNS "text"
-#        LANGUAGE "plpgsql"
-#        SET "search_path" TO 'public'
-#        AS $$
-#    BEGIN
-#      RETURN 'success';
-#    END;
-#    $$;
-#
 name: Supabase Keep Alive
 
 on:
@@ -29,10 +9,9 @@ jobs:
   ping-db:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Ping Request to Supabase API
+      - name: Send Query Request to Supabase API
         run: |
-          curl -s -X POST \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/ping" \
+          curl -s -X GET \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive?select=*&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json"
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
