@@ -66,17 +66,19 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-400">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-800 border-t-zinc-400"></div>
-          <span className="text-xs uppercase tracking-wider opacity-60">Memuat Portal Dashboard...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0C] text-[#E2E8F0] font-mono crt-screen">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 border-2 border-zinc-800 border-t-red-500 animate-spin rounded-none"></div>
+          <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+            [ LOADING PORTAL DASHBOARD... ]
+          </span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-row h-[100dvh] bg-[#050505] text-zinc-50 w-full max-w-[98%] mx-auto relative transition-colors duration-500 overflow-hidden">
+    <div className="flex flex-row h-[100dvh] bg-[#0A0A0C] text-[#E2E8F0] font-mono crt-screen w-full relative transition-colors duration-500 overflow-hidden select-none">
       
       <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />
 

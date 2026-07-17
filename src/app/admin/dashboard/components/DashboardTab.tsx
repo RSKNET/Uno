@@ -34,146 +34,182 @@ export default function DashboardTab({
   onNavigateToTab
 }: DashboardTabProps) {
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/30 border border-zinc-800/50 p-6 rounded-3xl backdrop-blur-sm">
-        <div>
-          <h2 className="text-xl font-extrabold tracking-tight font-display text-gradient">Selamat Datang, Admin!</h2>
-          <p className="text-xs text-zinc-400 mt-1">Berikut ringkasan performa sistem dan database UNO Skors.</p>
+    <div className="space-y-6 select-none font-mono animate-fade-in text-[#E2E8F0]">
+      
+      {/* Top Banner Verification Status */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0E0E12] border-2 border-zinc-800 p-6 rounded-none relative">
+        <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
+
+        <div className="space-y-1">
+          <h2 className="text-base font-black uppercase text-white tracking-widest">
+            [ ADMIN GATEWAY SESSION // CALIBRATION_OK ]
+          </h2>
+          <p className="text-[10px] text-zinc-500 uppercase">
+            LIVE TELEMETRY SUMMARY OF CORE UNO DATABASES AND SYSTEM RUNTIME CONSTANTS.
+          </p>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full select-none self-start md:self-auto">
-          <CheckCircle2 className="w-4 h-4" />
-          Sistem Sehat
+        <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-500 text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-none">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          [ SYS_HEALTH: OK ]
         </div>
       </div>
+
+      {/* Grid readouts */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bezel-outer">
-          <div 
-            className="bezel-inner p-6 space-y-4 cursor-pointer hover:border-zinc-700/50 transition-all" 
-            onClick={() => onNavigateToTab('player')}
-          >
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-zinc-500">Pemain Terdaftar</p>
-                <p className="text-2xl font-extrabold font-display">{playersCount}</p>
-              </div>
-              <div className="p-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/15 rounded-xl">
-                <Users className="w-5 h-5" />
-              </div>
+        
+        {/* Players Card */}
+        <div 
+          className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-4 cursor-pointer hover:border-red-500 transition-colors rounded-none relative group" 
+          onClick={() => onNavigateToTab('player')}
+        >
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <p className="text-[9px] uppercase font-bold text-zinc-500 tracking-wider">
+                [ 01 // REGISTERED_PLAYERS ]
+              </p>
+              <p className="text-3xl font-black text-white group-hover:text-red-500 transition-colors">
+                {playersCount}
+              </p>
             </div>
-            <p className="text-[10px] text-zinc-400 font-semibold">Kelola database nama pemain</p>
+            <div className="p-2.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-none">
+              <Users className="w-5 h-5" />
+            </div>
           </div>
+          <p className="text-[9px] text-zinc-500 uppercase">
+            &gt;&gt;&gt; READ / WRITE NAMES DATABASE
+          </p>
         </div>
 
-        <div className="bezel-outer">
-          <div 
-            className="bezel-inner p-6 space-y-4 cursor-pointer hover:border-zinc-700/50 transition-all" 
-            onClick={() => onNavigateToTab('report')}
-          >
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-zinc-500">Total Laporan Game</p>
-                <p className="text-2xl font-extrabold font-display">{gamesCount}</p>
-              </div>
-              <div className="p-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/15 rounded-xl">
-                <FileText className="w-5 h-5" />
-              </div>
+        {/* Reports Card */}
+        <div 
+          className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-4 cursor-pointer hover:border-red-500 transition-colors rounded-none relative group" 
+          onClick={() => onNavigateToTab('report')}
+        >
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <p className="text-[9px] uppercase font-bold text-zinc-500 tracking-wider">
+                [ 02 // HISTORICAL_REPORTS ]
+              </p>
+              <p className="text-3xl font-black text-white group-hover:text-red-500 transition-colors">
+                {gamesCount}
+              </p>
             </div>
-            <p className="text-[10px] text-zinc-400 font-semibold">Lihat log pertandingan historis</p>
+            <div className="p-2.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-none">
+              <FileText className="w-5 h-5" />
+            </div>
           </div>
+          <p className="text-[9px] text-zinc-500 uppercase">
+            &gt;&gt;&gt; ANALYZE MATCH LOG HISTORIES
+          </p>
         </div>
 
-        <div className="bezel-outer">
-          <div 
-            className="bezel-inner p-6 space-y-4 cursor-pointer hover:border-zinc-700/50 transition-all" 
-            onClick={() => onNavigateToTab('setting')}
-          >
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase font-bold text-zinc-500">Maintenance Mode</p>
-                <p className={`text-[10px] font-extrabold font-display mt-2 border px-2.5 py-0.5 rounded-full inline-block
-                  ${maintenanceMode 
-                    ? 'bg-red-500/10 text-red-400 border-red-500/20' 
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                  }
-                `}>
-                  {maintenanceMode ? 'AKTIF' : 'NONAKTIF'}
-                </p>
-              </div>
-              <div className="p-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/15 rounded-xl">
-                <Settings className="w-5 h-5" />
-              </div>
+        {/* Maintenance Card */}
+        <div 
+          className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-4 cursor-pointer hover:border-red-500 transition-colors rounded-none relative group" 
+          onClick={() => onNavigateToTab('setting')}
+        >
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <p className="text-[9px] uppercase font-bold text-zinc-500 tracking-wider">
+                [ 03 // MAINTENANCE_MODE ]
+              </p>
+              <p className={`text-[10px] font-black tracking-widest uppercase border px-2.5 py-0.5 mt-2 rounded-none inline-block
+                ${maintenanceMode 
+                  ? 'bg-red-500/10 text-red-500 border-red-500/30 font-black' 
+                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                }
+              `}>
+                {maintenanceMode ? '[ ACTIVE ]' : '[ OFF ]'}
+              </p>
             </div>
-            <p className="text-[10px] text-zinc-400 font-semibold">Ubah status pemeliharaan</p>
+            <div className="p-2.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-none">
+              <Settings className="w-5 h-5" />
+            </div>
           </div>
+          <p className="text-[9px] text-zinc-500 uppercase">
+            &gt;&gt;&gt; EDIT PRIVILEGE GATEWAYS
+          </p>
+        </div>
+
+      </div>
+
+      {/* Connectivity specifications table */}
+      <div className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-5 rounded-none relative">
+        <h3 className="text-xs font-black uppercase text-[#FFFFFF] tracking-wider flex items-center gap-2">
+          <Shield className="w-4 h-4 text-red-500" />
+          [ CORE CONNECTIVITY & DATA READOUTS ]
+        </h3>
+
+        <div className="w-full h-px bg-zinc-800" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-0 text-[11px] text-zinc-500 font-mono uppercase">
+          
+          <div className="space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">DATABASE ENGINE</span>
+              <span className="font-bold text-zinc-300 truncate" title={dbEngine}>{dbEngine}</span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">API CONNECTIVITY</span>
+              {apiConnected === 'checking' && (
+                <span className="text-zinc-400 font-bold">[ CHECKING... ]</span>
+              )}
+              {apiConnected === true && (
+                <span className="text-green-500 font-black">[ CONNECTED_OK ]</span>
+              )}
+              {apiConnected === false && (
+                <span className="text-red-500 font-black">[ DISCONNECTED_ERROR ]</span>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">REALTIME SETTINGS</span>
+              {settingsActive === 'checking' && (
+                <span className="text-zinc-400 font-bold">[ CHECKING... ]</span>
+              )}
+              {settingsActive === true && (
+                <span className="text-green-500 font-black">[ SYNCHRONIZED ]</span>
+              )}
+              {settingsActive === false && (
+                <span className="text-red-500 font-black">[ SYNC_FAIL ]</span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">SUPABASE RLS POLICY</span>
+              {rlsActive === 'checking' && (
+                <span className="text-zinc-400 font-bold">[ CHECKING... ]</span>
+              )}
+              {rlsActive === true && (
+                <span className="text-green-500 font-black">[ RLS_ACTIVE_SECURE ]</span>
+              )}
+              {rlsActive === false && (
+                <span className="text-red-500 font-black">[ INSECURE_WARNING ]</span>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">LATENCY BENCHMARK</span>
+              <span className="font-bold text-zinc-300">
+                {latency !== null ? `${latency} MS` : '[ MEASURING... ]'}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 py-1.5 border-b border-zinc-900">
+              <span className="text-zinc-600 shrink-0">SERVER INFRA LOCATION</span>
+              <span className="font-bold text-zinc-300 truncate" title={serverLocation}>{serverLocation}</span>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div className="bezel-outer">
-        <div className="bezel-inner p-6 space-y-5">
-          <h3 className="text-base font-bold font-display flex items-center gap-2">
-            <Shield className="w-4.5 h-4.5 text-rose-500" /> Detail Konektivitas & API Database
-          </h3>
 
-          <div className="w-full h-px bg-zinc-800/60" />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-0">
-            <div className="space-y-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Database Engine</span>
-                <span className="font-semibold text-zinc-200 truncate" title={dbEngine}>{dbEngine}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Status Koneksi API</span>
-                {apiConnected === 'checking' && (
-                  <span className="text-zinc-400 font-semibold">Memeriksa...</span>
-                )}
-                {apiConnected === true && (
-                  <span className="text-emerald-400 font-bold">TERHUBUNG (OK)</span>
-                )}
-                {apiConnected === false && (
-                  <span className="text-red-500 font-bold">TERPUTUS (ERROR)</span>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Tabel Realtime Settings</span>
-                {settingsActive === 'checking' && (
-                  <span className="text-zinc-400 font-semibold">Memeriksa...</span>
-                )}
-                {settingsActive === true && (
-                  <span className="text-emerald-400 font-semibold">Aktif & Sinkron</span>
-                )}
-                {settingsActive === false && (
-                  <span className="text-red-500 font-semibold">Gangguan / Bermasalah</span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Supabase RLS Policy</span>
-                {rlsActive === 'checking' && (
-                  <span className="text-zinc-400 font-semibold">Memeriksa...</span>
-                )}
-                {rlsActive === true && (
-                  <span className="text-emerald-400 font-semibold">Aktif (Aman)</span>
-                )}
-                {rlsActive === false && (
-                  <span className="text-red-500 font-semibold">TIDAK AMAN (Non-RLS)</span>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Latency Check</span>
-                <span className="font-mono text-zinc-200">
-                  {latency !== null ? `${latency}ms` : 'Mengukur...'}
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-6 text-xs py-1.5 border-b border-zinc-900/40 sm:border-none">
-                <span className="text-zinc-400 shrink-0">Lokasi Server</span>
-                <span className="font-semibold text-zinc-200 truncate" title={serverLocation}>{serverLocation}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

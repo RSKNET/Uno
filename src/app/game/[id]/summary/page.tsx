@@ -3,8 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { localDb, type GameCache } from '@/lib/db';
-import { Home, Download, Award, Calendar, BarChart2, Sparkles } from 'lucide-react';
+import { Home, Download, Award, Calendar, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+// design-taste-frontend Configuration:
+// DESIGN_VARIANCE: 9
+// MOTION_INTENSITY: 5
+// VISUAL_DENSITY: 8
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,6 +22,8 @@ export default function GameSummaryPage({ params }: PageProps) {
 
   const [mounted, setMounted] = useState(false);
   const [game, setGame] = useState<GameCache | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [systemTime, setSystemTime] = useState("");
 
   useEffect(() => {
     Promise.resolve().then(() => setMounted(true));
@@ -29,7 +36,6 @@ export default function GameSummaryPage({ params }: PageProps) {
       }
       setGame(data);
 
-      
       const duration = 3 * 1000;
       const end = Date.now() + duration;
 
@@ -39,14 +45,14 @@ export default function GameSummaryPage({ params }: PageProps) {
           angle: 60,
           spread: 55,
           origin: { x: 0 },
-          colors: ['#f43f5e', '#f59e0b', '#10b981', '#0ea5e9']
+          colors: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6']
         });
         confetti({
           particleCount: 4,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
-          colors: ['#f43f5e', '#f59e0b', '#10b981', '#0ea5e9']
+          colors: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6']
         });
 
         if (Date.now() < end) {
@@ -60,12 +66,49 @@ export default function GameSummaryPage({ params }: PageProps) {
     loadGame();
   }, [gameId, router]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsOnline(navigator.onLine);
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const formatter = new Intl.DateTimeFormat('sv-SE', options);
+      setSystemTime(formatter.format(now));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (!mounted || !game) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-400">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-800 border-t-zinc-400"></div>
-          <span className="text-xs uppercase tracking-wider opacity-60">Memuat Hasil...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0C] text-[#E2E8F0] font-mono crt-screen">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 border-2 border-zinc-800 border-t-red-500 animate-spin rounded-none"></div>
+          <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+            [ COMPILING FINAL REPORTS... ]
+          </span>
         </div>
       </div>
     );
@@ -73,7 +116,6 @@ export default function GameSummaryPage({ params }: PageProps) {
 
   const N = game.totalPlayers;
 
-  
   const getLeaderboard = () => {
     return game.players.map((p) => {
       let totalScore = 0;
@@ -112,9 +154,7 @@ export default function GameSummaryPage({ params }: PageProps) {
   const firstPlace = leaderboard[0];
   const secondPlace = leaderboard[1];
   const thirdPlace = leaderboard[2];
-  const otherPlaces = leaderboard.slice(3);
 
-  
   const exportPDF = async () => {
     if (!game) return;
     const { exportGamePdf } = await import('@/lib/pdf-template');
@@ -126,128 +166,197 @@ export default function GameSummaryPage({ params }: PageProps) {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
-  });
+  }).toUpperCase();
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-[#050505] text-zinc-950 dark:text-zinc-50 relative pb-6 justify-center transition-colors duration-500 overflow-x-hidden">
+    <div className="flex min-h-screen flex-col bg-[#0A0A0C] text-[#E2E8F0] font-mono crt-screen relative overflow-x-hidden select-none pb-12">
       
-      
-      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70%] h-[40%] rounded-full bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-teal-500/10 blur-[140px] pointer-events-none" />
-
-      
-      <main className="w-full max-w-[98%] mx-auto px-4 mt-6 flex flex-col items-center">
-        
-        
-        <div className="text-center space-y-1 mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/20 text-[9px] font-bold tracking-widest uppercase font-display">
-            <Award className="w-3 w-3" />
-            Game Over
-          </div>
-          <h2 className="text-2xl font-extrabold tracking-tight font-display text-gradient">
-            Hasil Pertandingan
-          </h2>
-          <div className="flex items-center gap-1.1 text-[10px] text-zinc-500 justify-center">
-            <Calendar className="w-3 h-3" />
-            <span>{formattedDate}</span>
-          </div>
+      {/* Top Banner / System Telemetry Bar */}
+      <header className="w-full border-b border-zinc-800 bg-[#0C0C0E]/90 backdrop-blur-sm px-6 py-3 flex flex-wrap items-center justify-between z-40 text-[11px] tracking-wider text-zinc-500">
+        <div className="flex items-center gap-4">
+          <span className="text-red-500 font-black tracking-widest uppercase">
+            [ UNO_CORE // REPORT_MATRIX ]
+          </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-start mt-4">
-          <div className="md:col-span-5 space-y-4">
+        <div className="flex items-center gap-4 mt-1 sm:mt-0">
+          <span className="uppercase">
+            NET_STATUS: {isOnline ? (
+              <span className="text-green-500 font-extrabold">[ ONLINE ]</span>
+            ) : (
+              <span className="text-red-500 font-extrabold">[ OFFLINE ]</span>
+            )}
+          </span>
+          <span className="hidden md:inline text-zinc-600">|</span>
+          <span className="text-zinc-400 font-medium">
+            {systemTime}
+          </span>
+        </div>
+      </header>
+
+      {/* Main Grid Workspace */}
+      <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-0 lg:divide-x lg:divide-zinc-800 border-t border-zinc-800 relative z-10">
+        
+        {/* Left Side: Summary Visuals & Action Blocks */}
+        <section className="lg:col-span-5 p-8 flex flex-col justify-between space-y-12 min-h-full">
+          <div className="space-y-8">
+            
+            {/* Heading block */}
+            <div className="space-y-4">
+              <span className="text-[10px] text-red-500 tracking-[0.25em] uppercase block font-black">
+                &gt;&gt;&gt; REPORT_LOG_GENERATOR
+              </span>
+              <h1 className="text-5xl sm:text-6xl font-black uppercase tracking-tighter leading-[0.85] text-[#FFFFFF]">
+                FINAL<br />
+                STANDINGS
+              </h1>
+              <div className="w-16 h-1.5 bg-red-600 mt-2" />
+              <p className="text-[9px] text-zinc-500 uppercase mt-2">
+                DATE OF SEQUENCE: {formattedDate}
+              </p>
+            </div>
+
+            {/* Visual Podium representation using block brutalist components */}
             {leaderboard.length >= 2 && (
-              <div className="w-full bg-zinc-100/50 dark:bg-zinc-900/20 border border-zinc-200/50 dark:border-zinc-800/40 rounded-2xl p-4 flex flex-col items-center">
-                <div className="flex items-end justify-center w-full max-w-xs gap-2 mt-2 h-[120px]">
+              <div className="w-full border border-zinc-800 bg-[#0C0C0F] p-6 relative">
+                <span className="text-[9px] text-zinc-500 uppercase tracking-widest block mb-4">
+                  [ 01 // PODIUM GRAPHIC ]
+                </span>
+                
+                <div className="flex items-end justify-center w-full gap-3 h-[140px] mt-2">
+                  
+                  {/* 2nd Place */}
                   {secondPlace && (
                     <div className="flex flex-col items-center w-20">
-                      <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-zinc-400">{secondPlace.name}</span>
-                      <div className="w-full bg-zinc-200 dark:bg-zinc-800 border-t border-x border-zinc-300 dark:border-zinc-700/60 rounded-t-lg h-[50px] flex flex-col items-center justify-center shadow-md">
-                        <span className="text-lg font-bold font-display text-zinc-400">2</span>
-                        <span className="text-[8px] font-mono opacity-80">{secondPlace.totalScore} pts</span>
+                      <span className="text-[9px] font-black truncate w-full text-center mb-1 text-zinc-400 uppercase">
+                        {secondPlace.name}
+                      </span>
+                      <div className="w-full bg-[#121216] border border-zinc-800 h-[55px] flex flex-col items-center justify-center rounded-none shadow-md">
+                        <span className="text-lg font-black text-zinc-400">2ND</span>
+                        <span className="text-[8px] font-mono font-bold text-zinc-500">{secondPlace.totalScore} PTS</span>
                       </div>
                     </div>
                   )}
+
+                  {/* 1st Place */}
                   {firstPlace && (
                     <div className="flex flex-col items-center w-24 relative">
-                      <Sparkles className="w-4 h-4 text-amber-400 absolute -top-5 animate-pulse" />
-                      <span className="text-xs font-extrabold truncate w-full text-center mb-0.5 text-amber-500">{firstPlace.name}</span>
-                      <div className="w-full bg-gradient-to-b from-amber-400 to-amber-500 dark:from-amber-500/80 dark:to-amber-600/60 border-t border-x border-amber-300 dark:border-amber-500/30 rounded-t-lg h-[80px] flex flex-col items-center justify-center shadow-lg shadow-amber-500/10">
-                        <span className="text-xl font-extrabold font-display text-white dark:text-zinc-900">1</span>
-                        <span className="text-[9px] font-mono font-bold text-white dark:text-zinc-900">{firstPlace.totalScore} pts</span>
+                      <Sparkles className="w-4 h-4 text-red-500 absolute -top-5 animate-pulse" />
+                      <span className="text-[10px] font-black truncate w-full text-center mb-1 text-red-500 uppercase">
+                        {firstPlace.name}
+                      </span>
+                      <div className="w-full bg-[#1A0C0C] border-2 border-red-500 h-[85px] flex flex-col items-center justify-center rounded-none shadow-lg">
+                        <span className="text-xl font-black text-red-500">01ST</span>
+                        <span className="text-[9px] font-mono font-black text-white">{firstPlace.totalScore} PTS</span>
                       </div>
                     </div>
                   )}
+
+                  {/* 3rd Place */}
                   {thirdPlace && (
                     <div className="flex flex-col items-center w-20">
-                      <span className="text-[10px] font-bold truncate w-full text-center mb-0.5 text-amber-700">{thirdPlace.name}</span>
-                      <div className="w-full bg-zinc-200 dark:bg-zinc-800 border-t border-x border-zinc-300 dark:border-zinc-700/60 rounded-t-lg h-[35px] flex flex-col items-center justify-center shadow-sm">
-                        <span className="text-lg font-bold font-display text-amber-700">3</span>
-                        <span className="text-[8px] font-mono opacity-80">{thirdPlace.totalScore} pts</span>
+                      <span className="text-[9px] font-black truncate w-full text-center mb-1 text-amber-600 uppercase">
+                        {thirdPlace.name}
+                      </span>
+                      <div className="w-full bg-[#0C0C0F] border border-zinc-800 h-[40px] flex flex-col items-center justify-center rounded-none">
+                        <span className="text-xs font-black text-amber-600">3RD</span>
+                        <span className="text-[8px] font-mono font-bold text-zinc-500">{thirdPlace.totalScore} PTS</span>
                       </div>
                     </div>
                   )}
+
                 </div>
               </div>
             )}
-            <div className="w-full grid grid-cols-2 gap-3">
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={exportPDF}
-                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-black py-2.5 text-xs font-bold transition-all shadow-md active:scale-95 border border-zinc-800 dark:border-zinc-200"
+                className="w-full flex items-center justify-center gap-1.5 bg-[#121216] border border-zinc-800 hover:bg-zinc-900 text-zinc-300 font-black py-3 text-xs tracking-widest uppercase transition-all active:translate-y-0.5 rounded-none cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                Unduh PDF
+                [ EXPORT REPORT PDF ]
               </button>
 
               <button
                 onClick={() => router.push('/')}
-                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white py-2.5 text-xs font-bold transition-all shadow-lg shadow-rose-500/20 active:scale-95"
+                className="w-full flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-black py-3 text-xs tracking-widest uppercase transition-colors border-b-4 border-red-800 active:border-b-0 active:translate-y-1 rounded-none cursor-pointer"
               >
                 <Home className="w-3.5 h-3.5" />
-                Main Lagi
+                [ RE-INITIALIZE TERMINAL ]
               </button>
             </div>
+
           </div>
-          <div className="md:col-span-7">
-            <div className="bezel-outer w-full">
-              <div className="bezel-inner p-4 space-y-3">
-                <h3 className="text-sm font-bold font-display flex items-center gap-2">
-                  <BarChart2 className="w-3.5 h-3.5 text-rose-500" /> Hasil Akhir Skor
-                </h3>
+        </section>
 
-                <div className="space-y-1.5">
-                  {leaderboard.map((item, index) => {
-                    const isWinner = index === 0;
-                    return (
-                      <div key={item.id} className={`flex items-center justify-between p-2 rounded-xl border
-                        ${isWinner 
-                          ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400 font-bold' 
-                          : 'bg-zinc-100/50 dark:bg-zinc-900/30 border-zinc-200/40 dark:border-zinc-800/40'
-                        }
-                      `}>
-                        <div className="flex items-center gap-2.5">
-                          <span className={`flex items-center justify-center w-5 h-5 rounded-md text-[10px] font-bold
-                            ${index === 0 ? 'bg-amber-500 text-black' : index === 1 ? 'bg-zinc-300 text-black' : index === 2 ? 'bg-amber-700 text-white' : 'bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-500'}
-                          `}>
-                            {index + 1}
-                          </span>
-                          <span className="text-xs font-semibold truncate max-w-[130px]">{item.name}</span>
-                        </div>
+        {/* Right Side: Tabular Final Score Breakdown */}
+        <section className="lg:col-span-7 p-8 flex flex-col justify-center min-h-full">
+          <div className="max-w-3xl w-full mx-auto border-2 border-zinc-800 bg-[#0C0C0F] relative">
+            
+            {/* Tactical Grid Crosshairs */}
+            <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+            <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+            <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+            <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
 
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-zinc-400 font-medium">
-                            🥇 {item.rankCounts[1] || 0}x
-                          </span>
-                          <span className="text-xs font-mono font-extrabold">{item.totalScore} pts</span>
-                        </div>
+            {/* Header info */}
+            <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between bg-[#0E0E12]">
+              <span className="text-xs font-black uppercase tracking-widest text-[#FFFFFF]">
+                [ FINAL CLASSIFICATION MATRIX ]
+              </span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+                ROUNDS SAVED: {game.rounds.length}
+              </span>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <h3 className="text-xs font-black uppercase text-[#FFFFFF] tracking-wider flex items-center gap-2">
+                [ DETAILED STANDINGS LOG ]
+              </h3>
+
+              <div className="space-y-2.5">
+                {leaderboard.map((item, index) => {
+                  const isWinner = index === 0;
+                  return (
+                    <div key={item.id} className={`flex items-center justify-between p-3 border
+                      ${isWinner 
+                        ? 'bg-[#1A0C0C] border-red-500 text-red-500 font-bold' 
+                        : 'bg-[#121216] border-zinc-800'
+                      }
+                    `}>
+                      <div className="flex items-center gap-3">
+                        <span className={`flex items-center justify-center w-6 h-6 border font-black text-[10px]
+                          ${index === 0 ? 'bg-red-600/20 text-red-500 border-red-500/50' : 
+                            index === 1 ? 'bg-zinc-700/20 text-zinc-400 border-zinc-700/50' : 
+                            index === 2 ? 'bg-amber-600/10 text-amber-500 border-amber-600/30' : 
+                            'text-zinc-600 border-zinc-800'}
+                        `}>
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span className="text-xs font-black truncate max-w-[130px] uppercase text-zinc-300">
+                          {item.name}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
+
+                      <div className="flex items-center gap-4">
+                        <span className="text-[10px] text-zinc-500 font-bold bg-[#0A0A0C] px-2 py-0.5 border border-zinc-800">
+                          [ 1ST_PL: {item.rankCounts[1] || 0}X ]
+                        </span>
+                        <span className="text-xs font-black text-red-500 tracking-wider">
+                          {item.totalScore} PTS
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
           </div>
+        </section>
 
-        </div>
-
-      </main>
+      </div>
     </div>
   );
 }

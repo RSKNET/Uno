@@ -22,47 +22,53 @@ export default function PlayerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bezel-outer max-w-sm w-full animate-bounce-short" style={{ animationDuration: '4s' }}>
-        <div className="bezel-inner p-6 space-y-4">
-          
-          <div className="space-y-1">
-            <h4 className="text-md font-bold font-display">
-              {mode === 'create' ? 'Tambah Pemain Baru' : 'Edit Nama Pemain'}
-            </h4>
-            <p className="text-xs text-zinc-500">Ketik nama untuk didaftarkan ke database Supabase.</p>
-          </div>
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full border-2 border-zinc-800 bg-[#0C0C0F] relative p-6 space-y-6 rounded-none">
+        
+        {/* Tactical Grid Crosshairs */}
+        <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
 
-          <form onSubmit={onSave} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Ketik nama pemain..."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={20}
-              required
-              autoFocus
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-rose-500 text-zinc-200"
-            />
-
-            <div className="flex gap-3 justify-end text-xs font-bold">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2.5 rounded-xl border border-zinc-800 hover:bg-zinc-900 transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2.5 rounded-xl bg-rose-500 dark:bg-rose-600 hover:bg-rose-600 text-white shadow-md transition-colors"
-              >
-                Simpan
-              </button>
-            </div>
-          </form>
-
+        <div className="space-y-1 pb-2 border-b border-zinc-800 font-mono">
+          <h4 className="text-sm font-black uppercase tracking-widest text-[#FFFFFF]">
+            {mode === 'create' ? '[ REGISTER NEW PLAYER ]' : '[ EDIT PLAYER ENTRY ]'}
+          </h4>
+          <p className="text-[10px] text-zinc-500 uppercase">
+            INPUT CORRESPONDING USERNAME TO ARCHIVE IN SUPABASE.
+          </p>
         </div>
+
+        <form onSubmit={onSave} className="space-y-5 font-mono">
+          <input
+            type="text"
+            placeholder="INPUT NAME..."
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={20}
+            required
+            autoFocus
+            className="w-full bg-[#121216] border border-zinc-800 px-3 py-2.5 text-xs font-bold focus:outline-none focus:border-red-500 text-zinc-200 rounded-none uppercase"
+          />
+
+          <div className="flex gap-3 justify-end text-xs font-bold">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-[#121216] border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-colors rounded-none uppercase cursor-pointer"
+            >
+              [ CANCEL ]
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white transition-colors rounded-none border-b-2 border-red-800 active:border-b-0 active:translate-y-0.5 uppercase cursor-pointer"
+            >
+              [ SUBMIT ]
+            </button>
+          </div>
+        </form>
+
       </div>
     </div>
   );

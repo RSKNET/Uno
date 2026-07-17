@@ -8,65 +8,91 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 py-16 px-6 relative overflow-x-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-500/5 blur-[120px] pointer-events-none" />
-
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#0A0A0C] text-[#E2E8F0] py-16 px-6 relative overflow-x-hidden font-mono crt-screen select-none">
+      
+      <div className="max-w-2xl mx-auto space-y-8 relative z-10">
+        
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-200 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Kembali ke Aplikasi
+          <ArrowLeft className="w-4 h-4 shrink-0" />
+          [ ABORT PROTOCOL // RETURN TO CORE ]
         </Link>
 
-        <div className="space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
-            <FileText className="w-5 h-5" />
+        {/* Header Block */}
+        <div className="space-y-4 border border-zinc-800 bg-[#0C0C0F] p-6 relative">
+          <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+          <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+          <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+          <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 border border-zinc-800 bg-[#121216] flex items-center justify-center text-red-500 rounded-none">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-base font-black uppercase tracking-widest text-white">
+                [ TERMS OF SERVICE MATRIX ]
+              </h1>
+              <p className="text-[9px] text-zinc-500 uppercase">
+                LAST UPDATE PARAMETER: 07 JUL 2026
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight font-display text-gradient">Syarat & Ketentuan</h1>
-          <p className="text-xs text-zinc-500">Terakhir diperbarui: 7 Juli 2026</p>
         </div>
 
-        <div className="w-full h-px bg-zinc-800/80" />
+        <div className="w-full h-px bg-zinc-800" />
 
-        <div className="space-y-6 text-zinc-400 text-sm leading-relaxed">
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-zinc-200">1. Penerimaan Syarat</h2>
-            <p>
-              Dengan mengakses dan menggunakan aplikasi UNO Skors, Anda dianggap telah membaca, memahami, dan menyetujui untuk terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak menyetujui bagian mana pun, harap segera hentikan penggunaan aplikasi ini.
+        {/* Content details */}
+        <div className="space-y-8 text-zinc-400 text-xs leading-relaxed uppercase">
+          
+          <section className="space-y-2 border border-zinc-800/60 bg-[#0C0C0F]/45 p-5">
+            <h2 className="text-xs font-black text-white">
+              [ 01 // TERM_ACCEPTANCE ]
+            </h2>
+            <p className="text-[11px]">
+              BY INITIATING AND OPERATING THE UNO SYSTEM INTERFACES, YOU AGREE TO REMAIN STRICTLY BOUND BY THESE SERVICE TERMS. IF DEVIATING OR NOT CONCURRING, IMMEDIATELY DISCONTINUE ALL ACCESS INSTRUCTIONS.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-zinc-200">2. Penggunaan Layanan</h2>
-            <p>
-              Aplikasi ini disediakan khusus untuk membantu pencatatan skor game kartu UNO secara lokal dan personal. Anda dilarang keras untuk:
+          <section className="space-y-2 border border-zinc-800/60 bg-[#0C0C0F]/45 p-5">
+            <h2 className="text-xs font-black text-white">
+              [ 02 // USAGE_PROTOCOL ]
+            </h2>
+            <p className="text-[11px]">
+              THIS SYSTEM INTERFACE IS DISTRIBUTED EXCLUSIVELY FOR CONVENIENT MATCH CALCULATION PURPOSES. USERS ARE FORBIDDEN FROM:
             </p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Menggunakan aplikasi untuk tujuan ilegal atau melanggar hukum.</li>
-              <li>Mencoba mengeksploitasi celah keamanan database, memanipulasi API, atau meretas hak akses administrator.</li>
+            <ul className="list-disc pl-5 space-y-1.5 text-[10px] text-zinc-500">
+              <li>INITIATING PENETRATION DEVIATIONS OR REVERSE ENGINEERING CORE DATABASE CHANNELS.</li>
+              <li>ABUSING AUTHENTICATED ACCESS TO MANIPULATE PRIVATE API PARAMETERS OR SECURE SYSTEM STATES.</li>
             </ul>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-zinc-200">3. Akun Administrator</h2>
-            <p>
-              Akses ke Portal Admin dilindungi dan hanya diizinkan untuk email administrator yang terdaftar (Google OAuth). Admin bertanggung jawab penuh untuk menjaga integritas data pemain, laporan game, dan konfigurasi sistem.
+          <section className="space-y-2 border border-zinc-800/60 bg-[#0C0C0F]/45 p-5">
+            <h2 className="text-xs font-black text-white">
+              [ 03 // ADMIN_ROLES ]
+            </h2>
+            <p className="text-[11px]">
+              SECURE ADMIN GATEWAYS ARE CONTROLLED VIA REGISTERED IDENTITIES (GOOGLE OAUTH). ADMINISTRATORS RETAIN ABSOLUTE OWNERSHIP FOR LOG FILE INTEGRITY, DATA READOUT ACTIONS, AND CONTROL DEPLOYMENTS.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-zinc-200">4. Batasan Tanggung Jawab</h2>
-            <p>
-              Aplikasi ini disediakan &quot;apa adanya&quot; (as is) tanpa jaminan apa pun. Kami tidak bertanggung jawab atas hilangnya data riwayat permainan karena kendala lokal browser atau pemeliharaan server database.
+          <section className="space-y-2 border border-zinc-800/60 bg-[#0C0C0F]/45 p-5">
+            <h2 className="text-xs font-black text-white">
+              [ 04 // WARRENTY_LIMITATIONS ]
+            </h2>
+            <p className="text-[11px]">
+              THE UNO SYSTEM RUNTIME IS DISTRIBUTED &quot;AS IS&quot; WITHOUT ANY EXPLICIT WARRANTIES. WE ASSUME ZERO RESPONSIBILITY FOR HISTORICAL DATABASE LOG ERASURES OR BROWSER STORAGE FAULTS.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-zinc-200">5. Perubahan Ketentuan</h2>
-            <p>
-              Kami dapat memperbarui Syarat dan Ketentuan ini sewaktu-waktu tanpa pemberitahuan sebelumnya. Perubahan akan langsung berlaku setelah dipublikasikan pada halaman ini.
+          <section className="space-y-2 border border-zinc-800/60 bg-[#0C0C0F]/45 p-5">
+            <h2 className="text-xs font-black text-white">
+              [ 05 // SYSTEM_AMENDMENTS ]
+            </h2>
+            <p className="text-[11px]">
+              THE ADMINISTRATOR RESERVES THE RIGHT TO AMEND SYSTEM RULES AT ANY TIME WITHOUT PRE-FLIGHT NOTICE. LOG UPDATES BECOME IMMEDIATELY ENFORCED UPON REFLECTION ON THE LIVE APP DOM.
             </p>
           </section>
         </div>

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { FileText, Trash2, CheckSquare, Square } from 'lucide-react';
-
+import { FileText, Trash2 } from 'lucide-react';
 
 interface Game {
   id: string;
@@ -29,8 +28,6 @@ export default function ReportTab({ games, onOpenSummaryModal, onDeleteGames, sh
   const [selectedGameIds, setSelectedGameIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
 
-
-
   const handleSelectAll = () => {
     if (selectedGameIds.size === games.length) {
       setSelectedGameIds(new Set());
@@ -51,8 +48,8 @@ export default function ReportTab({ games, onOpenSummaryModal, onDeleteGames, sh
 
   const handleDeleteSingle = (g: Game) => {
     showModal(
-      "Hapus Laporan Game",
-      `Apakah Anda yakin ingin menghapus laporan game "${g.id.slice(0, 8)}..."? Berkas game ini akan dihapus permanen dari Supabase Storage.`,
+      "HAPUS LAPORAN GAME",
+      `APAKAH ANDA YAKIN INGIN MENGHAPUS LAPORAN GAME "${g.id.slice(0, 8)}..."? BERKAS GAME INI AKAN DIHAPUS PERMANEN DARI SUPABASE STORAGE.`,
       async () => {
         setDeleting(true);
         try {
@@ -76,8 +73,8 @@ export default function ReportTab({ games, onOpenSummaryModal, onDeleteGames, sh
     if (count === 0) return;
 
     showModal(
-      "Hapus Banyak Laporan",
-      `Apakah Anda yakin ingin menghapus ${count} laporan game terpilih? Berkas game ini akan dihapus permanen dari Supabase Storage.`,
+      "HAPUS BANYAK LAPORAN",
+      `APAKAH ANDA YAKIN INGIN MENGHAPUS ${count} LAPORAN GAME TERPILIH? BERKAS GAME INI AKAN DIHAPUS PERMANEN DARI SUPABASE STORAGE.`,
       async () => {
         setDeleting(true);
         try {
@@ -98,119 +95,112 @@ export default function ReportTab({ games, onOpenSummaryModal, onDeleteGames, sh
   const isSomeSelected = selectedGameIds.size > 0 && selectedGameIds.size < games.length;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="bezel-outer">
-        <div className="bezel-inner p-6 space-y-5">
-          
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold font-display flex items-center gap-2 text-zinc-100">
-                <FileText className="w-5 h-5 text-rose-500" /> Laporan Game UNO
-              </h3>
-              <p className="text-xs text-zinc-400">Daftar seluruh pertandingan UNO yang telah didaftarkan ke cloud database.</p>
-            </div>
+    <div className="space-y-6 select-none font-mono animate-fade-in text-[#E2E8F0] w-full">
+      <div className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-5 rounded-none relative">
+        <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
 
-            {selectedGameIds.size > 0 && (
-              <button
-                onClick={handleDeleteBulk}
-                disabled={deleting}
-                className="self-start sm:self-center px-4 py-2 text-xs font-bold bg-red-500/10 hover:bg-red-500/25 border border-red-500/30 hover:border-red-500/50 text-red-500 rounded-xl transition-all duration-300 flex items-center gap-2 active:scale-95 disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" />
-                Hapus Terpilih ({selectedGameIds.size})
-              </button>
-            )}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-black uppercase text-white tracking-wider flex items-center gap-2">
+              <FileText className="w-5 h-5 text-red-500" /> [ GAME MATCH REPORTS DATABASE ]
+            </h3>
+            <p className="text-[10px] text-zinc-500 uppercase leading-relaxed">
+              LIST OF REGISTERED UNO MATCH RECORDS ARCHIVED IN SUPABASE STORAGE.
+            </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                  <th className="py-3 px-2 w-10 text-center">
-                    {games.length > 0 && (
+          {selectedGameIds.size > 0 && (
+            <button
+              onClick={handleDeleteBulk}
+              disabled={deleting}
+              className="self-start sm:self-center px-4 py-2 text-xs font-black bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 text-red-500 rounded-none transition-colors flex items-center gap-2 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              [ PURGE SELECTED ({selectedGameIds.size}) ]
+            </button>
+          )}
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-800 text-zinc-500 text-[10px] font-black uppercase tracking-wider">
+                <th className="py-3 px-2 w-10 text-center">
+                  {games.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSelectAll}
+                      className="text-zinc-500 hover:text-zinc-300 font-bold focus:outline-none cursor-pointer"
+                    >
+                      {isAllSelected ? '[X]' : isSomeSelected ? '[-]' : '[ ]'}
+                    </button>
+                  )}
+                </th>
+                <th className="py-3 px-2">GAME_ID</th>
+                <th className="py-3 px-2">MATCH_DATE</th>
+                <th className="py-3 px-2">PLAYERS_COUNT</th>
+                <th className="py-3 px-2">ROUNDS_PLAYED</th>
+                <th className="py-3 px-2 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              {games.map((g) => {
+                const isChecked = selectedGameIds.has(g.id);
+                return (
+                  <tr key={g.id} className={`border-b border-zinc-900 transition-colors hover:bg-zinc-900/40 ${isChecked ? 'bg-red-500/5 hover:bg-red-500/10' : ''}`}>
+                    <td className="py-3.5 px-2 text-center">
                       <button
                         type="button"
-                        onClick={handleSelectAll}
-                        className="text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
+                        onClick={() => handleSelectGame(g.id)}
+                        className="text-zinc-500 hover:text-zinc-300 font-bold focus:outline-none cursor-pointer"
                       >
-                        {isAllSelected ? (
-                          <CheckSquare className="w-4.5 h-4.5 text-rose-500" />
-                        ) : isSomeSelected ? (
-                          <CheckSquare className="w-4.5 h-4.5 text-rose-500/60" />
-                        ) : (
-                          <Square className="w-4.5 h-4.5" />
-                        )}
+                        {isChecked ? '[X]' : '[ ]'}
                       </button>
-                    )}
-                  </th>
-                  <th className="py-3 px-2">Game ID</th>
-                  <th className="py-3 px-2">Tanggal Game</th>
-                  <th className="py-3 px-2">Jumlah Pemain</th>
-                  <th className="py-3 px-2">Babak Ditentukan</th>
-                  <th className="py-3 px-2 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {games.map((g) => {
-                  const isChecked = selectedGameIds.has(g.id);
-                  return (
-                    <tr key={g.id} className={`border-b border-zinc-900/60 transition-colors hover:bg-zinc-900/10 ${isChecked ? 'bg-rose-500/5 hover:bg-rose-500/10' : ''}`}>
-                      <td className="py-3.5 px-2 text-center">
+                    </td>
+                    <td className="py-3.5 px-2 font-mono text-xs text-red-500 font-semibold">{g.id.slice(0, 8).toUpperCase()}...</td>
+                    <td className="py-3.5 px-2 text-[10px] text-zinc-400 uppercase">
+                      {new Date(g.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
+                    </td>
+                    <td className="py-3.5 px-2 text-[10px] text-zinc-300 font-bold uppercase">{g.total_players} PLAYERS</td>
+                    <td className="py-3.5 px-2 text-[10px] text-zinc-400 uppercase">
+                      {g.is_unlimited_rounds ? 'UNLIMITED' : `${g.total_rounds} ROUNDS`}
+                    </td>
+                    <td className="py-3.5 px-2 text-right">
+                      <div className="inline-flex items-center gap-3">
                         <button
-                          type="button"
-                          onClick={() => handleSelectGame(g.id)}
-                          className="text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
+                          onClick={() => onOpenSummaryModal(g)}
+                          className="text-[10px] font-black text-red-500 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer uppercase"
                         >
-                          {isChecked ? (
-                            <CheckSquare className="w-4.5 h-4.5 text-rose-500" />
-                          ) : (
-                            <Square className="w-4.5 h-4.5" />
-                          )}
+                          [ COMPILING RINGKASAN &gt;&gt; ]
                         </button>
-                      </td>
-                      <td className="py-3.5 px-2 font-mono text-xs text-rose-400 font-semibold">{g.id.slice(0, 8)}...</td>
-                      <td className="py-3.5 px-2 text-xs text-zinc-400">
-                        {new Date(g.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="py-3.5 px-2 text-xs text-zinc-300 font-semibold">{g.total_players} Pemain</td>
-                      <td className="py-3.5 px-2 text-xs text-zinc-400">
-                        {g.is_unlimited_rounds ? 'Bebas (Unlimited)' : `${g.total_rounds} Babak`}
-                      </td>
-                      <td className="py-3.5 px-2 text-right">
-                        <div className="inline-flex items-center gap-3">
-                          <button
-                            onClick={() => onOpenSummaryModal(g)}
-                            className="text-xs font-bold text-rose-500 hover:text-rose-400 transition-colors bg-transparent border-0 cursor-pointer"
-                          >
-                            Buka Ringkasan &rarr;
-                          </button>
-                          <button
-                            onClick={() => handleDeleteSingle(g)}
-                            disabled={deleting}
-                            className="p-1.5 rounded-lg text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-50"
-                            title="Hapus laporan ini"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {games.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-zinc-500 italic">
-                      Belum ada laporan pertandingan yang terdaftar di cloud.
+                        <button
+                          onClick={() => handleDeleteSingle(g)}
+                          disabled={deleting}
+                          className="p-1.5 border border-zinc-800 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-none cursor-pointer disabled:opacity-50"
+                          title="PURGE SINGLE GAME"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
+                );
+              })}
+              {games.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-[10px] text-zinc-500 italic uppercase">
+                    [ NO GAME REPORTS RECORDED IN CLOUD DATABASE ]
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
 
+      </div>
     </div>
   );
 }

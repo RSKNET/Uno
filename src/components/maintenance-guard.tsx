@@ -97,10 +97,12 @@ export function MaintenanceGuard({ children }: { children: React.ReactNode }) {
 
   if (loading && !isMaintenancePage && !isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-400">
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0C] text-[#E2E8F0] font-mono crt-screen">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-400"></div>
-          <span className="text-xs tracking-wider uppercase opacity-80 font-medium">Checking System...</span>
+          <div className="h-6 w-6 border-2 border-zinc-800 border-t-red-500 animate-spin rounded-none"></div>
+          <span className="text-[10px] uppercase font-bold tracking-widest opacity-60">
+            [ CHECKING SYSTEM CONTROLLER... ]
+          </span>
         </div>
       </div>
     );

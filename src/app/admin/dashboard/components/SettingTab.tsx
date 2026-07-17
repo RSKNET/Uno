@@ -22,116 +22,151 @@ export default function SettingTab({
   onMaxPlayersChange
 }: SettingTabProps) {
   return (
-    <div className="space-y-6 animate-fade-in w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-900/30 border border-zinc-800/50 p-6 rounded-3xl backdrop-blur-sm mb-2">
-        <div>
-          <h2 className="text-xl font-extrabold tracking-tight font-display text-gradient">Pengaturan Sistem</h2>
-          <p className="text-xs text-zinc-400 mt-1">Konfigurasi batasan match, mode pemeliharaan, dan default parameter permainan.</p>
+    <div className="space-y-6 select-none font-mono animate-fade-in w-full text-[#E2E8F0]">
+      
+      {/* Overview header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0E0E12] border-2 border-zinc-800 p-6 rounded-none relative">
+        <span className="absolute -top-2 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -top-2 -right-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -left-2 font-black text-red-500 select-none">+</span >
+        <span className="absolute -bottom-3 -right-2 font-black text-red-500 select-none">+</span >
+
+        <div className="space-y-1">
+          <h2 className="text-base font-black uppercase text-white tracking-widest">
+            [ SYSTEM PARAMETERS // CONFIGURATION_OK ]
+          </h2>
+          <p className="text-[10px] text-zinc-500 uppercase">
+            MODIFY MATCH LIMITATIONS, MAINTENANCE PRIVILEGES, AND DEFAULT SYSTEM VARIABLES.
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-start">
-        <div className="bezel-outer w-full">
-          <div className="bezel-inner p-6 space-y-5">
-            <h3 className="text-sm font-bold font-display flex items-center gap-2 text-zinc-200">
-              <ShieldAlert className="w-4.5 h-4.5 text-red-500 shrink-0" />
-              Status & Akses Keamanan
-            </h3>
-            
-            <div className="w-full h-px bg-zinc-800/60" />
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">
-                  Maintenance Mode
-                </span>
-                <p className="text-[11px] text-zinc-400 leading-normal max-w-sm">
-                  Mengalihkan seluruh halaman pemain secara real-time ke layar informasi pemeliharaan sistem.
-                </p>
-              </div>
+        
+        {/* Security Settings panel */}
+        <div className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-5 rounded-none relative">
+          <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
+            [ ACCESS SECURITY CONSTANTS ]
+          </h3>
+          
+          <div className="w-full h-px bg-zinc-800" />
+          
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1.5">
+              <span className="text-xs font-black text-zinc-300 uppercase">
+                MAINTENANCE MODE
+              </span>
+              <p className="text-[10px] text-zinc-500 leading-normal max-w-sm uppercase">
+                REROUTES ALL PUBLIC APP ACCESS IN REAL-TIME TO THE SYSTEM MAINTENANCE OVERVIEW PANEL.
+              </p>
+            </div>
 
+            {/* Brutalist binary switch */}
+            <div className="flex border border-zinc-800 rounded-none bg-[#0A0A0C] shrink-0 overflow-hidden">
               <button
-                onClick={() => onToggleMaintenance(!maintenanceMode)}
+                type="button"
                 disabled={savingSettings === 'maintenance'}
-                className={`w-11 h-6 rounded-full transition-colors relative shrink-0 focus:outline-none border
-                  ${maintenanceMode 
-                    ? 'bg-red-500 border-red-500' 
-                    : 'bg-zinc-800 border-zinc-700'
-                  }
+                onClick={() => onToggleMaintenance(true)}
+                className={`px-3 py-1.5 text-[9px] font-black uppercase transition-colors rounded-none cursor-pointer disabled:opacity-40
+                  ${maintenanceMode ? 'bg-red-600 text-white' : 'text-zinc-500 hover:text-zinc-300'}
                 `}
               >
                 {savingSettings === 'maintenance' ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400 absolute top-1 left-1.5" />
+                  <Loader2 className="w-3 h-3 animate-spin" />
                 ) : (
-                  <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all absolute top-0.5
-                    ${maintenanceMode ? 'right-0.5' : 'left-0.5'}
-                  `} />
+                  '[ ON ]'
                 )}
+              </button>
+              <button
+                type="button"
+                disabled={savingSettings === 'maintenance'}
+                onClick={() => onToggleMaintenance(false)}
+                className={`px-3 py-1.5 text-[9px] font-black uppercase transition-colors rounded-none cursor-pointer disabled:opacity-40
+                  ${!maintenanceMode ? 'bg-[#16161C] text-zinc-300' : 'text-zinc-500 hover:text-zinc-300'}
+                `}
+              >
+                '[ OFF ]'
               </button>
             </div>
           </div>
         </div>
-        <div className="bezel-outer w-full">
-          <div className="bezel-inner p-6 space-y-5">
-            <h3 className="text-sm font-bold font-display flex items-center gap-2 text-zinc-200">
-              <Sliders className="w-4.5 h-4.5 text-rose-500 shrink-0" />
-              Konfigurasi Default Permainan
-            </h3>
 
-            <div className="w-full h-px bg-zinc-800/60" />
+        {/* Game configuration panel */}
+        <div className="border border-zinc-800 bg-[#0C0C0F] p-6 space-y-5 rounded-none relative">
+          <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-red-500 shrink-0" />
+            [ MATCH PARAMETER SETS ]
+          </h3>
 
-            <div className="space-y-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">
-                    Batas Babak Bebas
-                  </span>
-                  <p className="text-[11px] text-zinc-400 leading-normal max-w-sm">
-                    Mengizinkan default form setup baru berada pada mode unlimited babak.
-                  </p>
-                </div>
+          <div className="w-full h-px bg-zinc-800" />
 
+          <div className="space-y-6">
+            
+            {/* Free rounds setting */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <span className="text-xs font-black text-zinc-300 uppercase">
+                  UNLIMITED MATCH SEQUENCES
+                </span>
+                <p className="text-[10px] text-zinc-500 leading-normal max-w-sm uppercase">
+                  ALLOWS NEW MATCH SETUPS TO DEFAULT TO UNLIMITED ROUND SEQUENCES BY DEFAULT.
+                </p>
+              </div>
+
+              {/* Brutalist binary switch */}
+              <div className="flex border border-zinc-800 rounded-none bg-[#0A0A0C] shrink-0 overflow-hidden">
                 <button
-                  onClick={() => onToggleUnlimitedRounds(!unlimitedRounds)}
+                  type="button"
                   disabled={savingSettings === 'rounds'}
-                  className={`w-11 h-6 rounded-full transition-colors relative shrink-0 focus:outline-none border
-                    ${unlimitedRounds 
-                      ? 'bg-rose-500 border-rose-500' 
-                      : 'bg-zinc-800 border-zinc-700'
-                    }
+                  onClick={() => onToggleUnlimitedRounds(true)}
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase transition-colors rounded-none cursor-pointer disabled:opacity-40
+                    ${unlimitedRounds ? 'bg-red-600 text-white' : 'text-zinc-500 hover:text-zinc-300'}
                   `}
                 >
                   {savingSettings === 'rounds' ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400 absolute top-1 left-1.5" />
+                    <Loader2 className="w-3 h-3 animate-spin" />
                   ) : (
-                    <span className={`block w-4.5 h-4.5 rounded-full bg-white transition-all absolute top-0.5
-                      ${unlimitedRounds ? 'right-0.5' : 'left-0.5'}
-                    `} />
+                    '[ ON ]'
                   )}
                 </button>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="text-sm font-semibold flex items-center gap-1.5 text-zinc-200">
-                    Maksimal Pemain
-                  </span>
-                  <p className="text-[11px] text-zinc-400 leading-normal max-w-sm">
-                    Mengatur batas maksimal jumlah pemain yang dapat dipilih pada saat setup.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <input
-                    type="number"
-                    min={2}
-                    max={20}
-                    value={maxPlayers}
-                    onChange={(e) => onMaxPlayersChange(parseInt(e.target.value, 10) || 8)}
-                    disabled={savingSettings === 'max_players'}
-                    className="w-16 bg-zinc-900 border border-zinc-800 rounded-xl px-2 py-1.5 text-center text-xs font-semibold focus:outline-none focus:border-rose-500 text-zinc-200"
-                  />
-                </div>
+                <button
+                  type="button"
+                  disabled={savingSettings === 'rounds'}
+                  onClick={() => onToggleUnlimitedRounds(false)}
+                  className={`px-3 py-1.5 text-[9px] font-black uppercase transition-colors rounded-none cursor-pointer disabled:opacity-40
+                    ${!unlimitedRounds ? 'bg-[#16161C] text-zinc-300' : 'text-zinc-500 hover:text-zinc-300'}
+                  `}
+                >
+                  '[ OFF ]'
+                </button>
               </div>
             </div>
+
+            {/* Max players configuration */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <span className="text-xs font-black text-zinc-300 uppercase">
+                  MAXIMUM PLAYERS MATRIX
+                </span>
+                <p className="text-[10px] text-zinc-500 leading-normal max-w-sm uppercase">
+                  SPECIFIES CONTROLLER LIMIT ON MAX PLAYERS CAPABLE OF REGISTRATION PER MATCH.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <input
+                  type="number"
+                  min={2}
+                  max={20}
+                  value={maxPlayers}
+                  onChange={(e) => onMaxPlayersChange(parseInt(e.target.value, 10) || 8)}
+                  disabled={savingSettings === 'max_players'}
+                  className="w-16 bg-[#121216] border border-zinc-800 rounded-none px-2 py-1.5 text-center text-xs font-bold focus:outline-none focus:border-red-500 text-zinc-200"
+                />
+              </div>
+            </div>
+
           </div>
         </div>
 
