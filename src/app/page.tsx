@@ -309,7 +309,7 @@ export default function SetupPage() {
       </header>
 
       {/* Main Grid Workspace */}
-      <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-0 lg:divide-x lg:divide-zinc-800 border-t border-zinc-800 relative z-10">
+      <main className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-y-12 lg:gap-0 lg:divide-x lg:divide-zinc-800 border-t border-zinc-800 relative z-10">
         
         {/* Left Side: System Specifications / Visuals */}
         <section className="lg:col-span-5 p-8 flex flex-col justify-between space-y-12 min-h-full">
@@ -329,7 +329,7 @@ export default function SetupPage() {
             {/* Micro-telemetry details */}
             <div className="space-y-2.5 text-xs text-zinc-400">
               <p className="font-semibold text-zinc-300">// PROTOCOL OBJECTIVES:</p>
-              <div className="space-y-1 text-zinc-500">
+              <div className="space-y-1 text-zinc-400">
                 <p>01. AUTOMATIC POIN CALCULATION MATRIX</p>
                 <p>02. ANTI-TIE PARITY CHECKER [ENABLED]</p>
                 <p>03. SYNC QUEUE BUFFER PIPELINE [DEXIE_DB]</p>
@@ -341,18 +341,18 @@ export default function SetupPage() {
             <div className="w-full h-8 hazard-stripes border border-red-500/20" />
 
             {/* Technical system logs container */}
-            <div className="border border-zinc-800 bg-[#0E0E12] p-4 text-[10px] space-y-1.5 font-mono text-zinc-500">
-              <p className="text-zinc-400 font-bold uppercase"># CURRENT SESSION TELEMETRY</p>
+            <div className="border border-zinc-800 bg-[#0E0E12] p-4 text-[10px] space-y-1.5 font-mono text-zinc-400">
+              <p className="text-zinc-300 font-bold uppercase"># CURRENT SESSION TELEMETRY</p>
               <p>ENGINE: DEXIE_DB_CLIENT_CACHE</p>
               <p>QUEUE: {dbPlayers.length} REGISTERED PLAYERS IN DB</p>
               <p>STATUS: READY FOR MATCH INITIALIZATION</p>
-              <p className="text-red-500/80">WARNING: AVOID REFRESH DURING PLAY SEQUENCE</p>
+              <p className="text-red-400 font-bold">WARNING: AVOID REFRESH DURING PLAY SEQUENCE</p>
             </div>
           </div>
 
           {/* Barcode Graphic */}
           <div className="space-y-2">
-            <span className="text-[9px] text-zinc-600 block uppercase tracking-widest">
+            <span className="text-[9px] text-zinc-400 block uppercase tracking-widest">
               PRODUCT SERIAL: 2026-UNO-GRID-0717
             </span>
             <svg className="w-48 h-8 opacity-40 text-[#E2E8F0]" viewBox="0 0 100 20" fill="currentColor">
@@ -404,7 +404,7 @@ export default function SetupPage() {
               <span className="text-xs font-black uppercase tracking-widest text-[#FFFFFF]">
                 [ PARAMETERS CONFIGURATION ]
               </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+              <span className="text-[10px] text-zinc-300 uppercase tracking-widest font-semibold">
                 SYSTEM ID: S_001
               </span>
             </div>
@@ -413,10 +413,11 @@ export default function SetupPage() {
               
               {/* Total Players input */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label htmlFor="totalPlayers" className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
                   [ 01 // TOTAL OPERATIONAL PLAYERS ]
                 </label>
                 <select
+                  id="totalPlayers"
                   value={totalPlayersWatch}
                   onChange={(e) => setValue('totalPlayers', parseInt(e.target.value) || 2)}
                   className="w-full bg-[#121216] border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-[#E2E8F0] font-bold focus:outline-none focus:border-red-500 focus:ring-0 appearance-none uppercase cursor-pointer"
@@ -432,7 +433,7 @@ export default function SetupPage() {
               {/* Rounds input details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="totalRounds" className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  <label htmlFor="totalRounds" className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
                     [ 02 // TOTAL ROUNDS ]
                   </label>
                   <input
@@ -451,7 +452,7 @@ export default function SetupPage() {
                 </div>
 
                 <div className="flex flex-col justify-end">
-                  <label className="flex items-center gap-3 px-4 py-2 bg-[#121216] border border-zinc-800 rounded-none cursor-pointer hover:bg-zinc-900 transition-colors h-[38px] select-none text-xs font-bold text-zinc-400">
+                  <label className="flex items-center gap-3 px-4 py-2 bg-[#121216] border border-zinc-800 rounded-none cursor-pointer hover:bg-zinc-900 transition-colors h-[38px] select-none text-xs font-bold text-zinc-300">
                     <input
                       type="checkbox"
                       {...register('isUnlimitedRounds')}
@@ -466,7 +467,7 @@ export default function SetupPage() {
 
               {/* Player Names Configuration */}
               <div className="space-y-4">
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
                   [ 03 // PLAYERS IDENTITY PROTOCOL ]
                 </label>
                 
@@ -480,7 +481,7 @@ export default function SetupPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-1">
                   {fields.map((field, index) => (
                     <div key={field.id} className="relative flex flex-col gap-1">
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-widest">
+                      <span className="text-[9px] text-zinc-400 uppercase tracking-widest">
                         PLAYER_{String(index + 1).padStart(2, '0')}
                       </span>
                       <input
@@ -565,7 +566,7 @@ export default function SetupPage() {
           </div>
         </section>
 
-      </div>
+      </main>
 
       <CustomModal
         isOpen={modalConfig.isOpen}

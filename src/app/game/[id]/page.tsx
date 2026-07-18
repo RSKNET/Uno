@@ -468,6 +468,7 @@ export default function GamePage({ params }: PageProps) {
                           +{points} PTS
                         </span>
                         <select
+                          aria-label={`Pemain untuk peringkat ${rank}`}
                           value={currentSelectedPlayerId}
                           onChange={(e) => handlePlayerChangeForRank(rank, e.target.value)}
                           className="bg-[#0A0A0C] border border-zinc-800 rounded-none px-2.5 py-1 text-xs font-bold text-[#E2E8F0] focus:outline-none focus:border-red-500 focus:ring-0 cursor-pointer uppercase"

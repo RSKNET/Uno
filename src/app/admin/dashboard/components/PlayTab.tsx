@@ -396,6 +396,7 @@ export default function PlayTab({ players, maxPlayers, unlimitedRounds, showModa
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block">[ PLAYERS_MATRIX_COUNT ]</label>
               <select
+                aria-label="Total Players Matrix"
                 value={totalPlayers}
                 onChange={(e) => handleTotalPlayersChange(parseInt(e.target.value) || 2)}
                 className="w-full bg-[#121216] border border-zinc-800 px-3 py-2.5 text-xs font-bold focus:outline-none focus:border-red-500 text-zinc-300 rounded-none uppercase"
@@ -443,6 +444,7 @@ export default function PlayTab({ players, maxPlayers, unlimitedRounds, showModa
                   <div key={idx} className="space-y-1.5">
                     <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">SLOT {String(idx + 1).padStart(2, '0')}</span>
                     <select
+                      aria-label={`Player selection slot ${idx + 1}`}
                       value={selectedPlayers[idx] || ''}
                       onChange={(e) => handlePlayerSlotChange(idx, e.target.value)}
                       className="w-full bg-[#121216] border border-zinc-800 px-3 py-2 text-xs font-bold focus:outline-none focus:border-red-500 text-zinc-300 rounded-none uppercase"
@@ -531,6 +533,7 @@ export default function PlayTab({ players, maxPlayers, unlimitedRounds, showModa
                             +{points} PTS
                           </span>
                           <select
+                            aria-label={`Rank ${rank} player selector`}
                             value={roundRanks[rank] || ''}
                             onChange={(e) => handleRankChange(rank, e.target.value)}
                             className="bg-[#0A0A0C] border border-zinc-800 px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 text-zinc-300 rounded-none uppercase"
