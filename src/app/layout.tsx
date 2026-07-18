@@ -1,22 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConnectionStatus } from "@/components/connection-status";
 import { MaintenanceGuard } from "@/components/maintenance-guard";
 
-const outfit = Outfit({
-  variable: "--font-display",
-  subsets: ["latin"],
-  display: "swap",
-});
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
@@ -49,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${outfit.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
