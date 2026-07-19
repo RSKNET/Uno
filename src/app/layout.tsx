@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -43,14 +42,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `var __name = (t, v) => t; window.__name = __name;` }} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-startup-image" href="/android-chrome-512x512.png" />
       </head>
       <body className="min-h-full flex flex-col">
-        <Script id="name-polyfill" strategy="beforeInteractive">
-          {`var __name = (t, v) => t; window.__name = __name;`}
-        </Script>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
