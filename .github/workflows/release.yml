@@ -3,7 +3,7 @@ name: Auto Release
 on:
   push:
     branches:
-      - test-workflow
+      - main
 
 permissions:
   contents: write
@@ -64,7 +64,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json public/manifest.json
           git commit -m "chore: release v$NEW_VERSION [skip ci]" || exit 0
-          git push origin test-workflow
+          git push origin main
           
           # Buat Release & Tag di GitHub
           gh release create "v$NEW_VERSION" --generate-notes
