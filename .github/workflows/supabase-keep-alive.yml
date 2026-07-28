@@ -6,16 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  keep-alive-db:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Upsert Request to Supabase API
-        run: |
-          curl -s -X POST \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/keep_alive" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -H "Cache-Control: no-cache" \
-            -d '{"id": 1}'
+  call-shared-keep-alive:
+    uses: StillLogic/Github-Actions/.github/workflows/supabase-keep-alive.yml@main
+    secrets:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
