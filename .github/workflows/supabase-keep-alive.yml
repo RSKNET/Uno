@@ -7,7 +7,7 @@ on:
 
 jobs:
   call-shared-keep-alive:
-    uses: StillLogic/Github-Actions/.github/workflows/supabase-keep-alive.yml@main
+    uses: RSKNET/Github-Actions/.github/workflows/supabase-keep-alive.yml@main
     secrets:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
