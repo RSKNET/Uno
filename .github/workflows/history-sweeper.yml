@@ -9,10 +9,22 @@ permissions:
   actions: write
 
 jobs:
-  call-shared-cleanup:
-    uses: RSKNET/Github-Actions/.github/workflows/history-sweeper.yml@main
-    with:
-      retain_days: 5
-      keep_minimum_runs: 3
-    secrets:
-      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v4
+
+      - name: Checkout Private Actions Repo
+        uses: actions/checkout@v4
+        with:
+          repository: RSKNET/Github-Actions
+          token: ${{ secrets.GH_PAT }}
+          path: .github/actions/github-actions
+
+      - name: Run History Sweeper Action
+        uses: ./.github/actions/github-actions/History Sweeper
+        with:
+          retain_days: 5
+          keep_minimum_runs: 3
+          github_token: ${{ secrets.GITHUB_TOKEN }}
