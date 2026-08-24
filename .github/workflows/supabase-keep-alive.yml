@@ -6,8 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  call-shared-keep-alive:
-    uses: RSKNET/Github-Actions/.github/workflows/supabase-keep-alive.yml@main
-    secrets:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  ping-db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v4
+
+      - name: Checkout Private Actions Repo
+        uses: actions/checkout@v4
+        with:
+          repository: RSKNET/Github-Actions
+          token: ${{ secrets.GH_PAT }}
+          path: .github/actions/github-actions
+
+      - name: Run Supabase Keep Alive Action
+        uses: ./.github/actions/github-actions/Supabase Keep Alive
+        with:
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_anon_key: ${{ secrets.SUPABASE_ANON_KEY }}
