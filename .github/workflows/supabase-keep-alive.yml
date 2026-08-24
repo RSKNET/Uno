@@ -2,16 +2,13 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 */3 * *'
   workflow_dispatch:
 
 jobs:
   ping-db:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Project Code
-        uses: actions/checkout@v4
-
       - name: Checkout Private Actions Repo
         uses: actions/checkout@v4
         with:
