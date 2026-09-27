@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -326,28 +327,14 @@ export default function SetupPage() {
               <div className="w-16 h-1.5 bg-red-600 mt-2" />
             </div>
 
-            {/* Micro-telemetry details */}
-            <div className="space-y-2.5 text-xs text-zinc-400">
-              <p className="font-semibold text-zinc-300">// PROTOCOL OBJECTIVES:</p>
-              <div className="space-y-1 text-zinc-400">
-                <p>01. AUTOMATIC POIN CALCULATION MATRIX</p>
-                <p>02. ANTI-TIE PARITY CHECKER [ENABLED]</p>
-                <p>03. SYNC QUEUE BUFFER PIPELINE [DEXIE_DB]</p>
-                <p>04. RAW METRIC REPORT GENERATOR</p>
-              </div>
-            </div>
+            {/* System Overview Description */}
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-sm">
+              Uno Matrix is an online companion tool to track player scores, rounds, and match statistics for Uno card games.
+            </p>
 
             {/* Hazard Warning Stripe segment */}
             <div className="w-full h-8 hazard-stripes border border-red-500/20" />
 
-            {/* Technical system logs container */}
-            <div className="border border-zinc-800 bg-[#0E0E12] p-4 text-[10px] space-y-1.5 font-mono text-zinc-400">
-              <p className="text-zinc-300 font-bold uppercase"># CURRENT SESSION TELEMETRY</p>
-              <p>ENGINE: DEXIE_DB_CLIENT_CACHE</p>
-              <p>QUEUE: {dbPlayers.length} REGISTERED PLAYERS IN DB</p>
-              <p>STATUS: READY FOR MATCH INITIALIZATION</p>
-              <p className="text-red-400 font-bold">WARNING: AVOID REFRESH DURING PLAY SEQUENCE</p>
-            </div>
           </div>
 
           {/* Barcode Graphic */}
@@ -567,6 +554,26 @@ export default function SetupPage() {
         </section>
 
       </main>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-zinc-800 bg-[#0C0C0E]/90 px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-[11px] text-zinc-500 tracking-wider z-20">
+        <span>© 2026 UNO MATRIX</span>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/privacy"
+            className="hover:text-zinc-300 transition-colors uppercase font-bold"
+          >
+            [ Privacy Policy ]
+          </Link>
+          <span className="text-zinc-700">|</span>
+          <Link
+            href="/terms"
+            className="hover:text-zinc-300 transition-colors uppercase font-bold"
+          >
+            [ Terms of Service ]
+          </Link>
+        </div>
+      </footer>
 
       <CustomModal
         isOpen={modalConfig.isOpen}
