@@ -1,0 +1,25 @@
+name: Repo Keep Alive
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Jalan tiap tgl 1 tiap bulan
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout Actions Repo
+        uses: actions/checkout@v4
+        with:
+          repository: RSKNET/Github-Actions
+          token: ${{ secrets.GH_PAT }}
+          path: .github/actions/github-actions
+
+      - name: Run Action
+        uses: ./.github/actions/github-actions/Repo Keep Alive
